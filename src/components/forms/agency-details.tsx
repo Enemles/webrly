@@ -126,7 +126,7 @@ const AgencyDetails = ({ data }: Props) => {
       //WIP custId
       newUserData = await initUser({ role: 'AGENCY_OWNER' })
       if (!data?.customerId) {
-        const response = 
+        const response = upsertAgency
       }
 
     } catch (error) {
