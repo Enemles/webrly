@@ -9,13 +9,13 @@ import {
   User,
 } from '@prisma/client'
 import {
-  _getTicketsWithAllRelations,
+  // _getTicketsWithAllRelations,
   getAuthUserDetails,
-  getFunnels,
-  getMedia,
-  getPipelineDetails,
-  getTicketsWithTags,
-  getUserPermissions,
+  // getFunnels,
+  // getMedia,
+  // getPipelineDetails,
+  // getTicketsWithTags,
+  // getUserPermissions,
 } from './queries'
 import { db } from './db'
 import { z } from 'zod'
@@ -24,22 +24,22 @@ import Stripe from 'stripe'
 
 export type NotificationWithUser =
   | ({
-      User: {
-        id: string
-        name: string
-        avatarUrl: string
-        email: string
-        createdAt: Date
-        updatedAt: Date
-        role: Role
-        agencyId: string | null
-      }
-    } & Notification)[]
+    User: {
+      id: string
+      name: string
+      avatarUrl: string
+      email: string
+      createdAt: Date
+      updatedAt: Date
+      role: Role
+      agencyId: string | null
+    }
+  } & Notification)[]
   | undefined
 
-export type UserWithPermissionsAndSubAccounts = Prisma.PromiseReturnType<
-  typeof getUserPermissions
->
+// export type UserWithPermissionsAndSubAccounts = Prisma.PromiseReturnType<
+//   typeof getUserPermissions
+// >
 
 export const FunnelPageSchema = z.object({
   name: z.string().min(1),
@@ -66,7 +66,7 @@ export type UsersWithAgencySubAccountPermissionsSidebarOptions =
     typeof __getUsersWithAgencySubAccountPermissionsSidebarOptions
   >
 
-export type GetMediaFiles = Prisma.PromiseReturnType<typeof getMedia>
+// export type GetMediaFiles = Prisma.PromiseReturnType<typeof getMedia>
 
 export type CreateMediaType = Prisma.MediaCreateWithoutSubaccountInput
 
@@ -91,15 +91,15 @@ export const CreateFunnelFormSchema = z.object({
   favicon: z.string().optional(),
 })
 
-export type PipelineDetailsWithLanesCardsTagsTickets = Prisma.PromiseReturnType<
-  typeof getPipelineDetails
->
+// export type PipelineDetailsWithLanesCardsTagsTickets = Prisma.PromiseReturnType<
+//   typeof getPipelineDetails
+// >
 
 export const LaneFormSchema = z.object({
   name: z.string().min(1),
 })
 
-export type TicketWithTags = Prisma.PromiseReturnType<typeof getTicketsWithTags>
+// export type TicketWithTags = Prisma.PromiseReturnType<typeof getTicketsWithTags>
 
 const currencyNumberRegex = /^\d+(\.\d{1,2})?$/
 
@@ -111,9 +111,9 @@ export const TicketFormSchema = z.object({
   }),
 })
 
-export type TicketDetails = Prisma.PromiseReturnType<
-  typeof _getTicketsWithAllRelations
->
+// export type TicketDetails = Prisma.PromiseReturnType<
+//   typeof _getTicketsWithAllRelations
+// >
 
 export const ContactUserFormSchema = z.object({
   name: z.string().min(1, 'Required'),
@@ -142,8 +142,8 @@ export type StripeCustomerType = {
 
 export type PricesList = Stripe.ApiList<Stripe.Price>
 
-export type FunnelsForSubAccount = Prisma.PromiseReturnType<
-  typeof getFunnels
->[0]
+// export type FunnelsForSubAccount = Prisma.PromiseReturnType<
+//   typeof getFunnels
+// >[0]
 
 export type UpsertFunnelPage = Prisma.FunnelPageCreateWithoutFunnelInput
