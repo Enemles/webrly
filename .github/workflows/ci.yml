@@ -1,0 +1,27 @@
+name: CI
+
+on:
+  push:
+    branches-ignore:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Récupération du code
+        uses: actions/checkout@v3
+
+      - name: Installation de Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: Installation de PNPM
+        run: npm install -g pnpm
+
+      - name: Installation des dépendances
+        run: pnpm install
+
+      - name: Build du projet
+        run: pnpm build
