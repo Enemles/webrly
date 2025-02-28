@@ -3,6 +3,7 @@ import { User } from '@clerk/nextjs/server'
 import Image from 'next/image'
 import Link from 'next/link'
 import React from 'react'
+import { ModeToggle } from '../global/mode-toggle'
 
 interface Props {
   user?: null | User
@@ -26,6 +27,7 @@ const Navigation = ({ user }: Props) => {
       <aside className='flex items-center gap-2'>
         <Link href={'/agency'}>Agency</Link>
         <UserButton />
+        <ModeToggle />
       </aside>
     </div>
   )
