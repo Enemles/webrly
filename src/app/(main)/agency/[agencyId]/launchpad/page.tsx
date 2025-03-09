@@ -1,11 +1,38 @@
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { db } from '@/lib/db'
+import { CheckCircleIcon } from 'lucide-react'
 import Image from 'next/image'
+import Link from 'next/link'
 import React from 'react'
 
-type Props = {}
+type Props = {
+  params: {
+    agencyId: string;
+  }
+  searchParams: {
+    code: string;
+  }
+}
 
-function LaunchPad(props: Props) {
+const LaunchPad = async ({ params, searchParams }: Props) => {
+
+  const agencyDetails = await db.agency.findUnique({ where: { id: params.agencyId } })
+
+  if (!agencyDetails) return null
+
+  const allDetailsExist =
+    agencyDetails.address &&
+    agencyDetails.address &&
+    agencyDetails.agencyLogo &&
+    agencyDetails.city &&
+    agencyDetails.companyEmail &&
+    agencyDetails.companyPhone &&
+    agencyDetails.country &&
+    agencyDetails.name &&
+    agencyDetails.state &&
+    agencyDetails.zipCode
+
 
   return (
     <div className='flex flex-col justify-center items-center'>
@@ -29,18 +56,22 @@ function LaunchPad(props: Props) {
             </div>
             <div className='flex justify-between items-center w-full border p-4 rounded-lg gap-2'>
               <div className="flex md:items-center gap-4 flex-col md:!flex-row">
-                <Image src='/appstore.png' alt='app store logo' width={80} height={80} className='rounded-md object-contain' />
+                <Image src={agencyDetails?.agencyLogo} alt='app store logo' width={80} height={80} className='rounded-md object-contain' />
                 <p>
-                  Save the website as a shortcut on your mobile device
+                  Fill in all your business details
                 </p>
               </div>
-              <Button>Start</Button>
+              {allDetailsExist ?
+                (<CheckCircleIcon size={50} className='text-primary p-2 flex-shrink-0' />)
+                : (
+                  <Link className='bg-primary py-2 px-4 rounded-md text-white' href={`/agency/${params.agencyId}/settings`}>Start</Link>
+                )}
             </div>
             <div className='flex justify-between items-center w-full border p-4 rounded-lg gap-2'>
               <div className="flex md:items-center gap-4 flex-col md:!flex-row">
-                <Image src='/appstore.png' alt='app store logo' width={80} height={80} className='rounded-md object-contain' />
+                <Image src='/stripelogo.png' alt='app store logo' width={80} height={80} className='rounded-md object-contain' />
                 <p>
-                  Save the website as a shortcut on your mobile device
+                  Connect your stripe account to accept payments and see your dashboard
                 </p>
               </div>
               <Button>Start</Button>
