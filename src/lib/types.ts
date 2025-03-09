@@ -11,6 +11,7 @@ import {
 import {
   // _getTicketsWithAllRelations,
   getAuthUserDetails,
+  getUserPermissions,
   // getFunnels,
   // getMedia,
   // getPipelineDetails,
@@ -37,9 +38,9 @@ export type NotificationWithUser =
   } & Notification)[]
   | undefined
 
-// export type UserWithPermissionsAndSubAccounts = Prisma.PromiseReturnType<
-//   typeof getUserPermissions
-// >
+export type UserWithPermissionsAndSubAccounts = Prisma.PromiseReturnType<
+  typeof getUserPermissions
+>
 
 export const FunnelPageSchema = z.object({
   name: z.string().min(1),

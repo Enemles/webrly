@@ -124,7 +124,7 @@ const AgencyDetails = ({ data }: Props) => {
 
       }
 
-      //WIP custId
+
       newUserData = await initUser({ role: 'AGENCY_OWNER' })
       if (!data?.id) {
         const response = await upsertAgency({
@@ -427,7 +427,7 @@ const AgencyDetails = ({ data }: Props) => {
                 <div>Danger Zone</div>
               </div>
               <div className="text-muted-foreground">
-                Deleting your agency cannpt be undone. This will also delete all
+                Deleting your agency cannot be undone. This will also delete all
                 sub accounts and all data related to your sub accounts. Sub
                 accounts will no longer have access to funnels, contacts etc.
               </div>
