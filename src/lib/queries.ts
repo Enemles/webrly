@@ -423,11 +423,11 @@ export const updateUser = async (user: Partial<User>) => {
     data: { ...user },
   })
 
-  await clerkClient.users.updateUserMetadata(response.id, {
-    privateMetadata: {
-      role: user.role || 'SUBACCOUNT_USER',
-    },
-  })
+  // await clerkClient.users.updateUserMetadata(response.id, {
+  //   privateMetadata: {
+  //     role: user.role || 'SUBACCOUNT_USER',
+  //   },
+  // })
 
   return response
 }
