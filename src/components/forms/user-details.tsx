@@ -43,7 +43,7 @@ import { Separator } from '../ui/separator'
 import { Switch } from '../ui/switch'
 
 type Props = {
-  id: string;
+  id: string | null;
   type: 'agency' | 'subaccount';
   userData?: Partial<User>;
   subAccounts?: SubAccount[]
