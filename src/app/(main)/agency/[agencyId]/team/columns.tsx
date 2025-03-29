@@ -38,7 +38,7 @@ import { Copy, Edit, MoreHorizontal, Trash } from 'lucide-react'
 import { useModal } from '@/providers/modal-provider'
 import UserDetails from '@/components/forms/user-details'
 
-import { deleteUser, getUser } from '@/lib/queries'
+import { deleteUser, getUser, getUserPermissions } from '@/lib/queries'
 import { useToast } from '@/components/ui/use-toast'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -196,10 +196,14 @@ const CellActions: React.FC<CellActionsProps> = ({ rowData }) => {
                     type="agency"
                     id={rowData?.Agency?.id || null}
                     subAccounts={rowData?.Agency?.SubAccount}
+                    userData={rowData}
                   />
                 </CustomModal>,
                 async () => {
-                  return { user: await getUser(rowData?.id) }
+                  const user = await getUser(rowData?.id);
+                  const permissions = await getUserPermissions(rowData?.id);
+                  console.log("Fetched fresh permissions when opening modal:", permissions);
+                  return { user, permissions };
                 }
               )
             }}

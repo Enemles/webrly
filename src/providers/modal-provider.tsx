@@ -1,5 +1,6 @@
 'use client';
 
+import { UserWithPermissionsAndSubAccounts } from "@/lib/types";
 import { Agency, User } from "@prisma/client";
 import React, { createContext, useContext, useEffect, useState } from "react";
 
@@ -10,6 +11,7 @@ interface ModalProviderProps {
 export type ModalData = {
   user?: User;
   agencyId?: Agency;
+  permissions?: UserWithPermissionsAndSubAccounts;
 }
 
 type ModalContextType = {
@@ -44,8 +46,9 @@ const ModalProvider: React.FC<ModalProviderProps> = ({ children }) => {
       }
       setShowingModal(modal);
       setIsOpen(true);
+    } else {
+      setData({});
     }
-    setData({});
     setShowingModal(modal);
     setIsOpen(true);
   }

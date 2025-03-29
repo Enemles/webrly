@@ -401,19 +401,59 @@ export const changeUserPermissions = async (
   subAccountId: string,
   permission: boolean
 ) => {
+  console.log("DEBUG - Entrée dans changeUserPermissions avec:", {
+    permissionId,
+    userEmail,
+    subAccountId,
+    permission
+  });
+
   try {
-    const response = await db.permissions.upsert({
-      where: { id: permissionId },
-      update: { access: permission },
-      create: {
-        access: permission,
+    // Vérifions d'abord si le permissionId existe réellement
+    if (permissionId) {
+      const existingPermission = await db.permissions.findUnique({
+        where: { id: permissionId }
+      });
+      console.log("DEBUG - Permission existante pour cet ID:", existingPermission);
+    }
+
+    // Vérifions également s'il existe déjà une permission pour cet email et ce subAccountId
+    const existingPermissionByEmail = await db.permissions.findFirst({
+      where: {
         email: userEmail,
-        subAccountId: subAccountId,
-      },
-    })
-    return response
+        subAccountId: subAccountId
+      }
+    });
+    console.log("DEBUG - Permission existante pour cet email et subAccountId:", existingPermissionByEmail);
+
+    let response;
+
+    // Si nous avons un ID valide ou une correspondance par email/subAccountId
+    if (permissionId || existingPermissionByEmail) {
+      const idToUse = permissionId || existingPermissionByEmail?.id;
+      console.log("DEBUG - Mise à jour de la permission avec ID:", idToUse);
+
+      response = await db.permissions.update({
+        where: { id: idToUse },
+        data: { access: permission }
+      });
+    } else {
+      // Sinon, créer une nouvelle permission
+      console.log("DEBUG - Création d'une nouvelle permission");
+      response = await db.permissions.create({
+        data: {
+          access: permission,
+          email: userEmail,
+          subAccountId: subAccountId
+        }
+      });
+    }
+
+    console.log("DEBUG - Réponse finale de l'opération:", response);
+    return response;
   } catch (error) {
-    console.log('🔴Could not change persmission', error)
+    console.error("DEBUG - Erreur dans changeUserPermissions:", error);
+    throw error; // Propager l'erreur pour qu'elle soit capturée dans onChangePermission
   }
 }
 
@@ -477,9 +517,17 @@ export const sendInvitation = async (
   email: string,
   agencyId: string
 ) => {
+  const existingInvitation = await db.invitation.findUnique({
+    where: { email }
+  });
+
+  if (existingInvitation) {
+    return existingInvitation;
+  }
+
   const response = await db.invitation.create({
     data: { email, agencyId, role },
-  })
+  });
 
   try {
     const invitation = await clerkClient.invitations.createInvitation({
@@ -489,11 +537,13 @@ export const sendInvitation = async (
         throughInvitation: true,
         role,
       },
-    })
+    });
   } catch (error) {
-    console.log(error)
-    throw error
+    // If Clerk invitation fails, delete the database record we just created
+    await db.invitation.delete({ where: { id: response.id } });
+    console.log(error);
+    throw error;
   }
 
-  return response
+  return response;
 }

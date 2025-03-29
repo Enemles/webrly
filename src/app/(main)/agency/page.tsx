@@ -10,7 +10,6 @@ const Page = async ({
   searchParams: { plan: Plan; state: string; code: string }
 }) => {
   const agencyId = await verifyAndAcceptInvitation()
-  console.log(agencyId)
 
   const user = await getAuthUserDetails()
   if (agencyId) {
