@@ -61,16 +61,21 @@ const UserDetails = ({ id, type, userData, subAccounts }: Props) => {
   const router = useRouter();
 
   useEffect(() => {
-    if (data.user) {
-      const fetchDetails = async () => {
+    const fetchDetails = async () => {
+      try {
         const response = await getAuthUserDetails();
         if (response) {
-          setauthUserData(response)
+          setauthUserData(response);
+        } else {
+          console.error("No response from getAuthUserDetails");
         }
+      } catch (error) {
+        console.error("Error fetching auth user details:", error);
       }
-      fetchDetails();
-    }
-  }, [data]);
+    };
+
+    fetchDetails();
+  }, []);
 
 
   const userDataSchema = z.object({
@@ -113,45 +118,63 @@ const UserDetails = ({ id, type, userData, subAccounts }: Props) => {
     if (userData) {
       form.reset(userData)
     }
-  }, [userData, data])
+  }, [userData, data.user])
 
   const onChangePermission = async (
     subAccountId: string,
     val: boolean,
     permissionsId: string | undefined
   ) => {
-    if (!data.user?.email) return
-    setloadingPermissions(true)
+    if (!userData?.email) return;
+    setloadingPermissions(true);
+
+    console.log("Changing permission for:", {
+      subAccountId,
+      value: val,
+      permissionsId
+    });
+
     const response = await changeUserPermissions(
-      permissionsId ? permissionsId : v4(),
-      data.user.email,
+      permissionsId,
+      userData.email,
       subAccountId,
       val
-    )
-    if (type === 'agency') {
-      await saveActivityLogsNotification({
-        agencyId: authUserData?.Agency?.id,
-        description: `Gave ${userData?.name} access to | ${subAccountPermissions?.Permissions.find(
-          (p) => p.subAccountId === subAccountId
-        )?.SubAccount.name
-          } `,
-        subaccountId: subAccountPermissions?.Permissions.find(
-          (p) => p.subAccountId === subAccountId
-        )?.SubAccount.id,
-      })
-    }
+    );
+
 
     if (response) {
       toast({
         title: 'Success',
-        description: 'The request was successfull',
-      })
+        description: 'The request was successful',
+      });
+
+      // Mettre à jour l'état local correctement
       if (subAccountPermissions) {
-        subAccountPermissions.Permissions.find((perm) => {
-          if (perm.subAccountId === subAccountId) {
-            return { ...perm, access: !perm.access }
-          }
-          return perm
+        const updatedPermissions = {
+          ...subAccountPermissions,
+          Permissions: subAccountPermissions.Permissions.map((perm) => {
+            if (perm.subAccountId === subAccountId) {
+              return { ...perm, access: val, id: response.id };
+            }
+            return perm;
+          }),
+        };
+
+        console.log("Updated local permissions state:", updatedPermissions);
+        setSubAccountPermissions(updatedPermissions);
+      }
+
+      // Si c'est une agence, enregistrer l'activité
+      if (type === 'agency') {
+        await saveActivityLogsNotification({
+          agencyId: authUserData?.Agency?.id,
+          description: `Gave ${userData?.name} access to | ${subAccountPermissions?.Permissions.find(
+            (p) => p.subAccountId === subAccountId
+          )?.SubAccount.name
+            } `,
+          subaccountId: subAccountPermissions?.Permissions.find(
+            (p) => p.subAccountId === subAccountId
+          )?.SubAccount.id,
         })
       }
     } else {
@@ -159,11 +182,19 @@ const UserDetails = ({ id, type, userData, subAccounts }: Props) => {
         variant: 'destructive',
         title: 'Failed',
         description: 'Could not update permissions',
-      })
+      });
     }
-    router.refresh()
-    setloadingPermissions(false)
+
+    router.refresh();
+    setloadingPermissions(false);
   }
+
+  useEffect(() => {
+    if (data?.permissions) {
+      setSubAccountPermissions(data.permissions);
+    }
+  }, [data?.permissions]);
+
 
   const onSubmit = async (values: z.infer<typeof userDataSchema>) => {
     if (!id) return
@@ -300,7 +331,7 @@ const UserDetails = ({ id, type, userData, subAccounts }: Props) => {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="AGENCY_ADMING">
+                      <SelectItem value="AGENCY_ADMIN">
                         Agency Admin
                       </SelectItem>
                       {(data?.user?.role === 'AGENCY_OWNER' ||
