@@ -11,6 +11,7 @@ import {
 import {
   // _getTicketsWithAllRelations,
   getAuthUserDetails,
+  getMedia,
   getUserPermissions,
   // getFunnels,
   // getMedia,
@@ -67,7 +68,7 @@ export type UsersWithAgencySubAccountPermissionsSidebarOptions =
     typeof __getUsersWithAgencySubAccountPermissionsSidebarOptions
   >
 
-// export type GetMediaFiles = Prisma.PromiseReturnType<typeof getMedia>
+export type GetMediaFiles = Prisma.PromiseReturnType<typeof getMedia>
 
 export type CreateMediaType = Prisma.MediaCreateWithoutSubaccountInput
 
