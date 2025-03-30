@@ -463,12 +463,11 @@ export const updateUser = async (user: Partial<User>) => {
     data: { ...user },
   })
 
-  //TODO
-  // await clerkClient.users.updateUserMetadata(response.id, {
-  //   privateMetadata: {
-  //     role: user.role || 'SUBACCOUNT_USER',
-  //   },
-  // })
+  await clerkClient.users.updateUserMetadata(response.id, {
+    privateMetadata: {
+      role: user.role || 'SUBACCOUNT_USER',
+    },
+  })
 
   return response
 }
@@ -546,4 +545,40 @@ export const sendInvitation = async (
   }
 
   return response;
+}
+
+export const getMedia = async (subaccountId: string) => {
+  const mediaFile = await db.subAccount.findUnique({
+    where: {
+      id: subaccountId,
+    },
+    include: {
+      Media: true
+    }
+  })
+  return mediaFile
+}
+
+export const createMedia = async (
+  subaccountId: string,
+  mediaFile: CreateMediaType
+) => {
+  const response = await db.media.create({
+    data: {
+      link: mediaFile.link,
+      name: mediaFile.name,
+      subAccountId: subaccountId,
+    },
+  })
+
+  return response
+}
+
+export const deleteMedia = async (mediaId: string) => {
+  const response = await db.media.delete({
+    where: {
+      id: mediaId,
+    },
+  })
+  return response
 }
