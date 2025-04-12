@@ -8,6 +8,10 @@ generator client {
   provider = "prisma-client-js"
 }
 
+generator dbml {
+  provider = "prisma-dbml-generator"
+}
+
 datasource db {
   provider     = "postgresql"
   url          = env("DATABASE_URL")
@@ -416,6 +420,7 @@ model Subscription {
   priceId              String
   customerId           String
   currentPeriodEndDate DateTime
+  //TODO FIX ORTHOGRAPHE
   subscritiptionId     String   @unique
 
   agencyId String? @unique
