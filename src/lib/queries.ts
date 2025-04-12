@@ -138,6 +138,7 @@ export const saveActivityLogsNotification = async ({
 
 export const createTeamUser = async (agencyId: string, user: User) => {
   if (user.role === 'AGENCY_OWNER') return null
+  // TODO : add try catch around all my db calls
   const response = await db.user.create({ data: { ...user } })
   return response
 }
@@ -196,16 +197,27 @@ export const updateAgencyDetails = async (
   agencyId: string,
   agencyDetails: Partial<Agency>
 ) => {
-  const response = await db.agency.update({
-    where: { id: agencyId },
-    data: { ...agencyDetails },
-  })
-  return response
+  try {
+    const response = await db.agency.update({
+      where: { id: agencyId },
+      data: { ...agencyDetails },
+    })
+    return response
+  }
+  catch (error) {
+    console.error('Error updating agency details:', error)
+    throw new Error('Failed to update agency details')
+  }
 }
 
 export const deleteAgency = async (agencyId: string) => {
-  const response = await db.agency.delete({ where: { id: agencyId } })
-  return response
+  try {
+    const response = await db.agency.delete({ where: { id: agencyId } })
+    return response
+  } catch (error) {
+    console.error('Error deleting agency:', error)
+    throw new Error('Failed to delete agency')
+  }
 }
 
 export const initUser = async (newUser: Partial<User>) => {
@@ -579,6 +591,78 @@ export const deleteMedia = async (mediaId: string) => {
     where: {
       id: mediaId,
     },
+  })
+  return response
+}
+
+export const getPipelineDetails = async (pipelineId: string) => {
+  const response = await db.pipeline.findUnique({
+    where: {
+      id: pipelineId,
+    },
+  })
+  return response
+}
+
+export const getLanesWithTicketsAndTags = async (
+  pipelineId: string
+) => {
+  const response = await db.lane.findMany({
+    where: {
+      pipelineId,
+    },
+    orderBy: {
+      order: 'asc',
+    },
+    include: {
+      Tickets: {
+        orderBy: {
+          order: 'asc',
+        },
+        include: {
+          Tags: true,
+          Assigned: true,
+          Customer: true,
+        },
+      },
+    },
+  })
+  return response
+}
+
+export const upsertFunnel = async (
+  subaccountId: string,
+  funnel: z.infer<typeof CreateFunnelFormSchema> & { liveProducts: string },
+  funnelId: string
+) => {
+  const response = await db.funnel.upsert({
+    where: { id: funnelId },
+    update: funnel,
+    create: {
+      ...funnel,
+      id: funnelId || v4(),
+      subAccountId: subaccountId,
+    },
+  })
+
+  return response
+}
+
+export const upsertPipeline = async (
+  pipeline: Prisma.PipelineUncheckedCreateWithoutLaneInput
+) => {
+  const response = await db.pipeline.upsert({
+    where: { id: pipeline.id || v4() },
+    update: pipeline,
+    create: pipeline,
+  })
+
+  return response
+}
+
+export const deletePipeline = async (pipelineId: string) => {
+  const response = await db.pipeline.delete({
+    where: { id: pipelineId },
   })
   return response
 }
