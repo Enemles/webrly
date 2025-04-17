@@ -1,6 +1,6 @@
 import React from 'react'
 import { z } from 'zod'
-import { useToast } from '../ui/use-toast'
+import { useToast } from '@/hooks/use-toast'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card'
