@@ -34,7 +34,7 @@ import {
   FormLabel,
   FormMessage,
 } from '../ui/form'
-import { useToast } from '../ui/use-toast'
+import { useToast } from '@/hooks/use-toast'
 
 import * as z from 'zod'
 import FileUpload from '../global/file-upload'
@@ -422,7 +422,7 @@ const AgencyDetails = ({ data }: Props) => {
           </Form>
 
           {data?.id && (
-            <div className="flex flex-row items-center justify-between rounded-lg border border-destructive gap-4 p-4 mt-4">
+            <div className="flex flex-col items-center justify-between rounded-lg border border-destructive gap-4 p-4 mt-4">
               <div>
                 <div>Danger Zone</div>
               </div>

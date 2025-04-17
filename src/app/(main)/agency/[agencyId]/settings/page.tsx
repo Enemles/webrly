@@ -39,13 +39,13 @@ const Settings = async ({ params }: Props) => {
 
   return (
     <div className="flex lg:!flex-row flex-col gap-4">
+      Settings
       <AgencyDetails data={agencyDetails} />
       <UserDetails
         type="agency"
         id={params.agencyId}
         subAccounts={subAccounts}
         userData={userDetails} />
-      Settings
     </div>
   )
 }
