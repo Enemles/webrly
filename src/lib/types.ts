@@ -4,23 +4,18 @@ import {
   Notification,
   Prisma,
   Role,
+  SubAccount,
   Tag,
   Ticket,
   User,
 } from '@prisma/client'
 import {
   _getTicketsWithAllRelations,
-  // _getTicketsWithAllRelations,
   getAuthUserDetails,
   getMedia,
   getPipelineDetails,
   getTicketsWithTags,
   getUserPermissions,
-  // getFunnels,
-  // getMedia,
-  // getPipelineDetails,
-  // getTicketsWithTags,
-  // getUserPermissions,
 } from './queries'
 import { db } from './db'
 import { z } from 'zod'
@@ -152,3 +147,7 @@ export type PricesList = Stripe.ApiList<Stripe.Price>
 // >[0]
 
 export type UpsertFunnelPage = Prisma.FunnelPageCreateWithoutFunnelInput
+
+export type SubaccountWithContacts = SubAccount & {
+  Contact: (Contact & { Ticket: Ticket[] })[]
+}
