@@ -36,10 +36,10 @@ const SubaccountContactPage = async ({ params }: Props) => {
   const allContacts = contacts.Contact
 
   const formatTotal = (tickets: Ticket[]) => {
-    if (!tickets || !tickets.length) return '$0.00'
+    if (!tickets || !tickets.length) return '€0.00'
     const total = new Intl.NumberFormat(undefined, {
       style: 'currency',
-      currency: 'USD',
+      currency: 'EUR',
     })
 
     const laneAmounts = tickets.reduce(
@@ -76,7 +76,7 @@ const SubaccountContactPage = async ({ params }: Props) => {
               </TableCell>
               <TableCell>{contact.email}</TableCell>
               <TableCell>
-                {formatTotal(contact.Ticket) === '$0.00' ? (
+                {formatTotal(contact.Ticket) === '€0.00' ? (
                   <Badge variant={'destructive'}>Inactive</Badge>
                 ) : (
                   <Badge className="bg-emerald-700">Active</Badge>

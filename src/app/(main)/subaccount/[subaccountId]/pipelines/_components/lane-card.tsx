@@ -57,7 +57,7 @@ const LaneCard: React.FC<LaneCardProps> = ({
 
   const amt = new Intl.NumberFormat(undefined, {
     style: 'currency',
-    currency: 'USD',
+    currency: 'EUR',
   })
 
   const laneAmt = useMemo(() => {
