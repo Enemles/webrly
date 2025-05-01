@@ -29,6 +29,7 @@ Table Permissions {
 Table Agency {
   id String [pk]
   connectAccountId String [default: '']
+  customerId String [not null, default: '']
   name String [not null]
   agencyLogo String [not null]
   companyEmail String [not null]
@@ -292,7 +293,7 @@ Table Subscription {
   priceId String [not null]
   customerId String [not null]
   currentPeriodEndDate DateTime [not null]
-  subscritiptionId String [unique, not null]
+  subscriptionId String [unique, not null]
   agencyId String [unique]
   Agency Agency
 }
@@ -368,8 +369,8 @@ Enum InvitationStatus {
 }
 
 Enum Plan {
-  price_1OYxkqFj9oKEERu1NbKUxXxN
-  price_1OYxkqFj9oKEERu1KfJGWxgN
+  price_1RHqglBa1q4VAXiSHxH98PEw
+  price_1RHqglBa1q4VAXiSxrKe3Eqp
 }
 
 Ref: User.agencyId > Agency.id [delete: Cascade]

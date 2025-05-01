@@ -31,7 +31,7 @@ type Props = {
 }
 
 const SubaccountPageId = async ({ params, searchParams }: Props) => {
-  let currency = 'USD'
+  let currency = 'EUR'
   let sessions
   let totalClosedSessions
   let totalPendingSessions
@@ -96,7 +96,7 @@ const SubaccountPageId = async ({ params, searchParams }: Props) => {
               <CardHeader>
                 <CardDescription>Income</CardDescription>
                 <CardTitle className="text-4xl">
-                  {net ? `${currency} ${net.toFixed(2)}` : `$0.00`}
+                  {net ? `${currency} ${net.toFixed(2)}` : `€0.00`}
                 </CardTitle>
                 <small className="text-xs text-muted-foreground">
                   For the year {currentYear}
@@ -113,7 +113,7 @@ const SubaccountPageId = async ({ params, searchParams }: Props) => {
                 <CardTitle className="text-4xl">
                   {potentialIncome
                     ? `${currency} ${potentialIncome.toFixed(2)}`
-                    : `$0.00`}
+                    : `€0.00`}
                 </CardTitle>
                 <small className="text-xs text-muted-foreground">
                   For the year {currentYear}

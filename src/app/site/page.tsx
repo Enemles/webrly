@@ -59,7 +59,7 @@ export default function Home() {
               </CardHeader>
               <CardContent>
                 <span className="text-4xl font-bold">
-                  {card.price === 0 ? '$0' : `$${card.price}`}
+                  {card.price === 0 ? '€0' : `€${card.price}`}
                 </span>
               </CardContent>
               <CardFooter className="flex flex-col items-start gap-4">
@@ -103,7 +103,7 @@ export default function Home() {
               <CardDescription>{pricingCards[0].description}</CardDescription>
             </CardHeader>
             <CardContent>
-              <span className="text-4xl font-bold">$0</span>
+              <span className="text-4xl font-bold">€0</span>
               <span>/ month</span>
             </CardContent>
             <CardFooter className="flex flex-col  items-start gap-4 ">
