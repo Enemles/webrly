@@ -16,7 +16,7 @@ import Notification from '@/components/icons/notification'
 import Payment from '@/components/icons/payment'
 import Person from '@/components/icons/person'
 import Pipelines from '@/components/icons/pipelines'
-import PluraCategory from '@/components/icons/plura-category'
+import WebrlyCategory from '@/components/icons/webrly-category'
 import Power from '@/components/icons/power'
 import Receipt from '@/components/icons/receipt'
 import Send from '@/components/icons/send'
@@ -204,7 +204,7 @@ export const icons = [
   {
     value: 'category',
     label: 'Category',
-    path: PluraCategory,
+    path: WebrlyCategory,
   },
   {
     value: 'clipboardIcon',
