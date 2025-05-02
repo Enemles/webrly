@@ -222,9 +222,19 @@ export const deleteAgency = async (agencyId: string) => {
 }
 
 export const initUser = async (newUser: Partial<User>) => {
-
   const user = await currentUser()
   if (!user) return null
+
+  // Extraire le nom d'utilisateur de l'email si firstName/lastName sont vides
+  const emailUsername = user.emailAddresses[0].emailAddress.split('@')[0]
+  
+  // Construire un nom d'utilisateur valide
+  let userName = 'User'
+  if (user.firstName || user.lastName) {
+    userName = `${user.firstName || ''} ${user.lastName || ''}`.trim()
+  } else if (emailUsername) {
+    userName = emailUsername
+  }
 
   const userData = await db.user.upsert({
     where: {
@@ -235,7 +245,7 @@ export const initUser = async (newUser: Partial<User>) => {
       id: user.id,
       avatarUrl: user.imageUrl,
       email: user.emailAddresses[0].emailAddress,
-      name: `${user.firstName} ${user.lastName}`,
+      name: userName,
       role: newUser.role || 'SUBACCOUNT_USER',
     }
   })
