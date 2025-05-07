@@ -21,7 +21,7 @@ jobs:
         run: npm install -g pnpm
 
       - name: Génération du client Prisma
-        run: pnpx prisma generate
+        run: npx prisma generate
 
       - name: Installation des dépendances
         run: pnpm install
