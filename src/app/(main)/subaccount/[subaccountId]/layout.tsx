@@ -68,9 +68,7 @@ const SubaccountLayout = async ({ children, params }: Props) => {
           subAccountId={params.subaccountId as string}
         />
         <div className="relative">
-          <BlurPage>
             {children}
-          </BlurPage>
         </div>
       </div>
     </div>
