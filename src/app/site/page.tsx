@@ -1,11 +1,16 @@
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { pricingCards } from "@/lib/constants";
+import stripe from "@/lib/stripe";
 import clsx from "clsx";
 import { Check } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
-export default function Home() {
+export default async function Home() {
+  const prices = await stripe.prices.list({
+    product: process.env.NEXT_WEBRLY_PRODUCT_ID,
+    active: true,
+  })
   return (
     <>
       <section className="h-full w-full pt-36 relative flex items-center justify-center flex-col">
@@ -35,37 +40,41 @@ export default function Home() {
           ready to commit you can get started for free.
         </p>
         <div className="flex  justify-center gap-4 flex-wrap mt-6">
-          {pricingCards.map((card) => (
+        {prices.data.map((card) => (
+            //WIP: Wire up free product from stripe
             <Card
-              key={card.title}
+              key={card.nickname}
               className={clsx('w-[300px] flex flex-col justify-between', {
-                'border-2 border-primary': card.title === 'Unlimited Saas',
+                'border-2 border-primary': card.nickname === 'Unlimited Saas',
               })}
             >
               <CardHeader>
                 <CardTitle
                   className={clsx('', {
-                    'text-muted-foreground': card.title !== 'Unlimited Saas',
+                    'text-muted-foreground': card.nickname !== 'Unlimited Saas',
                   })}
                 >
-                  {card.title}
+                  {card.nickname}
                 </CardTitle>
                 <CardDescription>
                   {
-                    pricingCards.find((c) => c.title === card.title)
+                    pricingCards.find((c) => c.title === card.nickname)
                       ?.description
                   }
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <span className="text-4xl font-bold">
-                  {card.price === 0 ? '$0' : `$${card.price}`}
+                  {card.unit_amount && card.unit_amount / 100}
+                </span>
+                <span className="text-muted-foreground">
+                  <span>/ {card.recurring?.interval}</span>
                 </span>
               </CardContent>
               <CardFooter className="flex flex-col items-start gap-4">
                 <div>
                   {pricingCards
-                    .find((c) => c.title === card.title)
+                    .find((c) => c.title === card.nickname)
                     ?.features.map((feature) => (
                       <div
                         key={feature}
@@ -82,7 +91,7 @@ export default function Home() {
                     'w-full text-center bg-primary p-2 rounded-md',
                     {
                       '!bg-muted-foreground':
-                        card.title !== 'Unlimited Saas',
+                        card.nickname !== 'Unlimited Saas',
                     }
                   )}
                 >
@@ -103,7 +112,7 @@ export default function Home() {
               <CardDescription>{pricingCards[0].description}</CardDescription>
             </CardHeader>
             <CardContent>
-              <span className="text-4xl font-bold">$0</span>
+              <span className="text-4xl font-bold">€0</span>
               <span>/ month</span>
             </CardContent>
             <CardFooter className="flex flex-col  items-start gap-4 ">

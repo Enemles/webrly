@@ -34,7 +34,7 @@ import {
   FormLabel,
   FormMessage,
 } from '../ui/form'
-import { useToast } from '../ui/use-toast'
+import { useToast } from '@/hooks/use-toast'
 
 import * as z from 'zod'
 import FileUpload from '../global/file-upload'
@@ -122,35 +122,44 @@ const AgencyDetails = ({ data }: Props) => {
           },
         }
 
+        const customerResponse = await fetch('/api/stripe/create-customer', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(bodyData)
+        })
+        const customerData: { customerId: string } = await customerResponse.json()
+        custId = customerData.customerId
       }
 
 
       newUserData = await initUser({ role: 'AGENCY_OWNER' })
-      if (!data?.id) {
-        const response = await upsertAgency({
-          id: data?.id ? data.id : v4(),
-          address: values.address,
-          agencyLogo: values.agencyLogo,
-          city: values.city,
-          companyPhone: values.companyPhone,
-          country: values.country,
-          name: values.name,
-          state: values.state,
-          whiteLabel: values.whiteLabel,
-          zipCode: values.zipCode,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          companyEmail: values.companyEmail,
-          connectAccountId: '',
-          goal: 5,
-        })
-        toast({
-          title: 'Created Agency',
-        })
-        if (data?.id) return router.refresh()
-        if (response) {
-          return router.refresh()
-        }
+      if (!data?.customerId && !custId) return
+      const response = await upsertAgency({
+        id: data?.id ? data.id : v4(),
+        customerId: data?.customerId || custId || '',
+        address: values.address,
+        agencyLogo: values.agencyLogo,
+        city: values.city,
+        companyPhone: values.companyPhone,
+        country: values.country,
+        name: values.name,
+        state: values.state,
+        whiteLabel: values.whiteLabel,
+        zipCode: values.zipCode,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        companyEmail: values.companyEmail,
+        connectAccountId: '',
+        goal: 5,
+      })
+      toast({
+        title: 'Created Agency',
+      })
+      if (data?.id) return router.refresh()
+      if (response) {
+        return router.refresh()
       }
 
     } catch (error) {
@@ -422,7 +431,7 @@ const AgencyDetails = ({ data }: Props) => {
           </Form>
 
           {data?.id && (
-            <div className="flex flex-row items-center justify-between rounded-lg border border-destructive gap-4 p-4 mt-4">
+            <div className="flex flex-col items-center justify-between rounded-lg border border-destructive gap-4 p-4 mt-4">
               <div>
                 <div>Danger Zone</div>
               </div>
