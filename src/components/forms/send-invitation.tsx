@@ -28,8 +28,9 @@ import {
 } from '../ui/select'
 import { Button } from '../ui/button'
 import Loading from '../global/loading'
-import { saveActivityLogsNotification, sendInvitation } from '@/lib/queries'
+import { saveActivityLogsNotification } from '@/lib/services/notification'
 import { useToast } from '../ui/use-toast'
+import { sendInvitation } from '@/lib/services/auth'
 
 interface SendInvitationProps {
   agencyId: string

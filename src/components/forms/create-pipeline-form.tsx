@@ -26,15 +26,12 @@ import Loading from '../global/loading'
 import { CreatePipelineFormSchema } from '@/lib/types'
 import {
   saveActivityLogsNotification,
-  upsertFunnel,
-  upsertPipeline,
-} from '@/lib/queries'
-import { v4 } from 'uuid'
+} from '@/lib/services/notification'
 import { toast } from '../ui/use-toast'
 import { useModal } from '@/providers/modal-provider'
 import { useRouter } from 'next/navigation'
 import { zodResolver } from '@hookform/resolvers/zod'
-
+import { upsertPipeline } from '@/lib/services/pipeline'
 interface CreatePipelineFormProps {
   defaultData?: Pipeline
   subAccountId: string

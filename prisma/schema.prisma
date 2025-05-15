@@ -110,7 +110,6 @@ model Agency {
   Invitation       Invitation[]
   Notification     Notification[]
   Subscription     Subscription?
-  AddOns           AddOns[]
 }
 
 model SubAccount {
@@ -135,8 +134,6 @@ model SubAccount {
   Funnels          Funnel[]
   Media            Media[]
   Contact          Contact[]
-  Trigger          Trigger[]
-  Automation       Automation[]
   Pipeline         Pipeline[]
   Tags             Tag[]
   Notification     Notification[]
@@ -204,69 +201,6 @@ model Ticket {
   @@index([laneId])
   @@index([customerId])
   @@index([assignedUserId])
-}
-
-enum TriggerTypes {
-  CONTACT_FORM
-}
-
-model Trigger {
-  id           String       @id @default(uuid())
-  name         String
-  type         TriggerTypes
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
-  subAccountId String
-  Subaccount   SubAccount   @relation(fields: [subAccountId], references: [id], onDelete: Cascade)
-  Automations  Automation[]
-
-  @@index([subAccountId])
-}
-
-model Automation {
-  id                 String               @id @default(uuid())
-  name               String
-  createdAt          DateTime             @default(now())
-  updatedAt          DateTime             @updatedAt
-  triggerId          String?
-  published          Boolean              @default(false)
-  Trigger            Trigger?             @relation(fields: [triggerId], references: [id], onDelete: Cascade)
-  subAccountId       String
-  Subaccount         SubAccount           @relation(fields: [subAccountId], references: [id], onDelete: Cascade)
-  Action             Action[]
-  AutomationInstance AutomationInstance[]
-
-  @@index([triggerId])
-  @@index([subAccountId])
-}
-
-model AutomationInstance {
-  id           String     @id @default(uuid())
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
-  automationId String
-  Automation   Automation @relation(fields: [automationId], references: [id], onDelete: Cascade)
-  active       Boolean    @default(false)
-
-  @@index([automationId])
-}
-
-enum ActionType {
-  CREATE_CONTACT
-}
-
-model Action {
-  id           String     @id @default(uuid())
-  name         String
-  type         ActionType
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
-  automationId String
-  order        Int
-  Automation   Automation @relation(fields: [automationId], references: [id], onDelete: Cascade)
-  laneId       String     @default("0")
-
-  @@index([automationId])
 }
 
 model Contact {
@@ -427,17 +361,4 @@ model Subscription {
   Agency   Agency? @relation(fields: [agencyId], references: [id])
 
   @@index([customerId])
-}
-
-model AddOns {
-  id        String   @id @default(uuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  name      String
-  active    Boolean  @default(false)
-  priceId   String   @unique
-  agencyId  String?
-  Agency    Agency?  @relation(fields: [agencyId], references: [id])
-
-  @@index([agencyId])
 }

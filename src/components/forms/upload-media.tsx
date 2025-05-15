@@ -4,13 +4,13 @@ import { useToast } from '@/hooks/use-toast'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card'
-import { createMedia, saveActivityLogsNotification } from '@/lib/queries'
+import { saveActivityLogsNotification } from '@/lib/services/notification'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form'
 import { Input } from '../ui/input'
 import FileUpload from '../global/file-upload'
 import { Button } from '../ui/button'
 import { useRouter } from 'next/navigation'
-
+import { createMedia } from '@/lib/services/media'
 type Props = {
   subaccountId: string
 }

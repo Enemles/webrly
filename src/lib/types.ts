@@ -9,19 +9,16 @@ import {
   Ticket,
   User,
 } from '@prisma/client'
+import { getAuthUserDetails, getUserPermissions } from './services/auth'
 import {
-  _getTicketsWithAllRelations,
-  getAuthUserDetails,
   getFunnels,
-  getMedia,
-  getPipelineDetails,
-  getTicketsWithTags,
-  getUserPermissions,
-} from './queries'
+} from './services/funnel'
 import { db } from './db'
+import { getMedia } from './services/media'
 import { z } from 'zod'
 
 import Stripe from 'stripe'
+import { _getTicketsWithAllRelations, getPipelineDetails, getTicketsWithTags } from './services/pipeline'
 
 export type NotificationWithUser =
   | ({

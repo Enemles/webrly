@@ -12,13 +12,12 @@ import Stripe from 'stripe'
 import Image from 'next/image'
 import {
   saveActivityLogsNotification,
-  updateFunnelProducts,
-} from '@/lib/queries'
+} from '@/lib/services/notification'
 import { Funnel } from '@prisma/client'
 import { useRouter } from 'next/navigation'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-
+import { updateFunnelProducts } from '@/lib/services/funnel'
 interface FunnelProductsTableProps {
   defaultData: Funnel
   products: Stripe.Product[]

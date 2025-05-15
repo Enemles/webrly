@@ -18,12 +18,9 @@ import { PlusCircleIcon, TrashIcon, X } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
 import { v4 } from 'uuid'
 import {
-  deleteTag,
-  getTagsForSubaccount,
   saveActivityLogsNotification,
-  upsertTag,
-} from '@/lib/queries'
-
+} from '@/lib/services/notification'
+import { upsertTag, deleteTag, getTagsForSubaccount } from '@/lib/services/pipeline'
 import {
   Command,
   CommandEmpty,

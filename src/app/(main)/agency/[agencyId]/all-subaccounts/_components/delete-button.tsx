@@ -1,12 +1,8 @@
 'use client'
-import {
-  deleteSubAccount,
-  getSubaccountDetails,
-  saveActivityLogsNotification,
-} from '@/lib/queries'
+import { saveActivityLogsNotification } from '@/lib/services/notification'
 import { useRouter } from 'next/navigation'
 import React from 'react'
-
+import { deleteSubAccount, getSubaccountDetails } from '@/lib/services/subaccount'
 type Props = {
   subaccountId: string
 }

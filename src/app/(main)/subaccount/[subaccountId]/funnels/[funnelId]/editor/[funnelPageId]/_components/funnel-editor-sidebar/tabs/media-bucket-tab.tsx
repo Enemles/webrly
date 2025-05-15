@@ -1,7 +1,7 @@
 'use client'
 import MediaComponent from '@/components/media'
-import { getMedia } from '@/lib/queries'
 import { GetMediaFiles } from '@/lib/types'
+import { getMedia } from '@/lib/services/media'
 import React, { useEffect, useState } from 'react'
 
 type Props = {

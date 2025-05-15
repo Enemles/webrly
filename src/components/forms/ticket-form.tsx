@@ -1,6 +1,9 @@
 'use client'
 
-import { getSubAccountsTeamMembers, saveActivityLogsNotification, searchContacts, upsertTicket } from "@/lib/queries"
+import { getSubAccountsTeamMembers } from "@/lib/services/subaccount"
+import { saveActivityLogsNotification } from "@/lib/services/notification"
+import { searchContacts } from "@/lib/services/contact"
+import { upsertTicket } from "@/lib/services/pipeline"
 import { TicketFormSchema, TicketWithTags } from "@/lib/types"
 import { useModal } from "@/providers/modal-provider"
 import { zodResolver } from "@hookform/resolvers/zod"

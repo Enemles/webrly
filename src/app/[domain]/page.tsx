@@ -1,5 +1,5 @@
 import { db } from '@/lib/db'
-import { getDomainContent } from '@/lib/queries'
+import { getDomainContent } from '@/lib/services/funnel'
 import EditorProvider from '@/providers/editor/editor-provider'
 import { notFound } from 'next/navigation'
 import React from 'react'
