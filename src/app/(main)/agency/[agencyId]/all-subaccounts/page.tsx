@@ -2,7 +2,7 @@ import { AlertDescription } from '@/components/ui/alert';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
-import { getAuthUserDetails } from '@/lib/queries'
+import { getAuthUserDetails } from '@/lib/services/auth';
 import { SubAccount } from '@prisma/client';
 import Image from 'next/image';
 import Link from 'next/link';

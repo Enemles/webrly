@@ -3,12 +3,11 @@ import ContactForm from '@/components/forms/contact-form'
 import { Badge } from '@/components/ui/badge'
 import { toast } from '@/components/ui/use-toast'
 import { EditorBtns } from '@/lib/constants'
+import { saveActivityLogsNotification } from '@/lib/services/notification'
+import { upsertContact } from '@/lib/services/contact'
 import {
   getFunnel,
-  saveActivityLogsNotification,
-  upsertContact,
-} from '@/lib/queries'
-
+} from '@/lib/services/funnel'
 import { ContactUserFormSchema } from '@/lib/types'
 import { EditorElement, useEditor } from '@/providers/editor/editor-provider'
 import clsx from 'clsx'

@@ -35,7 +35,8 @@ import {
   HoverCardTrigger,
 } from '@/components/ui/hover-card'
 import { toast } from '@/components/ui/use-toast'
-import { deleteTicket, saveActivityLogsNotification } from '@/lib/queries'
+import { saveActivityLogsNotification } from '@/lib/services/notification'
+import { deleteTicket } from '@/lib/services/pipeline'
 import { TicketWithTags } from '@/lib/types'
 import { useModal } from '@/providers/modal-provider'
 import { Contact2, Edit, MoreHorizontalIcon, Trash, User2 } from 'lucide-react'

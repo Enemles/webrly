@@ -21,7 +21,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { deleteLane, saveActivityLogsNotification } from '@/lib/queries'
+import { saveActivityLogsNotification } from '@/lib/services/notification'
 import { LaneDetail, TicketWithTags } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { useModal } from '@/providers/modal-provider'
@@ -32,6 +32,7 @@ import React, { Dispatch, SetStateAction, useMemo } from 'react'
 import CustomModal from '@/components/global/CustomModal'
 import TicketForm from '@/components/forms/ticket-form'
 import PipelineTicket from './pipeline-ticket'
+import { deleteLane } from '@/lib/services/pipeline'
 
 interface LaneCardProps {
   setAllTickets: Dispatch<SetStateAction<TicketWithTags>>

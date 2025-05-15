@@ -23,9 +23,9 @@ import {
 } from '@/components/ui/alert-dialog'
 import { Copy, MoreHorizontal, Trash } from 'lucide-react'
 import Image from 'next/image'
-import { deleteMedia, saveActivityLogsNotification } from '@/lib/queries'
+import { saveActivityLogsNotification } from '@/lib/services/notification'
 import { toast } from '../ui/use-toast'
-
+import { deleteMedia } from '@/lib/services/media'
 type Props = { file: Media }
 
 const MediaCard = ({ file }: Props) => {

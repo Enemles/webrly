@@ -1,6 +1,5 @@
 'use client'
 import React from 'react'
-import PipelineInfoBar from './PipelineInfoBar'
 import { Pipeline } from '@prisma/client'
 import CreatePipelineForm from '@/components/forms/create-pipeline-form'
 import { Button } from '@/components/ui/button'
@@ -15,7 +14,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
-import { deletePipeline } from '@/lib/queries'
+import { deletePipeline } from '@/lib/services/pipeline'
 import { toast } from '@/components/ui/use-toast'
 import { useRouter } from 'next/navigation'
 

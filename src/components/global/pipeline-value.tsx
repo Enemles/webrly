@@ -1,5 +1,5 @@
 'use client'
-import { getPipelines } from '@/lib/queries'
+import { getPipelines } from '@/lib/services/pipeline'
 import { Prisma } from '@prisma/client'
 import React, { useEffect, useMemo, useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader } from '../ui/card'

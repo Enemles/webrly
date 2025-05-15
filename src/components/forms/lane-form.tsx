@@ -18,24 +18,20 @@ import {
   CardContent,
 } from '@/components/ui/card'
 import { useForm } from 'react-hook-form'
-import { Funnel, Lane, Pipeline } from '@prisma/client'
+import { Lane } from '@prisma/client'
 import { Input } from '../ui/input'
 
 import { Button } from '../ui/button'
 import Loading from '../global/loading'
 import { LaneFormSchema } from '@/lib/types'
 import {
-  getPipelineDetails,
   saveActivityLogsNotification,
-  upsertFunnel,
-  upsertLane,
-  upsertPipeline,
-} from '@/lib/queries'
-import { v4 } from 'uuid'
+} from '@/lib/services/notification'
 import { toast } from '../ui/use-toast'
 import { useModal } from '@/providers/modal-provider'
 import { useRouter } from 'next/navigation'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { getPipelineDetails, upsertLane } from '@/lib/services/pipeline'
 
 interface CreateLaneFormProps {
   defaultData?: Lane

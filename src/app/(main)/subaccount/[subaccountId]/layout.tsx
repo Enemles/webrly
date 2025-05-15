@@ -2,11 +2,8 @@ import BlurPage from '@/components/global/blur-page'
 import InfoBar from '@/components/global/info-bar'
 import Sidebar from '@/components/sidebar'
 import Unauthorized from '@/components/unauthorized'
-import {
-  getAuthUserDetails,
-  getNotificationAndUser,
-  verifyAndAcceptInvitation,
-} from '@/lib/queries'
+import { getNotificationAndUser } from '@/lib/services/notification'
+import { getAuthUserDetails, verifyAndAcceptInvitation } from '@/lib/services/auth'
 import { currentUser } from '@clerk/nextjs'
 import { Role } from '@prisma/client'
 import { redirect } from 'next/navigation'

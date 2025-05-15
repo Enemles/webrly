@@ -293,15 +293,7 @@ Table Subscription {
   priceId String [not null]
   customerId String [not null]
   currentPeriodEndDate DateTime [not null]
-<<<<<<< HEAD
-<<<<<<< HEAD
   subscriptionId String [unique, not null]
-=======
-  subscritiptionId String [unique, not null]
->>>>>>> 0afcdc91e3575b4ca9a05eec49dbd4a51cdc4938
-=======
-  subscriptionId String [unique, not null]
->>>>>>> global-feature/stripe
   agencyId String [unique]
   Agency Agency
 }
@@ -377,18 +369,8 @@ Enum InvitationStatus {
 }
 
 Enum Plan {
-<<<<<<< HEAD
-<<<<<<< HEAD
   price_1RHqglBa1q4VAXiSHxH98PEw
   price_1RHqglBa1q4VAXiSxrKe3Eqp
-=======
-  price_1OYxkqFj9oKEERu1NbKUxXxN
-  price_1OYxkqFj9oKEERu1KfJGWxgN
->>>>>>> 0afcdc91e3575b4ca9a05eec49dbd4a51cdc4938
-=======
-  price_1RHqglBa1q4VAXiSHxH98PEw
-  price_1RHqglBa1q4VAXiSxrKe3Eqp
->>>>>>> global-feature/stripe
 }
 
 Ref: User.agencyId > Agency.id [delete: Cascade]

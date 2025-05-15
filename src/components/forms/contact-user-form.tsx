@@ -23,10 +23,11 @@ import { Input } from '../ui/input'
 import { Button } from '../ui/button'
 import Loading from '../global/loading'
 import { ContactUserFormSchema } from '@/lib/types'
-import { saveActivityLogsNotification, upsertContact } from '@/lib/queries'
+import { saveActivityLogsNotification } from '@/lib/services/notification'
 import { toast } from '../ui/use-toast'
 import { useRouter } from 'next/navigation'
 import { useModal } from '@/providers/modal-provider'
+import { upsertContact } from '@/lib/services/contact'
 
 interface ContactUserFormProps {
   subaccountId: string

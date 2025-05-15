@@ -3,7 +3,6 @@ import { AlertDialog } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { toast } from '@/components/ui/use-toast'
-import { upsertFunnelPage } from '@/lib/queries'
 import { FunnelsForSubAccount } from '@/lib/types'
 import { useModal } from '@/providers/modal-provider'
 import { FunnelPage } from '@prisma/client'
@@ -28,7 +27,7 @@ import {
 import CustomModal from '@/components/global/CustomModal'
 import CreateFunnelPage from '@/components/forms/funnel-page'
 import FunnelStepCard from './funnel-step-card'
-
+import { upsertFunnelPage } from '@/lib/services/funnel'
 type Props = {
   funnel: FunnelsForSubAccount
   subaccountId: string

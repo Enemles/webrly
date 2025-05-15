@@ -41,12 +41,10 @@ import FileUpload from '../global/file-upload'
 import { Input } from '../ui/input'
 import { Switch } from '../ui/switch'
 import {
-  deleteAgency,
-  initUser,
   saveActivityLogsNotification,
-  updateAgencyDetails,
-  upsertAgency,
-} from '@/lib/queries'
+} from '@/lib/services/notification'
+import { updateAgencyDetails, deleteAgency, upsertAgency } from '@/lib/services/agency'
+import { initUser } from '@/lib/services/auth'
 import { Button } from '../ui/button'
 import Loading from '../global/loading'
 

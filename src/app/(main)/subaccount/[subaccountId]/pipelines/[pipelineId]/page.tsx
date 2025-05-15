@@ -1,6 +1,6 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { db } from '@/lib/db'
-import { getLanesWithTicketsAndTags, getPipelineDetails, updateLanesOrder, updateTicketOrder } from '@/lib/queries'
+import { getLanesWithTicketsAndTags, getPipelineDetails, updateLanesOrder, updateTicketOrder } from '@/lib/services/pipeline'
 import { LaneDetail } from '@/lib/types'
 import { redirect } from 'next/navigation'
 import React from 'react'

@@ -1,4 +1,4 @@
-import { getAuthUserDetails } from "@/lib/queries";
+import { getAuthUserDetails } from "@/lib/services/auth";
 import { permission } from "process";
 import React from "react";
 import MenuOptions from "./MenuOptions";

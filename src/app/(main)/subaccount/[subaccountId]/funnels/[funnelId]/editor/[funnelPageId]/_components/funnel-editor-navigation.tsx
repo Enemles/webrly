@@ -9,7 +9,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
-import { saveActivityLogsNotification, upsertFunnelPage } from '@/lib/queries'
+import { saveActivityLogsNotification } from '@/lib/services/notification'
+import { upsertFunnelPage } from '@/lib/services/funnel'
 import { DeviceTypes, useEditor } from '@/providers/editor/editor-provider'
 import { FunnelPage } from '@prisma/client'
 import clsx from 'clsx'

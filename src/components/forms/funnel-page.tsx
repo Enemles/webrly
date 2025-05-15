@@ -26,15 +26,12 @@ import { useToast } from '../ui/use-toast'
 import { FunnelPage } from '@prisma/client'
 import { FunnelPageSchema } from '@/lib/types'
 import {
-  deleteFunnelePage,
-  getFunnels,
   saveActivityLogsNotification,
-  upsertFunnelPage,
-} from '@/lib/queries'
+} from '@/lib/services/notification'
 import { useRouter } from 'next/navigation'
 import { v4 } from 'uuid'
 import { CopyPlusIcon, Trash } from 'lucide-react'
-
+import { deleteFunnelePage, getFunnels, upsertFunnelPage } from '@/lib/services/funnel'
 interface CreateFunnelPageProps {
   defaultData?: FunnelPage
   funnelId: string

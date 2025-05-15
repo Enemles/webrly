@@ -1,6 +1,6 @@
 import BlurPage from "@/components/global/blur-page";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { getFunnel } from "@/lib/queries";
+import { getFunnel } from "@/lib/services/funnel";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import FunnelSettings from "./_components/funnel-settings";

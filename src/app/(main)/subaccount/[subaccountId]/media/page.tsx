@@ -1,5 +1,5 @@
 import MediaComponent from "@/components/media";
-import { getMedia } from "@/lib/queries";
+import { getMedia } from "@/lib/services/media";
 import React from "react";
 
 type Props = {
