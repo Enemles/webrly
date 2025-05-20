@@ -30,7 +30,6 @@ const TextComponent = (props: Props) => {
     })
   }
 
-  //WE ARE NOT ADDING DRAG DROP
   return (
     <div
       style={styles}

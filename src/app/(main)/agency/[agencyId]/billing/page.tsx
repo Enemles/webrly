@@ -1,4 +1,5 @@
-import { addOnProducts, pricingCards } from '@/lib/constants'
+import { addOnProducts } from '@/lib/constants'
+import { PRICING } from '@/config/pricing'
 import { db } from '@/lib/db'
 import stripe from '@/lib/stripe'
 import React from 'react'
@@ -36,7 +37,7 @@ const Billing = async ({ params }: Props) => {
     active: true,
   })
 
-  const currentPlanDetails = pricingCards.find(
+  const currentPlanDetails = PRICING.find(
     (c) => c.priceId === agencySubscription?.Subscription?.priceId
   )
 
@@ -95,7 +96,7 @@ const Billing = async ({ params }: Props) => {
             agencySubscription?.Subscription?.active === true
               ? currentPlanDetails?.features || []
               : currentPlanDetails?.features ||
-                pricingCards.find((pricing) => pricing.title === 'Starter')
+                PRICING.find((pricing) => pricing.title === 'Starter')
                   ?.features ||
                 []
           }
