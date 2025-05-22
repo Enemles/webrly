@@ -1,11 +1,8 @@
 import BlurPage from '@/components/global/blur-page'
-import InfoBar from '@/components/global/info-bar'
-import Sidebar from '@/components/sidebar'
+import Sidebar from '@/components/sidebar/sidebarServer'
 import Unauthorized from '@/components/unauthorized'
-import { getNotificationAndUser } from '@/lib/services/notification'
 import { getAuthUserDetails, verifyAndAcceptInvitation } from '@/lib/services/auth'
 import { currentUser } from '@clerk/nextjs'
-import { Role } from '@prisma/client'
 import { redirect } from 'next/navigation'
 import React from 'react'
 
@@ -22,8 +19,6 @@ const SubaccountLayout = async ({ children, params }: Props) => {
     return redirect('/')
   }
 
-  let notifications: any = []
-
   if (!user.privateMetadata.role) {
     return <Unauthorized />
   } else {
@@ -35,20 +30,6 @@ const SubaccountLayout = async ({ children, params }: Props) => {
     if (!hasPermission) {
       return <Unauthorized />
     }
-
-    const allNotifications = await getNotificationAndUser(agencyId)
-
-    if (
-      user.privateMetadata.role === 'AGENCY_ADMIN' ||
-      user.privateMetadata.role === 'AGENCY_OWNER'
-    ) {
-      notifications = allNotifications
-    } else {
-      const filteredNoti = allNotifications?.filter(
-        (item) => item.subAccountId === params.subaccountId
-      )
-      if (filteredNoti) notifications = filteredNoti
-    }
   }
 
   return (
@@ -58,14 +39,9 @@ const SubaccountLayout = async ({ children, params }: Props) => {
         type="subaccount"
       />
 
-      <div className="md:pl-[300px]">
-        <InfoBar
-          notifications={notifications}
-          role={user.privateMetadata.role as Role}
-          subAccountId={params.subaccountId as string}
-        />
+      <div className="md:pl-[60px]">
         <div className="relative">
-            {children}
+          {children}
         </div>
       </div>
     </div>
