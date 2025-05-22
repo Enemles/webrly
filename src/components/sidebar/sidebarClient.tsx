@@ -77,7 +77,7 @@ export function NotificationButton({
     <div className="fixed top-4 right-4 z-50">
       <Sheet>
         <SheetTrigger>
-          <div className="rounded-full w-9 h-9 bg-background flex items-center justify-center text-white shadow-md hover:shadow-lg transition-shadow">
+          <div className="rounded-full w-9 h-9 bg-background flex items-center justify-center text-neutral-700 dark:text-neutral-200 shadow-md hover:shadow-lg transition-shadow">
             <Bell size={17} />
           </div>
         </SheetTrigger>
@@ -129,7 +129,7 @@ export function NotificationButton({
           ))}
           {allNotifications?.length === 0 && (
             <div className="flex items-center justify-center text-muted-foreground mb-4">
-              Vous n'avez pas de notifications
+              Vous n&apos;avez pas de notifications
             </div>
           )}
         </SheetContent>
