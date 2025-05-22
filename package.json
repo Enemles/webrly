@@ -3,11 +3,25 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "prisma generate && next dev",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "postinstall": "prisma generate"
+    "docker:start": "docker-compose up -d",
+    "docker:stop": "docker-compose down",
+    "db:migrate:dev": "prisma migrate dev",
+    "db:push": "prisma db push",
+    "db:studio": "prisma studio",
+    "db:setup:local": "npm run docker:start && npm run db:push",
+    "db:export": "node export-data.js",
+    "db:import": "node import-data.js",
+    "db:duplicate": "npm run db:export && npm run db:import",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:debug": "playwright test --debug",
+    "test:basic": "playwright test tests/homepage.spec.ts --debug",
+    "test:simple": "playwright test tests/simple.spec.ts",
+    "test:site": "playwright test tests/site.spec.ts"
   },
   "dependencies": {
     "@clerk/nextjs": "^4.29.1",
@@ -58,6 +72,7 @@
     "embla-carousel-react": "^8.0.0-rc17",
     "input-otp": "^1.4.2",
     "lucide-react": "^0.303.0",
+    "motion": "^12.12.1",
     "next": "14.0.4",
     "next-themes": "^0.2.1",
     "prisma": "^5.7.1",
@@ -78,6 +93,7 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
+    "@playwright/test": "^1.52.0",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
@@ -86,6 +102,7 @@
     "eslint-config-next": "14.0.4",
     "postcss": "^8",
     "prisma-dbml-generator": "^0.12.0",
+    "tailwind-scrollbar": "^3.1.0",
     "tailwindcss": "^3.3.0",
     "typescript": "^5"
   }

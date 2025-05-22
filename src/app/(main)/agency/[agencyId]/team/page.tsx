@@ -5,36 +5,26 @@ import { Plus } from 'lucide-react'
 import { currentUser } from '@clerk/nextjs'
 import { columns } from './columns'
 import SendInvitation from '@/components/forms/send-invitation'
+import { getAuthUserGroup } from '@/lib/services/auth'
+import { redirect } from 'next/navigation'
+import { getAgencyDetails } from '@/lib/services/agency'
 
 type Props = {
   params: { agencyId: string }
 }
 
 const TeamPage = async ({ params }: Props) => {
+  const { agencyId } = params
   const authUser = await currentUser()
-  const teamMembers = await db.user.findMany({
-    where: {
-      Agency: {
-        id: params.agencyId,
-      },
-    },
-    include: {
-      Agency: { include: { SubAccount: true } },
-      Permissions: { include: { SubAccount: true } },
-    },
-  })
 
-  if (!authUser) return null
-  const agencyDetails = await db.agency.findUnique({
-    where: {
-      id: params.agencyId,
-    },
-    include: {
-      SubAccount: true,
-    },
-  })
+  if (!authUser) redirect("/agency/sign-in");
+  if (!agencyId) redirect("/agency/unauthorized");
 
-  if (!agencyDetails) return
+  const teamMembers = await getAuthUserGroup(agencyId);
+  if (!teamMembers) redirect("/agency/sign-in");
+
+  const agencyDetails = await getAgencyDetails(agencyId);
+  if (!agencyDetails) redirect("/agency/unauthorized");
 
   return (
     <DataTable

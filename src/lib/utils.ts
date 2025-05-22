@@ -43,6 +43,12 @@ export function convertDecimalToNumber<T>(obj: T): T {
   return obj;
 }
 
+export const logger = (...args: any[]) => {
+  if (process.env.NODE_ENV === "development") {
+    console.log("%c[DEV]:", "background-color: yellow; color: black", args);
+  }
+};
+
 
 export function getStripeOAuthLink(
   accountType: 'agency' | 'subaccount',

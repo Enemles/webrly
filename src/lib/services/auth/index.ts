@@ -33,7 +33,21 @@ export const getAuthUserDetails = async () => {
 
   return userData
 }
+export const getAuthUserGroup = async (agencyId: string) => {
+  const teamMembers = await db.user.findMany({
+    where: {
+      Agency: {
+        id: agencyId,
+      },
+    },
+    include: {
+      Agency: { include: { SubAccount: true } },
+      Permissions: { include: { SubAccount: true } },
+    },
+  });
 
+  return teamMembers;
+};
 export const verifyAndAcceptInvitation = async () => {
   const user = await currentUser()
   if (!user) return redirect('/sign-in')

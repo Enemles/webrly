@@ -1,9 +1,12 @@
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { pricingCards } from "@/lib/constants";
+import { BackgroundBeams } from "@/components/modules/landing/BackgroundBeams";
+import { HeroContainerScroll } from "@/components/modules/landing/HeroContainerScroll";
+import HoverPriceCard from "@/components/modules/landing/HoverPriceCard";
+import { InfiniteMovingCards } from "@/components/modules/landing/InfiniteMovingCard";
+import { StickyScroll } from "@/components/modules/landing/StickyScrollReveal";
+import { buttonVariants } from "@/components/ui/button";
+import MaxWidthWrapper from "@/components/ui/max-width-wrapper";
 import stripe from "@/lib/stripe";
-import clsx from "clsx";
-import { Check } from "lucide-react";
-import Image from "next/image";
+import { cn } from "@/lib/utils";
 import Link from "next/link";
 
 export default async function Home() {
@@ -12,138 +15,69 @@ export default async function Home() {
     active: true,
   })
   return (
-    <>
-      <section className="h-full w-full pt-36 relative flex items-center justify-center flex-col">
-        <div className="absolute bottom-0 left-0 right-0 top-0 bg-[linear-gradient(to_right,#4f4f4f2e_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f2e_1px,transparent_1px)] bg-[size:14px_24px] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,#000_70%,transparent_110%)]" />
-        <p className="text-center">Run your agency, in one place</p>
-        <div className="bg-gradient-to-r from-primary to-secondary-foreground text-transparent bg-clip-text relative">
-          <h1 className="text-9xl font-bold text-center">
-            Weberly
-          </h1>
-        </div>
-        <div className="flex justify-center items-center relative md:mt-[-70px]">
-          <Image
-            src={'/assets/preview.png'}
-            alt="banner image"
-            height={1200}
-            width={1200}
-            className="rounded-tl-2xl rounded-tr-2xl border-2 border-muted"
-          />
-          <div className="bottom-0 top-[50%] bg-gradient-to-t dark:from-background left-0 right-0 absolute z-10"></div>
+    <div className="h-full">
+      <section className="w-full relative">
+        <MaxWidthWrapper>
+          <HeroContainerScroll />
+        </MaxWidthWrapper>
+        {/* <BackgroundBeams /> */}
+      </section>
+      <section>
+        <MaxWidthWrapper className="flex items-center flex-col gap-4 md:mt-20">
+          <h2 className="text-4xl text-center font-medium">
+            Choose what fits you right
+          </h2>
+          <p className="text-muted-foreground text-center">
+            Our straightforward pricing plans are tailored to meet your needs.
+            If you&apos;re not ready to commit you can get started for free.
+          </p>
+          <HoverPriceCard />
+        </MaxWidthWrapper>
+      </section>
+      <section className="w-full mt-10 md:mt-20">
+        <InfiniteMovingCards pauseOnHover={false} speed="slow" />
+      </section>
+      <section className="w-full mt-10 md:mt-20">
+        <MaxWidthWrapper>
+          <div className="flex flex-col gap-4 items-center">
+            <h2 className="text-4xl text-center font-medium">
+              Explore new features
+            </h2>
+            <div className="text-muted-foreground text-center">
+              <p>
+                Webrly does everything possible to provide you with a convenient
+                tool for managing your agency.
+              </p>
+              <p>Here are just a few tools that may interest you.</p>
+            </div>
+          </div>
+        </MaxWidthWrapper>
+        <div className="py-10">
+          <StickyScroll />
         </div>
       </section>
-      <section className="flex justify-center items-center flex-col gap-4 md:!mt-20 mt-[-60px]">
-        <h2 className="text-4xl text-center"> Choose what fits you right</h2>
-        <p className="text-muted-foreground text-center">
-          Our straightforward pricing plans are tailored to meet your needs. If
-          {" you're"} not <br />
-          ready to commit you can get started for free.
-        </p>
-        <div className="flex  justify-center gap-4 flex-wrap mt-6">
-        {prices.data.map((card) => (
-            //WIP: Wire up free product from stripe
-            <Card
-              key={card.nickname}
-              className={clsx('w-[300px] flex flex-col justify-between', {
-                'border-2 border-primary': card.nickname === 'Unlimited Saas',
-              })}
+      <div className="h-[40rem] w-full rounded-md relative flex flex-col items-center justify-center antialiased">
+        <div className="max-w-2xl mx-auto p-4 z-10">
+          <h2 className="relative z-10 text-lg md:text-7xl  bg-clip-text text-transparent bg-gradient-to-b from-neutral-200 to-neutral-600  text-center font-sans font-bold">
+            Join Webrly
+          </h2>
+          <p></p>
+          <p className="text-neutral-500 max-w-lg mx-auto my-2 text-sm text-center relative z-10">
+            Discover the power of seamless agency management with Webrly Agency
+            CRM. Experience the difference today and revolutionize the way you
+            manage your agency with Webrly.
+          </p>
+          <div className="flex justify-center mt-8">
+            <Link
+              href="/agency"
+              className={cn(buttonVariants({ variant: "secondary" }), "w-20")}
             >
-              <CardHeader>
-                <CardTitle
-                  className={clsx('', {
-                    'text-muted-foreground': card.nickname !== 'Unlimited Saas',
-                  })}
-                >
-                  {card.nickname}
-                </CardTitle>
-                <CardDescription>
-                  {
-                    pricingCards.find((c) => c.title === card.nickname)
-                      ?.description
-                  }
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <span className="text-4xl font-bold">
-                  {card.unit_amount && card.unit_amount / 100}
-                </span>
-                <span className="text-muted-foreground">
-                  <span>/ {card.recurring?.interval}</span>
-                </span>
-              </CardContent>
-              <CardFooter className="flex flex-col items-start gap-4">
-                <div>
-                  {pricingCards
-                    .find((c) => c.title === card.nickname)
-                    ?.features.map((feature) => (
-                      <div
-                        key={feature}
-                        className="flex gap-2"
-                      >
-                        <Check />
-                        <p>{feature}</p>
-                      </div>
-                    ))}
-                </div>
-                <Link
-                  href={`/agency?plan=${card.id}`}
-                  className={clsx(
-                    'w-full text-center bg-primary p-2 rounded-md',
-                    {
-                      '!bg-muted-foreground':
-                        card.nickname !== 'Unlimited Saas',
-                    }
-                  )}
-                >
-                  Get Started
-                </Link>
-              </CardFooter>
-            </Card>
-          ))}
-          <Card className={clsx('w-[300px] flex flex-col justify-between')}>
-            <CardHeader>
-              <CardTitle
-                className={clsx({
-                  'text-muted-foreground': true,
-                })}
-              >
-                {pricingCards[0].title}
-              </CardTitle>
-              <CardDescription>{pricingCards[0].description}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <span className="text-4xl font-bold">€0</span>
-              <span>/ month</span>
-            </CardContent>
-            <CardFooter className="flex flex-col  items-start gap-4 ">
-              <div>
-                {pricingCards
-                  .find((c) => c.title === 'Starter')
-                  ?.features.map((feature) => (
-                    <div
-                      key={feature}
-                      className="flex gap-2"
-                    >
-                      <Check />
-                      <p>{feature}</p>
-                    </div>
-                  ))}
-              </div>
-              <Link
-                href="/agency"
-                className={clsx(
-                  'w-full text-center bg-primary p-2 rounded-md',
-                  {
-                    '!bg-muted-foreground': true,
-                  }
-                )}
-              >
-                Get Started
-              </Link>
-            </CardFooter>
-          </Card>
+              Join
+            </Link>
+          </div>
         </div>
-      </section>
-    </>
+        {/* <BackgroundBeams /> */}
+      </div>
+    </div>
   );
 }

@@ -226,7 +226,7 @@ const FunnelEditorNavigation = ({
             <div className="flex flex-row items-center gap-4">
               Draft
               <Switch
-                disabled
+              // TODO : make this switch work to publich or draft 
                 defaultChecked={true}
               />
               Publish
