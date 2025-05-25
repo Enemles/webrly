@@ -127,7 +127,7 @@ const LaneCard: React.FC<LaneCardProps> = ({
       {(provided, snapshot) => {
         if (snapshot.isDragging) {
           //@ts-ignore
-          const offset = { x: 300, y: 0 }
+          const offset = { x: 0, y: 0 }
           //@ts-ignore
           const x = provided.draggableProps.style?.left - offset.x
           //@ts-ignore
