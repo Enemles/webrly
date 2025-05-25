@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { z } from 'zod'
 import {
   Form,
@@ -23,7 +23,7 @@ import { Input } from '../ui/input'
 
 import { Button } from '../ui/button'
 import Loading from '../global/loading'
-import { LaneFormSchema } from '@/lib/types'
+import { LaneColors, LaneFormSchema } from '@/lib/types'
 import {
   saveActivityLogsNotification,
 } from '@/lib/services/notification'
@@ -32,6 +32,7 @@ import { useModal } from '@/providers/modal-provider'
 import { useRouter } from 'next/navigation'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { getPipelineDetails, upsertLane } from '@/lib/services/pipeline'
+import TagComponent from '../global/tag'
 
 interface CreateLaneFormProps {
   defaultData?: Lane
@@ -44,11 +45,14 @@ const LaneForm: React.FC<CreateLaneFormProps> = ({
 }) => {
   const { setClose } = useModal()
   const router = useRouter()
+  const [selectedColor, setSelectedColor] = useState<string>(defaultData?.color || 'BLUE')
+  
   const form = useForm<z.infer<typeof LaneFormSchema>>({
     mode: 'onChange',
     resolver: zodResolver(LaneFormSchema),
     defaultValues: {
       name: defaultData?.name || '',
+      color: defaultData?.color || 'BLUE',
     },
   })
 
@@ -56,7 +60,9 @@ const LaneForm: React.FC<CreateLaneFormProps> = ({
     if (defaultData) {
       form.reset({
         name: defaultData.name || '',
+        color: defaultData.color || 'BLUE',
       })
+      setSelectedColor(defaultData.color || 'BLUE')
     }
   }, [defaultData])
 
@@ -67,6 +73,7 @@ const LaneForm: React.FC<CreateLaneFormProps> = ({
     try {
       const response = await upsertLane({
         ...values,
+        color: selectedColor,
         id: defaultData?.id,
         pipelineId: pipelineId,
         order: defaultData?.order,
@@ -96,6 +103,12 @@ const LaneForm: React.FC<CreateLaneFormProps> = ({
     }
     setClose()
   }
+
+  const handleColorSelect = (color: string) => {
+    setSelectedColor(color)
+    form.setValue('color', color)
+  }
+
   return (
     <Card className="w-full ">
       <CardHeader>
@@ -119,6 +132,31 @@ const LaneForm: React.FC<CreateLaneFormProps> = ({
                       placeholder="Lane Name"
                       {...field}
                     />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              disabled={isLoading}
+              control={form.control}
+              name="color"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Lane Color</FormLabel>
+                  <FormControl>
+                    <div className="flex items-center gap-2">
+                      {LaneColors.map((colorName) => (
+                        <TagComponent
+                          key={colorName}
+                          selectedColor={handleColorSelect}
+                          title=""
+                          colorName={colorName}
+                          isSelected={selectedColor === colorName}
+                        />
+                      ))}
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>

@@ -69,7 +69,16 @@ const LaneCard: React.FC<LaneCardProps> = ({
     )
   }, [tickets])
 
-  const randomColor = `#${Math.random().toString(16).slice(2, 8)}`
+  const getLaneColor = (colorName: string) => {
+    const colorMap: { [key: string]: string } = {
+      'BLUE': '#57acea',
+      'ORANGE': '#ffac7e', 
+      'ROSE': '#f43f5e',
+      'GREEN': '#10b981',
+      'PURPLE': '#a855f7',
+    }
+    return colorMap[colorName] || '#3b82f6'
+  }
 
   const addNewTicket = (ticket: TicketWithTags[0]) => {
     setAllTickets([...allTickets, ticket])
@@ -157,7 +166,7 @@ const LaneCard: React.FC<LaneCardProps> = ({
                       <div className="flex items-center w-full gap-2">
                         <div
                           className={cn('w-4 h-4 rounded-full')}
-                          style={{ background: randomColor }}
+                          style={{ background: getLaneColor(laneDetails.color) }}
                         />
                         <span className="font-bold text-sm">
                           {laneDetails.name}
