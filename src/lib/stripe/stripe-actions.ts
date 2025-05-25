@@ -3,6 +3,7 @@
 import Stripe from "stripe"
 import { db } from "../db"
 import stripe from "."
+import { Plan } from "@prisma/client"
 
 export const subscriptionCreated = async (
   subscription: Stripe.Subscription, 
@@ -21,16 +22,21 @@ export const subscriptionCreated = async (
       throw new Error('Agency not found to upsert subscription')
     }
 
+    const priceId = subscription.items.data[0].price.id;
+
+    const planValue = 
+      priceId === "price_1RHqglBa1q4VAXiSHxH98PEw" ? Plan.price_1RHqglBa1q4VAXiSHxH98PEw :
+      priceId === "price_1RHqglBa1q4VAXiSxrKe3Eqp" ? Plan.price_1RHqglBa1q4VAXiSxrKe3Eqp :
+      null;
+
     const data = {
       active: subscription.status === 'active',
       agencyId: agency.id,
       customerId,
       currentPeriodEndDate: new Date(subscription.current_period_end * 1000),
-      // @ts-ignore
-      priceId: subscription.plan.id,
+      priceId: priceId,
       subscriptionId: subscription.id,
-      // @ts-ignore
-      plan: subscription.plan.id,
+      plan: planValue,
     }
 
     const res = await db.subscription.upsert({

@@ -1,8 +1,6 @@
 import BlurPage from "@/components/global/blur-page";
-import InfoBar from "@/components/global/info-bar";
-import Sidebar from "@/components/sidebar";
+import Sidebar from "@/components/sidebar/sidebarServer";
 import Unauthorized from "@/components/unauthorized";
-import { getNotificationAndUser } from "@/lib/services/notification";
 import { verifyAndAcceptInvitation } from "@/lib/services/auth";
 import { currentUser } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
@@ -31,23 +29,15 @@ const layout = async ({ children, params }: Props) => {
   if (user.privateMetadata.role !== 'AGENCY_OWNER' && user.privateMetadata.role !== 'AGENCY_ADMIN')
     return <Unauthorized />
 
-  let allNotifications: any = []
-
-  const notifications = await getNotificationAndUser(agencyId)
-
-  if (notifications) allNotifications = notifications
-
   return (
     <div className="h-screen overflow-hidden">
       <Sidebar id={params.agencyId} type="agency" />
-      <div className="md:pl-[300px]">
-        <InfoBar notifications={allNotifications} role={allNotifications.User?.role} />
+      <div className="md:pl-[60px]">
         <div className="relative">
           <BlurPage>
             {children}
           </BlurPage>
         </div>
-
       </div>
     </div>
   );

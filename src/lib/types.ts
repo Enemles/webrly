@@ -95,7 +95,11 @@ export type PipelineDetailsWithLanesCardsTagsTickets = Prisma.PromiseReturnType<
 
 export const LaneFormSchema = z.object({
   name: z.string().min(1),
+  color: z.string().min(1, 'Color is required'),
 })
+
+export const LaneColors = ['BLUE', 'ORANGE', 'ROSE', 'PURPLE', 'GREEN'] as const
+export type LaneColor = (typeof LaneColors)[number]
 
 export type TicketWithTags = Prisma.PromiseReturnType<typeof getTicketsWithTags>
 

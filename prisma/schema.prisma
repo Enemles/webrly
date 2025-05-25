@@ -170,6 +170,7 @@ model Pipeline {
 model Lane {
   id         String   @id @default(uuid())
   name       String
+  color      String   @default("#3b82f6")
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   Pipeline   Pipeline @relation(fields: [pipelineId], references: [id], onDelete: Cascade)

@@ -123,7 +123,7 @@ const PipelineTicket = ({
     >
       {(provided, snapshot) => {
         if (snapshot.isDragging) {
-          const offset = { x: 300, y: 20 }
+          const offset = { x: 0, y: 0 }
           //@ts-ignore
           const x = provided.draggableProps.style?.left - offset.x
           //@ts-ignore
