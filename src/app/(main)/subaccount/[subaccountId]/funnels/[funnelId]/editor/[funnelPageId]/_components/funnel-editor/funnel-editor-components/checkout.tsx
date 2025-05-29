@@ -82,9 +82,8 @@ const Checkout = (props: Props) => {
             open: true,
             className: 'z-[100000]',
             variant: 'destructive',
-            title: 'Oppse!',
-            //@ts-ignore
-            description: error.message,
+            title: 'Oops!',
+            description: error instanceof Error ? error.message : 'Something went wrong',
           })
         }
       }
