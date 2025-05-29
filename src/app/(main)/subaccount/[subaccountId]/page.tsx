@@ -10,19 +10,16 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { db } from '@/lib/db'
-import  stripe  from '@/lib/stripe'
-import { AreaChart, BadgeDelta } from '@tremor/react'
+import { getSubaccountAnalytics, getFunnelPerformanceMetrics } from '@/lib/services/analytics'
+import { AreaChart } from '@tremor/react'
 import { ClipboardIcon, Contact2, EuroIcon, ShoppingCart } from 'lucide-react'
 import Link from 'next/link'
 import React from 'react'
@@ -35,96 +32,39 @@ type Props = {
 }
 
 const SubaccountPageId = async ({ params, searchParams }: Props) => {
-  let currency = 'EUR'
-  let sessions
-  let totalClosedSessions
-  let totalPendingSessions
-  let net = 0
-  let potentialIncome = 0
-  let closingRate = 0
-
-  const subaccountDetails = await db.subAccount.findUnique({
-    where: {
-      id: params.subaccountId,
-    },
-  })
-
   const currentYear = new Date().getFullYear()
-  const startDate = new Date(`${currentYear}-01-01T00:00:00Z`).getTime() / 1000
-  const endDate = new Date(`${currentYear}-12-31T23:59:59Z`).getTime() / 1000
-
-  if (!subaccountDetails) return
-
-  if (subaccountDetails.connectAccountId) {
-    const response = await stripe.accounts.retrieve({
-      stripeAccount: subaccountDetails.connectAccountId,
-    })
-    currency = response.default_currency?.toUpperCase() || 'USD'
-    const checkoutSessions = await stripe.checkout.sessions.list(
-      { created: { gte: startDate, lte: endDate }, limit: 100 },
-      {
-        stripeAccount: subaccountDetails.connectAccountId,
-      }
-    )
-    sessions = checkoutSessions.data.map((session) => ({
-      ...session,
-      created: new Date(session.created).toLocaleDateString(),
-      amount_total: session.amount_total ? session.amount_total / 100 : 0,
-    }))
-
-    totalClosedSessions = checkoutSessions.data
-      .filter((session) => session.status === 'complete')
-      .map((session) => ({
-        ...session,
-        created: new Date(session.created).toLocaleDateString(),
-        amount_total: session.amount_total ? session.amount_total / 100 : 0,
-      }))
-
-    totalPendingSessions = checkoutSessions.data
-      .filter(
-        (session) => session.status === 'open' || session.status === 'expired'
-      )
-      .map((session) => ({
-        ...session,
-        created: new Date(session.created).toLocaleDateString(),
-        amount_total: session.amount_total ? session.amount_total / 100 : 0,
-      }))
-
-    net = +totalClosedSessions
-      .reduce((total, session) => total + (session.amount_total || 0), 0)
-      .toFixed(2)
-
-    potentialIncome = +totalPendingSessions
-      .reduce((total, session) => total + (session.amount_total || 0), 0)
-      .toFixed(2)
-
-    closingRate = +(
-      (totalClosedSessions.length / checkoutSessions.data.length) *
-      100
-    ).toFixed(2)
+  
+  // Récupération des métriques via les services
+  const analytics = await getSubaccountAnalytics(params.subaccountId)
+  const funnelPerformanceMetrics = await getFunnelPerformanceMetrics(params.subaccountId)
+  
+  // Valeurs par défaut si pas de données Stripe
+  const defaultValues = {
+    currency: 'EUR',
+    net: 0,
+    potentialIncome: 0,
+    closingRate: 0,
+    sessions: [],
+    totalClosedSessions: [],
+    totalPendingSessions: [],
   }
 
-  const funnels = await db.funnel.findMany({
-    where: {
-      subAccountId: params.subaccountId,
-    },
-    include: {
-      FunnelPages: true,
-    },
-  })
+  const {
+    currency,
+    net,
+    potentialIncome,
+    closingRate,
+    sessions,
+    totalClosedSessions,
+    totalPendingSessions,
+  } = analytics.stripe || defaultValues
 
-  const funnelPerformanceMetrics = funnels.map((funnel) => ({
-    ...funnel,
-    totalFunnelVisits: funnel.FunnelPages.reduce(
-      (total, page) => total + page.visits,
-      0
-    ),
-  }))
+  const hasStripeConnection = Boolean(analytics.stripe)
 
   return (
     <BlurPage>
       <div className="relative h-full">
-        {!subaccountDetails.connectAccountId && (
+        {!hasStripeConnection && (
           <div className="absolute -top-10 -left-10 right-0 bottom-0 z-30 flex items-center justify-center backdrop-blur-md bg-background/50">
             <Card>
               <CardHeader>
@@ -133,7 +73,7 @@ const SubaccountPageId = async ({ params, searchParams }: Props) => {
                   You need to connect your stripe account to see metrics
                 </CardDescription>
                 <Link
-                  href={`/subaccount/${subaccountDetails.id}/launchpad`}
+                  href={`/subaccount/${params.subaccountId}/launchpad`}
                   className="p-2 w-fit bg-secondary text-white rounded-md flex items-center gap-2"
                 >
                   <ClipboardIcon />
@@ -186,7 +126,7 @@ const SubaccountPageId = async ({ params, searchParams }: Props) => {
                   value={closingRate}
                   description={
                     <>
-                      {sessions && (
+                      {sessions.length > 0 && (
                         <div className="flex flex-col">
                           Total Carts Opened
                           <div className="flex gap-2">
@@ -195,7 +135,7 @@ const SubaccountPageId = async ({ params, searchParams }: Props) => {
                           </div>
                         </div>
                       )}
-                      {totalClosedSessions && (
+                      {totalClosedSessions.length > 0 && (
                         <div className="flex flex-col">
                           Won Carts
                           <div className="flex gap-2">
@@ -231,7 +171,7 @@ const SubaccountPageId = async ({ params, searchParams }: Props) => {
               </CardHeader>
               <AreaChart
                 className="text-sm stroke-primary"
-                data={sessions || []}
+                data={sessions}
                 index="created"
                 categories={['amount_total']}
                 colors={['primary']}
@@ -240,31 +180,21 @@ const SubaccountPageId = async ({ params, searchParams }: Props) => {
               />
             </Card>
           </div>
-          <div className="flex gap-4 xl:!flex-row flex-col">
-            <Card className="p-4 flex-1 h-[450px] overflow-scroll relative">
+          <div className="flex gap-4 flex-col xl:!flex-row">
+            <Card className="p-4 flex-1 relative">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  Transition History
-                  <BadgeDelta
-                    className="rounded-xl bg-transparent"
-                    deltaType="moderateIncrease"
-                    isIncreasePositive={true}
-                    size="xs"
-                  >
-                    +12.3%
-                  </BadgeDelta>
-                </CardTitle>
+                <CardDescription>Transaction History</CardDescription>
                 <Table>
                   <TableHeader className="!sticky !top-0">
                     <TableRow>
-                      <TableHead className="w-[300px]">Email</TableHead>
-                      <TableHead className="w-[200px]">Status</TableHead>
+                      <TableHead className="w-[200px]">Email</TableHead>
+                      <TableHead>Status</TableHead>
                       <TableHead>Created Date</TableHead>
                       <TableHead className="text-right">Value</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody className="font-medium truncate">
-                    {totalClosedSessions
+                    {totalClosedSessions.length > 0
                       ? totalClosedSessions.map((session) => (
                           <TableRow key={session.id}>
                             <TableCell>
@@ -276,9 +206,8 @@ const SubaccountPageId = async ({ params, searchParams }: Props) => {
                               </Badge>
                             </TableCell>
                             <TableCell>
-                              {new Date(session.created).toUTCString()}
+                              {session.created}
                             </TableCell>
-
                             <TableCell className="text-right">
                               <small>{currency}</small>{' '}
                               <span className="text-emerald-500">
@@ -287,7 +216,11 @@ const SubaccountPageId = async ({ params, searchParams }: Props) => {
                             </TableCell>
                           </TableRow>
                         ))
-                      : 'No Data'}
+                      : <TableRow>
+                          <TableCell colSpan={4} className="text-center text-muted-foreground">
+                            No Data
+                          </TableCell>
+                        </TableRow>}
                   </TableBody>
                 </Table>
               </CardHeader>

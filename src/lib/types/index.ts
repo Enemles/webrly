@@ -19,6 +19,9 @@ export * from './notification'
 // Stripe types
 export * from './stripe'
 
+// Analytics types
+export * from './analytics'
+
 // Re-export schemas for convenience
 export * from './pipeline/schemas'
 export * from './funnel/schemas'

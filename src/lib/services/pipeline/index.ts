@@ -236,5 +236,5 @@ export const getPipelines = async (subaccountId: string) => {
       },
     },
   })
-  return response
+  return convertDecimalToNumber(response)
 }

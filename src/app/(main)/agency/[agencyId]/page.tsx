@@ -9,8 +9,7 @@ import {
 } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { Separator } from '@/components/ui/separator'
-import { db } from '@/lib/db'
-import  stripe  from '@/lib/stripe'
+import { getAgencyAnalytics, getCurrentYearDateRange } from '@/lib/services/analytics'
 import { AreaChart } from '@tremor/react'
 import {
   ClipboardIcon,
@@ -28,77 +27,37 @@ const Page = async ({
   params: { agencyId: string }
   searchParams: { code: string }
 }) => {
-  let currency = 'EUR'
-  let sessions
-  let totalClosedSessions
-  let totalPendingSessions
-  let net = 0
-  let potentialIncome = 0
-  let closingRate = 0
   const currentYear = new Date().getFullYear()
-  const startDate = new Date(`${currentYear}-01-01T00:00:00Z`).getTime() / 1000
-  const endDate = new Date(`${currentYear}-12-31T23:59:59Z`).getTime() / 1000
-
-  const agencyDetails = await db.agency.findUnique({
-    where: {
-      id: params.agencyId,
-    },
-  })
-
-  if (!agencyDetails) return
-
-  const subaccounts = await db.subAccount.findMany({
-    where: {
-      agencyId: params.agencyId,
-    },
-  })
-
-  if (agencyDetails.connectAccountId) {
-    const response = await stripe.accounts.retrieve({
-      stripeAccount: agencyDetails.connectAccountId,
-    })
-
-    currency = response.default_currency?.toUpperCase() || 'EUR'
-    const checkoutSessions = await stripe.checkout.sessions.list(
-      {
-        created: { gte: startDate, lte: endDate },
-        limit: 100,
-      },
-      { stripeAccount: agencyDetails.connectAccountId }
-    )
-    sessions = checkoutSessions.data
-    totalClosedSessions = checkoutSessions.data
-      .filter((session) => session.status === 'complete')
-      .map((session) => ({
-        ...session,
-        created: new Date(session.created).toLocaleDateString(),
-        amount_total: session.amount_total ? session.amount_total / 100 : 0,
-      }))
-
-    totalPendingSessions = checkoutSessions.data
-      .filter((session) => session.status === 'open')
-      .map((session) => ({
-        ...session,
-        created: new Date(session.created).toLocaleDateString(),
-        amount_total: session.amount_total ? session.amount_total / 100 : 0,
-      }))
-    net = +totalClosedSessions
-      .reduce((total, session) => total + (session.amount_total || 0), 0)
-      .toFixed(2)
-
-    potentialIncome = +totalPendingSessions
-      .reduce((total, session) => total + (session.amount_total || 0), 0)
-      .toFixed(2)
-
-    closingRate = +(
-      (totalClosedSessions.length / checkoutSessions.data.length) *
-      100
-    ).toFixed(2)
+  
+  // Récupération des métriques via le service
+  const analytics = await getAgencyAnalytics(params.agencyId)
+  
+  // Valeurs par défaut si pas de données Stripe
+  const defaultValues = {
+    currency: 'EUR',
+    net: 0,
+    potentialIncome: 0,
+    closingRate: 0,
+    sessions: [],
+    totalClosedSessions: [],
+    totalPendingSessions: [],
   }
+
+  const {
+    currency,
+    net,
+    potentialIncome,
+    closingRate,
+    sessions,
+    totalClosedSessions,
+    totalPendingSessions,
+  } = analytics.stripe || defaultValues
+
+  const hasStripeConnection = Boolean(analytics.stripe)
 
   return (
     <div className="relative h-full">
-      {!agencyDetails.connectAccountId && (
+      {!hasStripeConnection && (
         <div className="absolute -top-10 -left-10 right-0 bottom-0 z-30 flex items-center justify-center backdrop-blur-md bg-background/50">
           <Card>
             <CardHeader>
@@ -107,7 +66,7 @@ const Page = async ({
                 You need to connect your stripe account to see metrics
               </CardDescription>
               <Link
-                href={`/agency/${agencyDetails.id}/launchpad`}
+                href={`/agency/${params.agencyId}/launchpad`}
                 className="p-2 w-fit bg-secondary text-white rounded-md flex items-center gap-2"
               >
                 <ClipboardIcon />
@@ -156,7 +115,7 @@ const Page = async ({
           <Card className="flex-1 relative">
             <CardHeader>
               <CardDescription>Active Clients</CardDescription>
-              <CardTitle className="text-4xl">{subaccounts.length}</CardTitle>
+              <CardTitle className="text-4xl">{analytics.subAccountsCount}</CardTitle>
             </CardHeader>
             <CardContent className="text-sm text-muted-foreground">
               Reflects the number of sub accounts you own and manage.
@@ -177,14 +136,14 @@ const Page = async ({
               <div className="flex flex-col w-full">
                 <div className="flex justify-between items-center">
                   <span className="text-muted-foreground text-sm">
-                    Current: {subaccounts.length}
+                    Current: {analytics.subAccountsCount}
                   </span>
                   <span className="text-muted-foreground text-sm">
-                    Goal: {agencyDetails.goal}
+                    Goal: {analytics.goal}
                   </span>
                 </div>
                 <Progress
-                  value={(subaccounts.length / agencyDetails.goal) * 100}
+                  value={analytics.goal ? (analytics.subAccountsCount / analytics.goal) * 100 : 0}
                 />
               </div>
             </CardFooter>
@@ -199,8 +158,8 @@ const Page = async ({
             <AreaChart
               className="text-sm stroke-primary"
               data={[
-                ...(totalClosedSessions || []),
-                ...(totalPendingSessions || []),
+                ...totalClosedSessions,
+                ...totalPendingSessions,
               ]}
               index="created"
               categories={['amount_total']}
@@ -218,7 +177,7 @@ const Page = async ({
                 value={closingRate}
                 description={
                   <>
-                    {sessions && (
+                    {sessions.length > 0 && (
                       <div className="flex flex-col">
                         Abandoned
                         <div className="flex gap-2">
@@ -227,7 +186,7 @@ const Page = async ({
                         </div>
                       </div>
                     )}
-                    {totalClosedSessions && (
+                    {totalClosedSessions.length > 0 && (
                       <div className="felx flex-col">
                         Won Carts
                         <div className="flex gap-2">
