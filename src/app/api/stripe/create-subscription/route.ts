@@ -43,10 +43,19 @@ export async function POST(req: Request){
           expand: ['latest_invoice.payment_intent'],
         }
       )
+      
+      // Gestion sécurisée du client_secret
+      const clientSecret = subscription.latest_invoice 
+        && typeof subscription.latest_invoice === 'object' 
+        && subscription.latest_invoice.payment_intent
+        && typeof subscription.latest_invoice.payment_intent === 'object'
+        // @ts-ignore
+        ? subscription.latest_invoice.payment_intent.client_secret
+        : null
+
       return NextResponse.json({
         subscriptionId : subscription.id,
-        //@ts-ignore because expanding payment intent from the default object
-        clientSecret : subscription.latest_invoice?.payment_intent.client_secret
+        clientSecret
       })
     } else {
       console.log('Creating subscription')
@@ -63,10 +72,19 @@ export async function POST(req: Request){
         },
         expand: ['latest_invoice.payment_intent'],
       })
+      
+      // Gestion sécurisée du client_secret
+      const clientSecret = subscription.latest_invoice 
+        && typeof subscription.latest_invoice === 'object' 
+        && subscription.latest_invoice.payment_intent
+        && typeof subscription.latest_invoice.payment_intent === 'object'
+        // @ts-ignore
+        ? subscription.latest_invoice.payment_intent.client_secret
+        : null
+
       return NextResponse.json({
         subscriptionId : subscription.id,
-        //@ts-ignore because expanding payment intent from the default object
-        clientSecret : subscription.latest_invoice?.payment_intent.client_secret
+        clientSecret
       })
     }
   } catch (error) {
