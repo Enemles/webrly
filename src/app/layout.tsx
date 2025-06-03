@@ -20,6 +20,7 @@ export default function RootLayout({
 }) {
   return (
     <html
+      className=''
       lang="en"
       suppressHydrationWarning
     >

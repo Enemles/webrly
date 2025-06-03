@@ -1,9 +1,8 @@
 import BlurPage from "@/components/global/blur-page";
 import Sidebar from "@/components/sidebar/sidebarServer";
-import Unauthorized from "@/components/unauthorized";
-import { verifyAndAcceptInvitation } from "@/lib/services/auth";
-import { currentUser } from "@clerk/nextjs";
-import { redirect } from "next/navigation";
+import { currentUser } from '@clerk/nextjs';
+import { db } from '@/lib/db';
+import { redirect } from 'next/navigation';
 import React from "react";
 
 type Props = {
@@ -14,20 +13,23 @@ type Props = {
 }
 
 const layout = async ({ children, params }: Props) => {
+  const authUser = await currentUser()
+  if (!authUser) return redirect('/sign-in')
 
-  const agencyId = await verifyAndAcceptInvitation()
-  const user = await currentUser();
+  const user = await db.user.findUnique({
+    where: {
+      email: authUser.emailAddresses[0].emailAddress,
+    },
+  })
+  if (!user) return redirect('/sign-in')
 
-  if (!user) {
-    return redirect('/sign')
+  if (user.role !== 'AGENCY_OWNER' && user.role !== 'AGENCY_ADMIN') {
+    return redirect('/unauthorized')
   }
 
-  if (!agencyId) {
-    return redirect('/agency')
+  if (user.agencyId !== params.agencyId) {
+    return redirect('/unauthorized')
   }
-
-  if (user.privateMetadata.role !== 'AGENCY_OWNER' && user.privateMetadata.role !== 'AGENCY_ADMIN')
-    return <Unauthorized />
 
   return (
     <div className="h-screen overflow-hidden">
@@ -41,7 +43,6 @@ const layout = async ({ children, params }: Props) => {
       </div>
     </div>
   );
-
 }
 
 export default layout;

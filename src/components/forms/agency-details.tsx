@@ -4,8 +4,10 @@ import { useForm } from 'react-hook-form'
 import React, { useEffect, useState } from 'react'
 import { NumberInput } from '@tremor/react'
 import { v4 } from 'uuid'
-
 import { useRouter } from 'next/navigation'
+import { zodResolver } from '@hookform/resolvers/zod'
+import * as z from 'zod'
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,7 +19,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '../ui/alert-dialog'
-import { zodResolver } from '@hookform/resolvers/zod'
 import {
   Card,
   CardContent,
@@ -34,19 +35,21 @@ import {
   FormLabel,
   FormMessage,
 } from '../ui/form'
-import { useToast } from '@/hooks/use-toast'
-
-import * as z from 'zod'
-import FileUpload from '../global/file-upload'
 import { Input } from '../ui/input'
 import { Switch } from '../ui/switch'
-import {
-  saveActivityLogsNotification,
-} from '@/lib/services/notification'
-import { updateAgencyDetails, deleteAgency, upsertAgency } from '@/lib/services/agency'
-import { initUser } from '@/lib/services/auth'
 import { Button } from '../ui/button'
 import Loading from '../global/loading'
+import FileUpload from '../global/file-upload'
+
+// Services
+import { saveActivityLogsNotification } from '@/lib/services/notification'
+import { updateAgencyDetails, deleteAgency, upsertAgency } from '@/lib/services/agency'
+import { initUser } from '@/lib/services/auth'
+import { updateAgencyGoalAction } from '@/lib/actions/pipeline'
+
+// Hooks personnalisés
+import { useFormSubmit } from '@/hooks/use-form-submit'
+import { useAsyncOperation } from '@/hooks/use-async-operation'
 
 type Props = {
   data?: Partial<Agency>
@@ -66,9 +69,13 @@ const FormSchema = z.object({
 })
 
 const AgencyDetails = ({ data }: Props) => {
-  const { toast } = useToast()
   const router = useRouter()
   const [deletingAgency, setDeletingAgency] = useState(false)
+  
+  // Hooks personnalisés pour la gestion des actions
+  const { handleSubmit: submitForm, isSubmitting } = useFormSubmit()
+  const { execute: executeDeleteAgency } = useAsyncOperation()
+
   const form = useForm<z.infer<typeof FormSchema>>({
     mode: 'onChange',
     resolver: zodResolver(FormSchema),
@@ -85,110 +92,133 @@ const AgencyDetails = ({ data }: Props) => {
       agencyLogo: data?.agencyLogo,
     },
   })
-  const isLoading = form.formState.isSubmitting
 
   useEffect(() => {
     if (data) {
       form.reset(data)
     }
-  }, [data])
+  }, [data, form])
 
-  const handleSubmit = async (values: z.infer<typeof FormSchema>) => {
-    try {
-      let newUserData
-      let custId
-      if (!data?.id) {
-        const bodyData = {
-          email: values.companyEmail,
-          name: values.name,
-          shipping: {
-            address: {
-              city: values.city,
-              country: values.country,
-              line1: values.address,
-              postal_code: values.zipCode,
-              state: values.zipCode,
-            },
-            name: values.name,
-          },
-          address: {
-            city: values.city,
-            country: values.country,
-            line1: values.address,
-            postal_code: values.zipCode,
-            state: values.zipCode,
-          },
+  // Logique métier extraite dans une fonction séparée
+  const createStripeCustomer = async (values: z.infer<typeof FormSchema>) => {
+    const bodyData = {
+      email: values.companyEmail,
+      name: values.name,
+      shipping: {
+        address: {
+          city: values.city,
+          country: values.country,
+          line1: values.address,
+          postal_code: values.zipCode,
+          state: values.zipCode,
+        },
+        name: values.name,
+      },
+      address: {
+        city: values.city,
+        country: values.country,
+        line1: values.address,
+        postal_code: values.zipCode,
+        state: values.zipCode,
+      },
+    }
+
+    const customerResponse = await fetch('/api/stripe/create-customer', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(bodyData)
+    })
+    
+    const customerData: { customerId: string } = await customerResponse.json()
+    return customerData.customerId
+  }
+
+  const onSubmit = async (values: z.infer<typeof FormSchema>) => {
+    await submitForm(
+      async (formData) => {
+        let custId = data?.customerId
+
+        // Créer customer Stripe si nouvelle agence
+        if (!data?.id) {
+          custId = await createStripeCustomer(formData)
         }
 
-        const customerResponse = await fetch('/api/stripe/create-customer', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(bodyData)
+        // Initialiser l'utilisateur
+        await initUser({ role: 'AGENCY_OWNER' })
+        
+        if (!custId) {
+          throw new Error('Customer ID is required')
+        }
+
+        // Créer/mettre à jour l'agence
+        const response = await upsertAgency({
+          id: data?.id ? data.id : v4(),
+          customerId: custId,
+          address: formData.address,
+          agencyLogo: formData.agencyLogo,
+          city: formData.city,
+          companyPhone: formData.companyPhone,
+          country: formData.country,
+          name: formData.name,
+          state: formData.state,
+          whiteLabel: formData.whiteLabel,
+          zipCode: formData.zipCode,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          companyEmail: formData.companyEmail,
+          connectAccountId: data?.connectAccountId || '',
+          goal: data?.goal || 5,
         })
-        const customerData: { customerId: string } = await customerResponse.json()
-        custId = customerData.customerId
+
+        return response
+      },
+      values,
+      {
+        successMessage: data?.id 
+          ? 'Agency updated successfully' 
+          : 'Agency created successfully',
+        errorMessage: 'Could not save agency details',
+        shouldRefresh: true
       }
-
-
-      newUserData = await initUser({ role: 'AGENCY_OWNER' })
-      if (!data?.customerId && !custId) return
-      const response = await upsertAgency({
-        id: data?.id ? data.id : v4(),
-        customerId: data?.customerId || custId || '',
-        address: values.address,
-        agencyLogo: values.agencyLogo,
-        city: values.city,
-        companyPhone: values.companyPhone,
-        country: values.country,
-        name: values.name,
-        state: values.state,
-        whiteLabel: values.whiteLabel,
-        zipCode: values.zipCode,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        companyEmail: values.companyEmail,
-        connectAccountId: '',
-        goal: 5,
-      })
-      toast({
-        title: data?.id ? 'Successfully updated agency' : 'Agency created successfully',
-      })
-      if (data?.id) return router.refresh()
-      if (response) {
-        return router.refresh()
-      }
-
-    } catch (error) {
-      console.log(error)
-      toast({
-        variant: 'destructive',
-        title: 'Oppse!',
-        description: 'Could not create your agency ',
-      })
-    }
+    )
   }
+
   const handleDeleteAgency = async () => {
     if (!data?.id) return
+    
     setDeletingAgency(true)
-    //WIP: discontinue the subscription
-    try {
-      const response = await deleteAgency(data.id)
-      toast({
-        title: 'Deleted Agency',
-        description: 'Deleted your agency and all subaccounts',
-      })
-      router.refresh()
-    } catch (error) {
-      console.log(error)
-      toast({
-        variant: 'destructive',
-        title: 'Oppse!',
-        description: 'could not delete your agency ',
-      })
-    }
-    setDeletingAgency(false)
+    
+    await executeDeleteAgency(
+      async () => {
+        await deleteAgency(data.id!)
+        router.refresh()
+      },
+      {
+        successMessage: 'Agency deleted successfully',
+        errorMessage: 'Could not delete agency',
+        onSuccess: () => setDeletingAgency(false),
+        onError: () => setDeletingAgency(false)
+      }
+    )
+  }
+
+  const handleGoalUpdate = async (val: number) => {
+    if (!data?.id) return
+    
+    // Utiliser la Server Action dédiée avec revalidation automatique
+    await executeDeleteAgency(
+      async () => {
+        return await updateAgencyGoalAction(data.id!, val)
+      },
+      {
+        successMessage: `Goal updated to ${val} successfully`,
+        errorMessage: 'Could not update goal',
+        showToast: true, // Afficher le toast pour confirmer
+        onSuccess: () => {
+          console.log('Goal updated successfully:', val)
+        }
+      }
+    )
   }
 
   return (
@@ -204,11 +234,11 @@ const AgencyDetails = ({ data }: Props) => {
         <CardContent>
           <Form {...form}>
             <form
-              onSubmit={form.handleSubmit(handleSubmit)}
+              onSubmit={form.handleSubmit(onSubmit)}
               className="space-y-4"
             >
               <FormField
-                disabled={isLoading}
+                disabled={isSubmitting}
                 control={form.control}
                 name="agencyLogo"
                 render={({ field }) => (
@@ -227,7 +257,7 @@ const AgencyDetails = ({ data }: Props) => {
               />
               <div className="flex md:flex-row gap-4">
                 <FormField
-                  disabled={isLoading}
+                  disabled={isSubmitting}
                   control={form.control}
                   name="name"
                   render={({ field }) => (
@@ -263,7 +293,7 @@ const AgencyDetails = ({ data }: Props) => {
               </div>
               <div className="flex md:flex-row gap-4">
                 <FormField
-                  disabled={isLoading}
+                  disabled={isSubmitting}
                   control={form.control}
                   name="companyPhone"
                   render={({ field }) => (
@@ -282,7 +312,7 @@ const AgencyDetails = ({ data }: Props) => {
               </div>
 
               <FormField
-                disabled={isLoading}
+                disabled={isSubmitting}
                 control={form.control}
                 name="whiteLabel"
                 render={({ field }) => {
@@ -308,7 +338,7 @@ const AgencyDetails = ({ data }: Props) => {
                 }}
               />
               <FormField
-                disabled={isLoading}
+                disabled={isSubmitting}
                 control={form.control}
                 name="address"
                 render={({ field }) => (
@@ -326,7 +356,7 @@ const AgencyDetails = ({ data }: Props) => {
               />
               <div className="flex md:flex-row gap-4">
                 <FormField
-                  disabled={isLoading}
+                  disabled={isSubmitting}
                   control={form.control}
                   name="city"
                   render={({ field }) => (
@@ -343,7 +373,7 @@ const AgencyDetails = ({ data }: Props) => {
                   )}
                 />
                 <FormField
-                  disabled={isLoading}
+                  disabled={isSubmitting}
                   control={form.control}
                   name="state"
                   render={({ field }) => (
@@ -360,7 +390,7 @@ const AgencyDetails = ({ data }: Props) => {
                   )}
                 />
                 <FormField
-                  disabled={isLoading}
+                  disabled={isSubmitting}
                   control={form.control}
                   name="zipCode"
                   render={({ field }) => (
@@ -378,7 +408,7 @@ const AgencyDetails = ({ data }: Props) => {
                 />
               </div>
               <FormField
-                disabled={isLoading}
+                disabled={isSubmitting}
                 control={form.control}
                 name="country"
                 render={({ field }) => (
@@ -403,16 +433,7 @@ const AgencyDetails = ({ data }: Props) => {
                   </FormDescription>
                   <NumberInput
                     defaultValue={data?.goal}
-                    onValueChange={async (val) => {
-                      if (!data?.id) return
-                      await updateAgencyDetails(data.id, { goal: val })
-                      await saveActivityLogsNotification({
-                        agencyId: data.id,
-                        description: `Updated the agency goal to | ${val} Sub Account`,
-                        subaccountId: undefined,
-                      })
-                      router.refresh()
-                    }}
+                    onValueChange={handleGoalUpdate}
                     min={1}
                     className="bg-background !border !border-input"
                     placeholder="Sub Account Goal"
@@ -421,9 +442,9 @@ const AgencyDetails = ({ data }: Props) => {
               )}
               <Button
                 type="submit"
-                disabled={isLoading}
+                disabled={isSubmitting}
               >
-                {isLoading ? <Loading /> : 'Save Agency Information'}
+                {isSubmitting ? <Loading /> : 'Save Agency Information'}
               </Button>
             </form>
           </Form>
@@ -439,7 +460,7 @@ const AgencyDetails = ({ data }: Props) => {
                 accounts will no longer have access to funnels, contacts etc.
               </div>
               <AlertDialogTrigger
-                disabled={isLoading || deletingAgency}
+                disabled={isSubmitting || deletingAgency}
                 className="text-red-600 p-2 text-center mt-2 rounded-md hove:bg-red-600 hover:text-white whitespace-nowrap"
               >
                 {deletingAgency ? 'Deleting...' : 'Delete Agency'}
