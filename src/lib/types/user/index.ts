@@ -1,4 +1,4 @@
-import { Prisma } from '@prisma/client'
+import { Prisma, Role } from '@prisma/client'
 import { getAuthUserDetails, getUserPermissions } from '@/lib/services/auth'
 
 export type AuthUserWithAgencySigebarOptionsSubAccounts =
@@ -16,7 +16,7 @@ export type UsersWithAgencySubAccountPermissionsSidebarOptions = {
   email: string
   createdAt: Date
   updatedAt: Date
-  role: string
+  role: Role
   agencyId: string | null
   Agency: {
     id: string
@@ -37,6 +37,7 @@ export type UsersWithAgencySubAccountPermissionsSidebarOptions = {
     connectAccountId: string | null
     SubAccount: Array<{
       id: string
+      connectAccountId: string | null
       name: string
       subAccountLogo: string
       createdAt: Date
@@ -59,6 +60,7 @@ export type UsersWithAgencySubAccountPermissionsSidebarOptions = {
     access: boolean
     SubAccount: {
       id: string
+      connectAccountId: string | null
       name: string
       subAccountLogo: string
       createdAt: Date
