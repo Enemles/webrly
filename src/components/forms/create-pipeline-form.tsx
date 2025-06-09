@@ -1,37 +1,25 @@
 'use client'
+
 import React, { useEffect } from 'react'
 import { z } from 'zod'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { Pipeline } from '@prisma/client'
+
 import {
-  Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from '@/components/ui/card'
-import { useForm } from 'react-hook-form'
-import { Funnel, Pipeline } from '@prisma/client'
 import { Input } from '../ui/input'
-
-import { Button } from '../ui/button'
-import Loading from '../global/loading'
+import { FormCard } from '../common/FormCard'
+import { useModalForm } from '@/hooks/use-modal-form'
 import { CreatePipelineFormSchema } from '@/lib/types'
-import {
-  saveActivityLogsNotification,
-} from '@/lib/services/notification'
-import { toast } from '../ui/use-toast'
-import { useModal } from '@/providers/modal-provider'
-import { useRouter } from 'next/navigation'
-import { zodResolver } from '@hookform/resolvers/zod'
 import { upsertPipeline } from '@/lib/services/pipeline'
+import { saveActivityLogsNotification } from '@/lib/services/notification'
+
 interface CreatePipelineFormProps {
   defaultData?: Pipeline
   subAccountId: string
@@ -41,8 +29,8 @@ const CreatePipelineForm: React.FC<CreatePipelineFormProps> = ({
   defaultData,
   subAccountId,
 }) => {
-  const { data, isOpen, setOpen, setClose } = useModal()
-  const router = useRouter()
+  const { handleModalSubmit, isSubmitting } = useModalForm()
+  
   const form = useForm<z.infer<typeof CreatePipelineFormSchema>>({
     mode: 'onChange',
     resolver: zodResolver(CreatePipelineFormSchema),
@@ -57,80 +45,63 @@ const CreatePipelineForm: React.FC<CreatePipelineFormProps> = ({
         name: defaultData.name || '',
       })
     }
-  }, [defaultData])
-
-  const isLoading = form.formState.isLoading
+  }, [defaultData, form])
 
   const onSubmit = async (values: z.infer<typeof CreatePipelineFormSchema>) => {
     if (!subAccountId) return
-    try {
-      const response = await upsertPipeline({
-        ...values,
-        id: defaultData?.id,
-        subAccountId: subAccountId,
-      })
 
-      await saveActivityLogsNotification({
-        agencyId: undefined,
-        description: `Updates a pipeline | ${response?.name}`,
-        subaccountId: subAccountId,
-      })
+    await handleModalSubmit(
+      async (data) => {
+        const response = await upsertPipeline({
+          ...data,
+          id: defaultData?.id,
+          subAccountId: subAccountId,
+        })
 
-      toast({
-        title: 'Success',
-        description: 'Saved pipeline details',
-      })
-      router.refresh()
-    } catch (error) {
-      toast({
-        variant: 'destructive',
-        title: 'Oppse!',
-        description: 'Could not save pipeline details',
-      })
-    }
+        await saveActivityLogsNotification({
+          agencyId: undefined,
+          description: `Updates a pipeline | ${response?.name}`,
+          subaccountId: subAccountId,
+        })
 
-    setClose()
+        return response
+      },
+      values,
+      {
+        successMessage: 'Pipeline saved successfully',
+        errorMessage: 'Failed to save pipeline',
+        shouldRefresh: true
+      }
+    )
   }
-  return (
-    <Card className="w-full ">
-      <CardHeader>
-        <CardTitle>Pipeline Details</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="flex flex-col gap-4"
-          >
-            <FormField
-              disabled={isLoading}
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Pipeline Name</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Name"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
 
-            <Button
-              className="w-20 mt-4"
-              disabled={isLoading}
-              type="submit"
-            >
-              {form.formState.isSubmitting ? <Loading /> : 'Save'}
-            </Button>
-          </form>
-        </Form>
-      </CardContent>
-    </Card>
+  return (
+    <FormCard
+      title="Pipeline Details"
+      description="Configure the pipeline details"
+      form={form}
+      onSubmit={onSubmit}
+      isLoading={isSubmitting}
+      submitText="Save"
+    >
+      <FormField
+        disabled={isSubmitting}
+        control={form.control}
+        name="name"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Pipeline Name</FormLabel>
+            <FormControl>
+              <Input
+                placeholder="Pipeline Name"
+                {...field}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+    </FormCard>
   )
 }
 

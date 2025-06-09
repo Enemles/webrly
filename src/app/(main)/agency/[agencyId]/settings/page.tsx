@@ -2,6 +2,7 @@ import AgencyDetails from '@/components/forms/agency-details';
 import UserDetails from '@/components/forms/user-details';
 import { db } from '@/lib/db';
 import { currentUser } from '@clerk/nextjs';
+import { redirect } from 'next/navigation';
 import React from 'react'
 
 type Props = {
@@ -11,10 +12,10 @@ type Props = {
 }
 
 const Settings = async ({ params }: Props) => {
-
   const authUser = await currentUser()
-
-  if (!authUser) return null
+  if (!authUser) {
+    redirect('/sign-in')
+  }
 
   const userDetails = await db.user.findUnique({
     where: {
@@ -22,7 +23,9 @@ const Settings = async ({ params }: Props) => {
     },
   })
 
-  if (!userDetails) return null
+  if (!userDetails) {
+    redirect('/sign-in')
+  }
 
   const agencyDetails = await db.agency.findUnique({
     where: {
@@ -33,7 +36,14 @@ const Settings = async ({ params }: Props) => {
     }
   })
 
-  if (!agencyDetails) return null
+  if (!agencyDetails) {
+    redirect('/agency')
+  }
+
+  // Vérification des permissions
+  if (userDetails.agencyId !== params.agencyId) {
+    redirect('/unauthorized')
+  }
 
   const subAccounts = agencyDetails.SubAccount
 

@@ -1,8 +1,7 @@
 import BlurPage from '@/components/global/blur-page'
 import Sidebar from '@/components/sidebar/sidebarServer'
-import Unauthorized from '@/components/unauthorized'
-import { getAuthUserDetails, verifyAndAcceptInvitation } from '@/lib/services/auth'
 import { currentUser } from '@clerk/nextjs'
+import { db } from '@/lib/db'
 import { redirect } from 'next/navigation'
 import React from 'react'
 
@@ -12,25 +11,30 @@ type Props = {
 }
 
 const SubaccountLayout = async ({ children, params }: Props) => {
-  const agencyId = await verifyAndAcceptInvitation()
-  if (!agencyId) return <Unauthorized />
-  const user = await currentUser()
-  if (!user) {
-    return redirect('/')
-  }
+  const authUser = await currentUser()
+  if (!authUser) return redirect('/sign-in')
 
-  if (!user.privateMetadata.role) {
-    return <Unauthorized />
-  } else {
-    const allPermissions = await getAuthUserDetails()
-    const hasPermission = allPermissions?.Permissions.find(
-      (permissions) =>
-        permissions.access && permissions.subAccountId === params.subaccountId
-    )
-    if (!hasPermission) {
-      return <Unauthorized />
-    }
-  }
+  const user = await db.user.findUnique({
+    where: {
+      email: authUser.emailAddresses[0].emailAddress,
+    },
+    include: {
+      Permissions: {
+        include: {
+          SubAccount: true,
+        },
+      },
+    },
+  })
+
+  if (!user) return redirect('/sign-in')
+
+  const hasPermission = user.Permissions.find(
+    (permission) =>
+      permission.access && permission.subAccountId === params.subaccountId
+  )
+
+  if (!hasPermission) return redirect('/unauthorized')
 
   return (
     <div className="h-screen overflow-hidden">
