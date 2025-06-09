@@ -34,7 +34,7 @@ export const TypewriterEffect: React.FC<TypewriterEffectProps> = ({
     },
     {
       text: "place.",
-      className: "text-blue-500 dark:text-blue-500",
+      className: "text-green-500 dark:text-green-500",
     },
   ];
   // split text inside of words into array of characters

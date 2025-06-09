@@ -74,7 +74,7 @@ export const HeroContainerScroll: React.FC<HeroContainerScrollProps> = ({}) => {
             <span className="absolute -bottom-0 left-[1.125rem] h-px w-[calc(100%-2.25rem)] bg-gradient-to-r from-primary/0 via-primary/90 to-primary/0 transition-opacity duration-500 group-hover:opacity-40"></span>
           </a>
           <p className="text-center font-medium mt-4 z-[99999]">
-            <TypewriterEffect cursorClassName="bg-blue-500 dark:bg-blue-500"/>
+            <TypewriterEffect cursorClassName="bg-green-500 dark:bg-green-500"/>
           </p>
           <div className="bg-gradient-to-r from-primary to-secondary-foreground text-transparent bg-clip-text relative">
             <h1 className="text-9xl font-bold text-center md:text-[300px] z-[99999]">
@@ -101,7 +101,7 @@ const Card: React.FC<CardProps> = ({ rotate, scale }) => {
         rotateX: rotate, // rotate in X-axis
         scale,
       }}
-      className="max-w-5xl -mt-20 mx-auto h-[30rem] md:h-[40rem] w-full border-4 border-[#6C6C6C] p-6 bg-background rounded-[30px] shadow-2xl"
+      className="max-w-5xl overflow-hidden -mt-20 mx-auto h-[30rem] md:h-[40rem] w-full border-4 border-[#6C6C6C] p-6 bg-background rounded-[30px] shadow-2xl"
     >
       <Image
         src="/assets/preview.png"
