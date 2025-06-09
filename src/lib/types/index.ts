@@ -1,6 +1,3 @@
-// Auth types
-export * from './auth'
-
 // Pipeline types
 export * from './pipeline'
 
@@ -21,6 +18,9 @@ export * from './stripe'
 
 // Analytics types
 export * from './analytics'
+
+// User types
+export * from './user'
 
 // Re-export schemas for convenience
 export * from './pipeline/schemas'

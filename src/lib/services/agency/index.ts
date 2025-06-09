@@ -3,6 +3,7 @@
 import { db } from "@/lib/db"
 import { logger } from "@/lib/utils"
 import { Agency, Plan } from '@prisma/client'
+import { revalidatePath } from 'next/cache'
 
 export const updateAgencyDetails = async (
   agencyId: string,
@@ -13,6 +14,11 @@ export const updateAgencyDetails = async (
       where: { id: agencyId },
       data: { ...agencyDetails },
     })
+    
+    // Revalider le cache pour la page de l'agence et ses sous-pages
+    revalidatePath(`/agency/${agencyId}`)
+    revalidatePath(`/agency/${agencyId}/settings`)
+    
     return response
   }
   catch (error) {

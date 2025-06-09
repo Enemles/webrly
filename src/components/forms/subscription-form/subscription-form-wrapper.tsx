@@ -26,12 +26,14 @@ const SubscriptionFormWrapper = ({ customerId, planExists }: Props) => {
   )
   const [subscription, setSubscription] = useState<{
     subscriptionId: string
-    clientSecret: string
-  }>({ subscriptionId: '', clientSecret: '' })
+    clientSecret: string | null
+  }>({ subscriptionId: '', clientSecret: null })
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const options: StripeElementsOptions = useMemo(
     () => ({
-      clientSecret: subscription?.clientSecret,
+      clientSecret: subscription?.clientSecret || undefined,
       appearance: {
         theme: 'flat',
       },
@@ -41,36 +43,64 @@ const SubscriptionFormWrapper = ({ customerId, planExists }: Props) => {
 
   useEffect(() => {
     if (!selectedPriceId) return
+    
     const createSecret = async () => {
-      const subscriptionResponse = await fetch(
-        '/api/stripe/create-subscription',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            customerId,
-            priceId: selectedPriceId,
-          }),
+      setLoading(true)
+      setError(null)
+      
+      try {
+        const subscriptionResponse = await fetch(
+          '/api/stripe/create-subscription',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              customerId,
+              priceId: selectedPriceId,
+            }),
+          }
+        )
+        
+        if (!subscriptionResponse.ok) {
+          throw new Error('Failed to create subscription')
         }
-      )
-      const subscriptionResponseData = await subscriptionResponse.json()
-      setSubscription({
-        clientSecret: subscriptionResponseData.clientSecret,
-        subscriptionId: subscriptionResponseData.subscriptionId,
-      })
-      if (planExists) {
-        toast({
-          title: 'Success',
-          description: 'Your plan has been successfully upgraded!',
+        
+        const subscriptionResponseData = await subscriptionResponse.json()
+        
+        setSubscription({
+          clientSecret: subscriptionResponseData.clientSecret,
+          subscriptionId: subscriptionResponseData.subscriptionId,
         })
-        setClose()
-        router.refresh()
+        
+        // Si clientSecret est null, c'est que la souscription est déjà active
+        if (!subscriptionResponseData.clientSecret && planExists) {
+          toast({
+            title: 'Success',
+            description: 'Your plan has been successfully updated!',
+          })
+          setClose()
+          router.refresh()
+        } else if (!subscriptionResponseData.clientSecret) {
+          setError('Unable to process payment - subscription may already be active')
+        }
+        
+      } catch (err) {
+        console.error('Error creating subscription:', err)
+        setError('Failed to create subscription. Please try again.')
+        toast({
+          variant: 'destructive',
+          title: 'Error',
+          description: 'Failed to create subscription. Please try again.',
+        })
+      } finally {
+        setLoading(false)
       }
     }
+    
     createSecret()
-  }, [data, selectedPriceId, customerId])
+  }, [data, selectedPriceId, customerId, planExists, setClose, router])
 
   return (
     <div className="border-none transition-all">
@@ -103,7 +133,8 @@ const SubscriptionFormWrapper = ({ customerId, planExists }: Props) => {
           </Card>
         ))}
 
-        {options.clientSecret && !planExists && (
+        {/* Affichage conditionnel pour les différents états */}
+        {subscription.clientSecret && !planExists && (
           <>
             <h1 className="text-xl">Payment Method</h1>
             <Elements
@@ -115,9 +146,34 @@ const SubscriptionFormWrapper = ({ customerId, planExists }: Props) => {
           </>
         )}
 
-        {!options.clientSecret && selectedPriceId && (
+        {loading && selectedPriceId && (
           <div className="flex items-center justify-center w-full h-40">
             <Loading />
+          </div>
+        )}
+
+        {error && (
+          <div className="flex items-center justify-center w-full h-40">
+            <div className="text-center text-destructive">
+              <p className="text-sm">{error}</p>
+              <button 
+                onClick={() => {
+                  setError(null)
+                  setSelectedPriceId('')
+                }}
+                className="text-xs underline mt-2"
+              >
+                Try again
+              </button>
+            </div>
+          </div>
+        )}
+
+        {!subscription.clientSecret && !loading && !error && selectedPriceId && planExists && (
+          <div className="flex items-center justify-center w-full h-40">
+            <div className="text-center text-muted-foreground">
+              <p className="text-sm">Plan updated successfully!</p>
+            </div>
           </div>
         )}
       </div>

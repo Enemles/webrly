@@ -82,12 +82,12 @@ export function NotificationButton({
           </div>
         </SheetTrigger>
         <SheetContent className="pr-4 overflow-scroll">
-          <SheetHeader className="text-left">
+          <SheetHeader className="text-left mb-4">
             <SheetTitle>Notifications</SheetTitle>
             <SheetDescription>
               {(role === 'AGENCY_ADMIN' || role === 'AGENCY_OWNER') && (
                 <Card className="flex items-center justify-between p-4">
-                  Sous-compte actuel
+                  Current SubAccount
                   <Switch onCheckedChange={handleClick} />
                 </Card>
               )}
@@ -96,7 +96,7 @@ export function NotificationButton({
           {allNotifications?.map((notification) => (
             <div
               key={notification.id}
-              className="flex flex-col gap-y-2 mb-2 overflow-x-scroll text-ellipsis"
+              className="flex flex-col gap-y-3 mb-3 overflow-x-scroll text-ellipsis"
             >
               <div className="flex gap-2">
                 <Avatar>
