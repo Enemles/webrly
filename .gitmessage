@@ -1,0 +1,28 @@
+# <type>[optional scope]: <description>
+#
+# [optional body]
+#
+# [optional footer(s)]
+#
+# --- TYPES ---
+# feat: nouvelle fonctionnalité
+# fix: correction de bug
+# docs: documentation seulement
+# style: changements qui n'affectent pas le sens du code
+# refactor: changement de code qui ne corrige pas de bug ni ajoute de fonctionnalité
+# perf: changement de code qui améliore les performances
+# test: ajout de tests manquants ou correction de tests existants
+# chore: changements aux outils de build ou aux dépendances
+# ci: changements aux fichiers et scripts CI
+# build: changements qui affectent le système de build
+# revert: annule un commit précédent
+#
+# --- EXEMPLES ---
+# feat(auth): ajout de l'authentification à deux facteurs
+# fix(api): correction du bug de timeout sur les requêtes longues
+# docs: mise à jour du README avec les instructions d'installation
+# chore(deps): mise à jour de Next.js vers la version 14.1
+#
+# --- BREAKING CHANGES ---
+# Ajoutez "BREAKING CHANGE:" dans le footer pour les changements majeurs
+# Ou ajoutez "!" après le type/scope: feat!: nouvelle API incompatible 
