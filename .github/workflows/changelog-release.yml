@@ -30,16 +30,21 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: '20.11.1'
+          cache: 'pnpm'
 
       - name: Install dependencies
         run: |
-          npm install -g standard-version
-          npm ci
+          pnpm add -g standard-version
+          pnpm install --frozen-lockfile
 
       - name: Configure Git
         run: |
@@ -96,9 +101,9 @@ jobs:
             ---
             **Installation:**
             ```bash
-            npm install
-            npm run build
-            npm start
+            pnpm install
+            pnpm run build
+            pnpm start
             ```
           draft: false
           prerelease: false
@@ -107,7 +112,7 @@ jobs:
       - name: Build application
         if: steps.version.outputs.new_version
         run: |
-          npm run build
+          pnpm run build
 
       - name: Deploy notification
         if: steps.version.outputs.new_version
