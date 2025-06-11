@@ -39,6 +39,10 @@ jobs:
           echo "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_dummy_key_for_build" >> .env
           echo "DATABASE_URL=postgresql://dummy:dummy@localhost:5432/dummy" >> .env
           echo "NEXTAUTH_SECRET=dummy-secret-for-build" >> .env
+          echo "NEXTAUTH_URL=http://localhost:3000" >> .env
+          echo "UPLOADTHING_SECRET=sk_live_dummykey123456789012345678901234567890123456789012345678" >> .env
+          echo "UPLOADTHING_APP_ID=dummyapp1234" >> .env
+          echo "NODE_ENV=production" >> .env
 
       - name: Génération du client Prisma
         run: npx prisma generate
@@ -76,13 +80,17 @@ jobs:
 
       - name: Setup environment variables for tests
         run: |
-          cp .env.example .env
-          echo "STRIPE_SECRET_KEY=sk_test_dummy_key_for_tests" >> .env
+          # Créer un fichier .env avec toutes les variables nécessaires
+          echo "STRIPE_SECRET_KEY=sk_test_dummy_key_for_tests" > .env
           echo "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_dummy_key_for_tests" >> .env
           echo "CLERK_SECRET_KEY=sk_test_dummy_key_for_tests" >> .env
           echo "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_dummy_key_for_tests" >> .env
           echo "DATABASE_URL=postgresql://dummy:dummy@localhost:5432/dummy" >> .env
           echo "NEXTAUTH_SECRET=dummy-secret-for-tests" >> .env
+          echo "NEXTAUTH_URL=http://localhost:3000" >> .env
+          echo "UPLOADTHING_SECRET=sk_live_dummykey123456789012345678901234567890123456789012345678" >> .env
+          echo "UPLOADTHING_APP_ID=dummyapp1234" >> .env
+          echo "NODE_ENV=test" >> .env
 
       - name: Génération du client Prisma
         run: npx prisma generate
