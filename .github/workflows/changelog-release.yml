@@ -1,0 +1,117 @@
+name: Changelog and Release
+
+on:
+  push:
+    branches:
+      - main
+
+  workflow_dispatch:
+    inputs:
+      release_type:
+        description: 'Type de release'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+jobs:
+  release:
+    name: Generate Changelog and Release
+    runs-on: ubuntu-22.04
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          npm install -g standard-version
+          npm ci
+
+      - name: Configure Git
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+      - name: Generate release (auto)
+        if: github.event_name == 'push'
+        run: |
+          standard-version --no-verify
+
+      - name: Generate release (manual)
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          standard-version --release-as ${{ github.event.inputs.release_type }} --no-verify
+
+      - name: Get new version from Git tag
+        id: version
+        run: |
+          TAG=$(git describe --tags --abbrev=0)
+          VERSION="${TAG#v}"
+          echo "new_version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+
+      - name: Push changes and tags
+        run: |
+          git push --follow-tags origin HEAD:${GITHUB_REF#refs/heads/}
+
+      - name: Extract changelog for release
+        id: changelog
+        run: |
+          VERSION=${{ steps.version.outputs.new_version }}
+          if [ -f CHANGELOG.md ]; then
+            CONTENT=$(awk "/^## \[${VERSION}\]/{flag=1; next} /^## \[/{flag=0} flag" CHANGELOG.md)
+          else
+            CONTENT="Première release automatisée"
+          fi
+          echo "changelog<<EOF" >> $GITHUB_OUTPUT
+          echo "$CONTENT" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          release_name: Release ${{ steps.version.outputs.tag }}
+          body: |
+            ## 🚀 Webrly ${{ steps.version.outputs.tag }}
+
+            ${{ steps.changelog.outputs.changelog }}
+
+            ---
+            **Installation:**
+            ```bash
+            npm install
+            npm run build
+            npm start
+            ```
+          draft: false
+          prerelease: false
+
+      # Optionnel: Build et deploy après release
+      - name: Build application
+        if: steps.version.outputs.new_version
+        run: |
+          npm run build
+
+      - name: Deploy notification
+        if: steps.version.outputs.new_version
+        run: |
+          echo "🚀 Version ${{ steps.version.outputs.tag }} prête pour déploiement!"
+          echo "📦 Nouvelle version disponible sur GitHub Releases"
+          # Ici tu peux ajouter le déploiement vers Coolify

@@ -1,0 +1,62 @@
+{
+  "header": "# Changelog\n\nTous les changements notables de ce projet seront documentés dans ce fichier.\n\n",
+  "types": [
+    {
+      "type": "feat",
+      "section": "🚀 Nouvelles fonctionnalités"
+    },
+    {
+      "type": "fix", 
+      "section": "🐛 Corrections de bugs"
+    },
+    {
+      "type": "perf",
+      "section": "⚡ Améliorations de performance"
+    },
+    {
+      "type": "refactor",
+      "section": "♻️ Refactorisation"
+    },
+    {
+      "type": "docs",
+      "section": "📚 Documentation"
+    },
+    {
+      "type": "test",
+      "section": "🧪 Tests"
+    },
+    {
+      "type": "build",
+      "section": "🏗️ Build"
+    },
+    {
+      "type": "ci",
+      "section": "👷 CI/CD"
+    },
+    {
+      "type": "chore",
+      "section": "🔧 Maintenance"
+    },
+    {
+      "type": "style",
+      "hidden": true
+    },
+    {
+      "type": "revert",
+      "section": "⏪ Annulations"
+    }
+  ],
+  "commitUrlFormat": "https://github.com/Enemles/webrly/commit/{{hash}}",
+  "compareUrlFormat": "https://github.com/Enemles/webrly/compare/{{previousTag}}...{{currentTag}}",
+  "issueUrlFormat": "https://github.com/Enemles/webrly/issues/{{id}}",
+  "userUrlFormat": "https://github.com/{{user}}",
+  "releaseCommitMessageFormat": "chore(release): {{currentTag}} [skip ci]",
+  "skip": {
+    "bump": false,
+    "changelog": false,
+    "commit": false,
+    "tag": false
+  },
+  "infile": "CHANGELOG.md",
+  "preset": "conventionalcommits"
+} 
