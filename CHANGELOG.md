@@ -3,6 +3,13 @@
 Tous les changements notables de ce projet seront documentés dans ce fichier.
 
 
+## [2.1.0](https://github.com/Enemles/webrly/compare/v2.0.0...v2.1.0) (2025-06-11)
+
+
+### Features
+
+* **ci:** ajout de la configuration des variables d'environnement et mise à jour des workflows pour Prisma et Playwright ([1575a18](https://github.com/Enemles/webrly/commit/1575a18656bece520fb7e9c6c0e5e137e249c115))
+
 ## 2.0.0 (2025-06-11)
 
 
