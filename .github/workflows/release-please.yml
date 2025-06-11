@@ -1,0 +1,69 @@
+name: Release Please
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    outputs:
+      release-created: ${{ steps.release.outputs.release_created }}
+      tag-name: ${{ steps.release.outputs.tag_name }}
+    steps:
+      - name: Release Please
+        id: release
+        uses: google-github-actions/release-please-action@v4
+        with:
+          release-type: node
+          package-name: webrly
+          changelog-types: |
+            [
+              {"type":"feat","section":"🚀 Nouvelles fonctionnalités","hidden":false},
+              {"type":"fix","section":"🐛 Corrections de bugs","hidden":false},
+              {"type":"perf","section":"⚡ Améliorations de performance","hidden":false},
+              {"type":"refactor","section":"♻️ Refactorisation","hidden":false},
+              {"type":"docs","section":"📚 Documentation","hidden":false},
+              {"type":"test","section":"🧪 Tests","hidden":false},
+              {"type":"build","section":"🏗️ Build","hidden":false},
+              {"type":"ci","section":"👷 CI/CD","hidden":false},
+              {"type":"chore","section":"🔧 Maintenance","hidden":false},
+              {"type":"style","section":"💄 Style","hidden":true},
+              {"type":"revert","section":"⏪ Annulations","hidden":false}
+            ]
+
+  # Optionnel: déploiement automatique après release
+  deploy:
+    needs: release-please
+    if: ${{ needs.release-please.outputs.release-created }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Build application
+        run: npm run build
+        
+      - name: Run tests
+        run: npm test --if-present
+        
+      # Ici tu peux ajouter le déploiement vers Coolify
+      - name: Deploy to Coolify
+        run: |
+          echo "🚀 Déploiement de la version ${{ needs.release-please.outputs.tag-name }}"
+          # Ajouter ici les commandes de déploiement Coolify 

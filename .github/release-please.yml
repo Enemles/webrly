@@ -1,0 +1,43 @@
+releaseType: node
+primaryBranch: main
+bumpMinorPreMajor: true
+bumpPatchForMinorPreMajor: true
+lastReleasesha: ""
+draft: false
+prerelease: false
+includeComponentInTag: false
+packageName: webrly
+changelogSections:
+  - type: feat
+    section: 🚀 Nouvelles fonctionnalités
+    hidden: false
+  - type: fix
+    section: 🐛 Corrections de bugs
+    hidden: false
+  - type: perf
+    section: ⚡ Améliorations de performance
+    hidden: false
+  - type: refactor
+    section: ♻️ Refactorisation
+    hidden: false
+  - type: docs
+    section: 📚 Documentation
+    hidden: false
+  - type: test
+    section: 🧪 Tests
+    hidden: false
+  - type: build
+    section: 🏗️ Build
+    hidden: false
+  - type: ci
+    section: 👷 CI/CD
+    hidden: false
+  - type: chore
+    section: 🔧 Maintenance
+    hidden: false
+  - type: style
+    section: 💄 Style
+    hidden: true
+  - type: revert
+    section: ⏪ Annulations
+    hidden: false 
