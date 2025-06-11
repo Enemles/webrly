@@ -24,27 +24,56 @@ jobs:
     steps:
       - name: Release Please
         id: release
-        uses: google-github-actions/release-please-action@v4
+        uses: googleapis/release-please-action@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          release-type: node
-          package-name: webrly
-          changelog-types: |
-            [
-              {"type":"feat","section":"🚀 Nouvelles fonctionnalités","hidden":false},
-              {"type":"fix","section":"🐛 Corrections de bugs","hidden":false},
-              {"type":"perf","section":"⚡ Améliorations de performance","hidden":false},
-              {"type":"refactor","section":"♻️ Refactorisation","hidden":false},
-              {"type":"docs","section":"📚 Documentation","hidden":false},
-              {"type":"test","section":"🧪 Tests","hidden":false},
-              {"type":"build","section":"🏗️ Build","hidden":false},
-              {"type":"ci","section":"👷 CI/CD","hidden":false},
-              {"type":"chore","section":"🔧 Maintenance","hidden":false},
-              {"type":"style","section":"💄 Style","hidden":true},
-              {"type":"revert","section":"⏪ Annulations","hidden":false}
-            ]
-
-  # Optionnel: déploiement automatique après release
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+            
+  # Auto-merge des PRs de release
+  auto-merge:
+    runs-on: ubuntu-latest
+    if: ${{ !needs.release-please.outputs.release-created }}
+    needs: release-please
+    steps:
+      - name: Auto-merge release PR
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { owner, repo } = context.repo;
+            
+            // Chercher les PRs Release Please ouvertes
+            const prs = await github.rest.pulls.list({
+              owner,
+              repo,
+              state: 'open',
+              head: 'release-please--branches--main'
+            });
+            
+            for (const pr of prs.data) {
+              if (pr.title.includes('chore(main): release')) {
+                console.log(`Auto-merging PR #${pr.number}: ${pr.title}`);
+                
+                // Activer auto-merge
+                await github.rest.pulls.createReview({
+                  owner,
+                  repo,
+                  pull_number: pr.number,
+                  event: 'APPROVE'
+                });
+                
+                // Merger automatiquement
+                await github.rest.pulls.merge({
+                  owner,
+                  repo,
+                  pull_number: pr.number,
+                  merge_method: 'squash'
+                });
+              }
+            }
+            
+  # Déploiement automatique après release
   deploy:
     needs: release-please
     if: ${{ needs.release-please.outputs.release-created }}
