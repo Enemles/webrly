@@ -3,6 +3,13 @@
 Tous les changements notables de ce projet seront documentés dans ce fichier.
 
 
+### [2.1.1](https://github.com/Enemles/webrly/compare/v2.1.0...v2.1.1) (2025-06-11)
+
+
+### Bug Fixes
+
+* **ci:** mise à jour des variables d'environnement dans les workflows pour une configuration cohérente ([6957973](https://github.com/Enemles/webrly/commit/6957973b534f6d95ea711738d3eb3f2132791872))
+
 ## [2.1.0](https://github.com/Enemles/webrly/compare/v2.0.0...v2.1.0) (2025-06-11)
 
 
