@@ -52,3 +52,8 @@ node_modules/
 /playwright/.cache/
 
 *.original.*
+
+monitoring/
+
+export-data.js
+import-data.js
