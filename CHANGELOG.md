@@ -3,6 +3,13 @@
 Tous les changements notables de ce projet seront documentés dans ce fichier.
 
 
+## [2.4.0](https://github.com/Enemles/webrly/compare/v2.3.0...v2.4.0) (2025-06-13)
+
+
+### Features
+
+* ajout de la route API pour les analyses et mise à jour du middleware pour inclure une nouvelle route publique ([b5508f6](https://github.com/Enemles/webrly/commit/b5508f6fc17b703e0f699c6c6e90ca9941f7c5ab))
+
 ## [2.3.0](https://github.com/Enemles/webrly/compare/v2.2.0...v2.3.0) (2025-06-13)
 
 
