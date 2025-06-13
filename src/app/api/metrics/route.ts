@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { register } from '@/lib/metrics';
+import { updateRealMetrics } from '@/lib/real-metrics';
 
 export async function GET(request: NextRequest) {
   try {
+    // Mettre à jour les métriques réelles à chaque scrape de Prometheus
+    await updateRealMetrics();
+    
     const metrics = await register.metrics();
     
     return new NextResponse(metrics, {

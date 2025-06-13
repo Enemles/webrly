@@ -1,24 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { activeUsers, authenticationAttempts } from '@/lib/metrics';
+import { updateRealMetrics } from '@/lib/real-metrics';
+import { authenticationAttempts } from '@/lib/metrics';
 
 export async function GET(req: NextRequest) {
   try {
-    // Simuler quelques métriques
-    activeUsers.set(Math.floor(Math.random() * 100) + 10);
-    authenticationAttempts.labels('success', 'clerk').inc();
+    // Mettre à jour toutes les métriques réelles depuis la DB
+    await updateRealMetrics();
     
-    // Simuler une latence variable
-    await new Promise(resolve => setTimeout(resolve, Math.random() * 100));
+    // Simuler occasionnellement des tentatives d'auth (mais moins souvent)
+    if (Math.random() < 0.1) { // 10% de chance seulement
+      authenticationAttempts.labels('success', 'clerk').inc();
+    }
     
     return NextResponse.json({
-      message: 'Route de test pour les métriques',
+      message: 'Métriques réelles mises à jour depuis la base de données',
       timestamp: new Date().toISOString(),
-      activeUsers: Math.floor(Math.random() * 100) + 10
+      updated: 'real_business_metrics',
+      note: 'Les métriques reflètent maintenant vos vraies données business'
     });
   } catch (error) {
-    console.error('Erreur dans test-metrics:', error);
+    console.error('Erreur dans real-metrics:', error);
     return NextResponse.json(
-      { error: 'Erreur lors de la génération des métriques de test' },
+      { error: 'Erreur lors de la mise à jour des métriques réelles' },
       { status: 500 }
     );
   }
@@ -26,15 +29,19 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
+    // Simuler une erreur ou action spécifique
     authenticationAttempts.labels('failure', 'clerk').inc();
-    activeUsers.set(Math.floor(Math.random() * 50) + 5);
+    
+    // Mettre à jour les métriques après une action
+    await updateRealMetrics();
     
     return NextResponse.json({
-      message: 'POST traité avec métriques',
-      timestamp: new Date().toISOString()
+      message: 'Action POST traitée avec mise à jour des métriques',
+      timestamp: new Date().toISOString(),
+      action: 'metrics_refreshed_after_post'
     });
   } catch (error) {
-    console.error('Erreur dans test-metrics POST:', error);
+    console.error('Erreur dans POST real-metrics:', error);
     return NextResponse.json(
       { error: 'Erreur lors du traitement POST' },
       { status: 500 }
