@@ -3,6 +3,13 @@
 Tous les changements notables de ce projet seront documentés dans ce fichier.
 
 
+## [2.5.0](https://github.com/Enemles/webrly/compare/v2.4.0...v2.5.0) (2025-06-13)
+
+
+### Features
+
+* ajout de la mise à jour des métriques réelles dans les routes API et création d'un nouveau module pour gérer les métriques business ([c6550fa](https://github.com/Enemles/webrly/commit/c6550fafc814cba7f9afa087a0d88a302b5b59f6))
+
 ## [2.4.0](https://github.com/Enemles/webrly/compare/v2.3.0...v2.4.0) (2025-06-13)
 
 
