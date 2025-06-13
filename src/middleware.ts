@@ -1,5 +1,6 @@
 import { authMiddleware } from '@clerk/nextjs'
 import { NextResponse } from 'next/server'
+import { startRequestTracking } from '@/lib/metrics-middleware'
 
 // This example protects all routes including api/trpc routes
 // Please edit this to allow other routes to be public as needed.
@@ -8,6 +9,9 @@ export default authMiddleware({
   publicRoutes: ['/site', '/api/uploadthing', '/api/metrics', '/api/test-metrics'],
   async beforeAuth(auth, req) {},
   async afterAuth(auth, req) {
+    // Commencer le tracking des métriques
+    const tracker = startRequestTracking(req);
+    
     //rewrite for domains
     const url = req.nextUrl
     const searchParams = url.searchParams.toString()
@@ -23,29 +27,32 @@ export default authMiddleware({
       ?.split(`${process.env.NEXT_PUBLIC_DOMAIN}`)
       .filter(Boolean)[0]
 
+    let response: NextResponse;
+
     if (customSubDomain) {
-      return NextResponse.rewrite(
+      response = NextResponse.rewrite(
         new URL(`/${customSubDomain}${pathWithSearchParams}`, req.url)
       )
-    }
-
-    if (url.pathname === '/sign-in' || url.pathname === '/sign-up') {
-      return NextResponse.redirect(new URL(`/agency/sign-in`, req.url))
-    }
-
-    if (
+    } else if (url.pathname === '/sign-in' || url.pathname === '/sign-up') {
+      response = NextResponse.redirect(new URL(`/agency/sign-in`, req.url))
+    } else if (
       url.pathname === '/' ||
       (url.pathname === '/site' && url.host === process.env.NEXT_PUBLIC_DOMAIN)
     ) {
-      return NextResponse.rewrite(new URL('/site', req.url))
-    }
-
-    if (
+      response = NextResponse.rewrite(new URL('/site', req.url))
+    } else if (
       url.pathname.startsWith('/agency') ||
       url.pathname.startsWith('/subaccount')
     ) {
-      return NextResponse.rewrite(new URL(`${pathWithSearchParams}`, req.url))
+      response = NextResponse.rewrite(new URL(`${pathWithSearchParams}`, req.url))
+    } else {
+      response = NextResponse.next()
     }
+
+    // Enregistrer les métriques
+    tracker.end(response.status);
+
+    return response;
   },
 })
 
