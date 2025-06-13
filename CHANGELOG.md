@@ -3,6 +3,13 @@
 Tous les changements notables de ce projet seront documentés dans ce fichier.
 
 
+## [2.2.0](https://github.com/Enemles/webrly/compare/v2.1.1...v2.2.0) (2025-06-13)
+
+
+### Features
+
+* ajout de la route API pour les métriques de test et mise à jour des routes publiques dans le middleware ([f1dd866](https://github.com/Enemles/webrly/commit/f1dd866ac64f57bc3610c98881ad414d5228f7cf))
+
 ### [2.1.1](https://github.com/Enemles/webrly/compare/v2.1.0...v2.1.1) (2025-06-11)
 
 
