@@ -3,6 +3,13 @@
 Tous les changements notables de ce projet seront documentés dans ce fichier.
 
 
+## [2.3.0](https://github.com/Enemles/webrly/compare/v2.2.0...v2.3.0) (2025-06-13)
+
+
+### Features
+
+* ajout du suivi des métriques dans le middleware et mise à jour de la route API de test pour utiliser les nouvelles métriques ([5078fb2](https://github.com/Enemles/webrly/commit/5078fb2b46f793b26bf095612aa4647f914f3db9))
+
 ## [2.2.0](https://github.com/Enemles/webrly/compare/v2.1.1...v2.2.0) (2025-06-13)
 
 
