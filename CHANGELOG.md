@@ -3,6 +3,13 @@
 Tous les changements notables de ce projet seront documentés dans ce fichier.
 
 
+## [2.6.0](https://github.com/Enemles/webrly/compare/v2.5.0...v2.6.0) (2025-06-15)
+
+
+### Features
+
+* ajout de l'endpoint de monitoring pour la mise à jour manuelle des métriques et mise à jour du middleware pour inclure la nouvelle route publique ([b613fd5](https://github.com/Enemles/webrly/commit/b613fd5ec235b927de23e6ed8011b0da37da7854))
+
 ## [2.5.0](https://github.com/Enemles/webrly/compare/v2.4.0...v2.5.0) (2025-06-13)
 
 
