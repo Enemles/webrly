@@ -3,6 +3,13 @@
 Tous les changements notables de ce projet seront documentés dans ce fichier.
 
 
+### [2.6.1](https://github.com/Enemles/webrly/compare/v2.6.0...v2.6.1) (2025-06-15)
+
+
+### Bug Fixes
+
+* use correct Prometheus registry for business metrics ([20d7873](https://github.com/Enemles/webrly/commit/20d78737556c83fafa610363e5cb0662e18aabf8))
+
 ## [2.6.0](https://github.com/Enemles/webrly/compare/v2.5.0...v2.6.0) (2025-06-15)
 
 
