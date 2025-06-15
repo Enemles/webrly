@@ -3,83 +3,84 @@ import {
   activeUsers, 
   authenticationAttempts, 
   httpRequestTotal, 
-  httpRequestDuration 
+  httpRequestDuration,
+  register
 } from './metrics';
 
 // Nouvelles métriques business
 import client from 'prom-client';
 
-// Métriques CRM spécifiques
+// Métriques CRM spécifiques - UTILISER LE BON REGISTRE
 export const totalAgencies = new client.Gauge({
   name: 'webrly_total_agencies',
   help: 'Nombre total d\'agences',
-  registers: [client.register],
+  registers: [register],
 });
 
 export const totalSubAccounts = new client.Gauge({
   name: 'webrly_total_subaccounts',
   help: 'Nombre total de sous-comptes',
-  registers: [client.register],
+  registers: [register],
 });
 
 export const totalContacts = new client.Gauge({
   name: 'webrly_total_contacts',
   help: 'Nombre total de contacts',
-  registers: [client.register],
+  registers: [register],
 });
 
 export const totalTickets = new client.Gauge({
   name: 'webrly_total_tickets',
   help: 'Nombre total de tickets',
-  registers: [client.register],
+  registers: [register],
 });
 
 export const totalTicketValue = new client.Gauge({
   name: 'webrly_total_ticket_value',
   help: 'Valeur totale des tickets en euros',
-  registers: [client.register],
+  registers: [register],
 });
 
 export const totalFunnels = new client.Gauge({
   name: 'webrly_total_funnels',
   help: 'Nombre total de funnels',
-  registers: [client.register],
+  registers: [register],
 });
 
 export const publishedFunnels = new client.Gauge({
   name: 'webrly_published_funnels',
   help: 'Nombre de funnels publiés',
-  registers: [client.register],
+  registers: [register],
 });
 
 export const totalFunnelVisits = new client.Gauge({
   name: 'webrly_total_funnel_visits',
   help: 'Nombre total de visites sur les funnels',
-  registers: [client.register],
+  registers: [register],
 });
 
 export const activeSubscriptions = new client.Gauge({
   name: 'webrly_active_subscriptions',
   help: 'Nombre d\'abonnements actifs',
-  registers: [client.register],
+  registers: [register],
 });
 
 export const newUsersToday = new client.Gauge({
   name: 'webrly_new_users_today',
   help: 'Nouveaux utilisateurs aujourd\'hui',
-  registers: [client.register],
+  registers: [register],
 });
 
 export const newContactsToday = new client.Gauge({
   name: 'webrly_new_contacts_today',
   help: 'Nouveaux contacts aujourd\'hui',
-  registers: [client.register],
+  registers: [register],
 });
 
 export const ticketsCreatedToday = new client.Gauge({
   name: 'webrly_tickets_created_today',
   help: 'Tickets créés aujourd\'hui',
-  registers: [client.register],
+  registers: [register],
 });
 
 // Fonction pour mettre à jour toutes les métriques réelles
