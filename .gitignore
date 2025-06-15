@@ -56,5 +56,7 @@ node_modules/
 
 monitoring/
 
+!src/app/api/monitoring/
+
 export-data.js
 import-data.js
