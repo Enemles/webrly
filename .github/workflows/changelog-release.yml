@@ -22,6 +22,19 @@ jobs:
     name: Generate Changelog and Release
     runs-on: ubuntu-22.04
     if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    env:
+      # Variables nécessaires pour le build - valeurs factices mais valides
+      DATABASE_URL: postgresql://testuser:testpass@localhost:5432/testdb
+      STRIPE_SECRET_KEY: sk_test_51234567890123456789012345678901234567890123456789012345678901234
+      NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: pk_test_51234567890123456789012345678901234567890123456789012345678901234
+      CLERK_SECRET_KEY: sk_test_1234567890123456789012345678901234567890123456789012345678901234
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_1234567890123456789012345678901234567890123456789012345678901234
+      UPLOADTHING_SECRET: sk_live_test123456789012345678901234567890123456789012345678901234567890
+      UPLOADTHING_APP_ID: testapp123
+      NEXTAUTH_SECRET: test-secret-for-ci-cd-only-not-production-safe
+      NEXTAUTH_URL: http://localhost:3000
+      NODE_ENV: production
+      CI: true
 
     steps:
       - name: Checkout repository
