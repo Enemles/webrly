@@ -1,0 +1,114 @@
+name: ✅ Contrôle Qualité
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [develop]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Job 1: Analyse statique du code
+  code-quality:
+    name: 🔍 Analyse du code
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Récupération du code
+        uses: actions/checkout@v4
+
+      - name: 🔧 Configuration de l'environnement
+        uses: ./.github/actions/setup-environment
+        with:
+          environment-type: 'test'
+
+      - name: 🧹 Vérification du linting
+        run: pnpm lint
+
+      - name: 🔤 Vérification des types TypeScript
+        run: npx tsc --noEmit
+
+      - name: 🔍 Analyse de sécurité des dépendances
+        run: pnpm audit --audit-level moderate
+
+  # Job 2: Tests de construction
+  build-test:
+    name: 🏗️ Test de construction
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Récupération du code
+        uses: actions/checkout@v4
+
+      - name: 🔧 Configuration de l'environnement
+        uses: ./.github/actions/setup-environment
+        with:
+          environment-type: 'build'
+
+      - name: 🏗️ Build de l'application
+        run: pnpm build
+
+      - name: 📊 Analyse du bundle
+        run: |
+          echo "📦 Taille du bundle :"
+          du -sh .next/ || true
+          echo "📁 Contenu de .next :"
+          ls -la .next/ || true
+
+  # Job 3: Tests End-to-End
+  e2e-tests:
+    name: 🧪 Tests E2E
+    runs-on: ubuntu-latest
+    needs: [code-quality, build-test]
+    steps:
+      - name: 📥 Récupération du code
+        uses: actions/checkout@v4
+
+      - name: 🔧 Configuration de l'environnement
+        uses: ./.github/actions/setup-environment
+        with:
+          environment-type: 'test'
+          install-playwright: 'true'
+
+      - name: 🚀 Démarrage du serveur de développement
+        run: |
+          pnpm dev &
+          sleep 30
+          curl -f http://localhost:3000 || exit 1
+
+      - name: 🧪 Exécution des tests E2E
+        run: npx playwright test --project=chromium
+
+      - name: 📊 Upload des rapports de test
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 30
+
+  # Job 4: Résumé des résultats
+  summary:
+    name: 📋 Résumé
+    runs-on: ubuntu-latest
+    needs: [code-quality, build-test, e2e-tests]
+    if: always()
+    steps:
+      - name: 📊 Résumé des résultats
+        run: |
+          echo "## 🎯 Résumé du contrôle qualité" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Job | Statut |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| 🔍 Analyse du code | ${{ needs.code-quality.result == 'success' && '✅ Réussi' || '❌ Échoué' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🏗️ Test de construction | ${{ needs.build-test.result == 'success' && '✅ Réussi' || '❌ Échoué' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🧪 Tests E2E | ${{ needs.e2e-tests.result == 'success' && '✅ Réussi' || '❌ Échoué' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [[ "${{ needs.code-quality.result }}" == "success" && "${{ needs.build-test.result }}" == "success" && "${{ needs.e2e-tests.result }}" == "success" ]]; then
+            echo "🎉 **Tous les contrôles sont passés avec succès !**" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ **Certains contrôles ont échoué. Vérifiez les logs ci-dessus.**" >> $GITHUB_STEP_SUMMARY
+          fi 

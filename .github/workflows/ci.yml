@@ -15,37 +15,10 @@ jobs:
       - name: Récupération du code
         uses: actions/checkout@v4
 
-      - name: Installation de pnpm
-        uses: pnpm/action-setup@v4
+      - name: Configuration de l'environnement
+        uses: ./.github/actions/setup-environment
         with:
-          version: 9
-
-      - name: Installation de Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20.11.1'
-          cache: 'pnpm'
-
-      - name: Installation des dépendances
-        run: pnpm install --frozen-lockfile
-
-      - name: Setup environment variables for build
-        run: |
-          cp .env.example .env
-          # Variables minimales pour que le build passe
-          echo "STRIPE_SECRET_KEY=sk_test_dummy_key_for_build" >> .env
-          echo "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_dummy_key_for_build" >> .env
-          echo "CLERK_SECRET_KEY=sk_test_dummy_key_for_build" >> .env
-          echo "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_dummy_key_for_build" >> .env
-          echo "DATABASE_URL=postgresql://dummy:dummy@localhost:5432/dummy" >> .env
-          echo "NEXTAUTH_SECRET=dummy-secret-for-build" >> .env
-          echo "NEXTAUTH_URL=http://localhost:3000" >> .env
-          echo "UPLOADTHING_SECRET=sk_live_dummykey123456789012345678901234567890123456789012345678" >> .env
-          echo "UPLOADTHING_APP_ID=dummyapp1234" >> .env
-          echo "NODE_ENV=production" >> .env
-
-      - name: Génération du client Prisma
-        run: npx prisma generate
+          environment-type: 'build'
 
       - name: Build du projet
         run: pnpm build
@@ -61,39 +34,11 @@ jobs:
       - name: Récupération du code
         uses: actions/checkout@v4
 
-      - name: Installation de pnpm
-        uses: pnpm/action-setup@v4
+      - name: Configuration de l'environnement
+        uses: ./.github/actions/setup-environment
         with:
-          version: 9
-
-      - name: Installation de Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20.11.1'
-          cache: 'pnpm'
-
-      - name: Installation des dépendances
-        run: pnpm install --frozen-lockfile
-
-      - name: Installation de Playwright
-        run: npx playwright install --with-deps
-
-      - name: Setup environment variables for tests
-        run: |
-          # Créer un fichier .env avec toutes les variables nécessaires
-          echo "STRIPE_SECRET_KEY=sk_test_dummy_key_for_tests" > .env
-          echo "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_dummy_key_for_tests" >> .env
-          echo "CLERK_SECRET_KEY=sk_test_dummy_key_for_tests" >> .env
-          echo "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_dummy_key_for_tests" >> .env
-          echo "DATABASE_URL=postgresql://dummy:dummy@localhost:5432/dummy" >> .env
-          echo "NEXTAUTH_SECRET=dummy-secret-for-tests" >> .env
-          echo "NEXTAUTH_URL=http://localhost:3000" >> .env
-          echo "UPLOADTHING_SECRET=sk_live_dummykey123456789012345678901234567890123456789012345678" >> .env
-          echo "UPLOADTHING_APP_ID=dummyapp1234" >> .env
-          echo "NODE_ENV=test" >> .env
-
-      - name: Génération du client Prisma
-        run: npx prisma generate
+          environment-type: 'test'
+          install-playwright: 'true'
 
       - name: Exécution des tests end-to-end
         run: npx playwright test
