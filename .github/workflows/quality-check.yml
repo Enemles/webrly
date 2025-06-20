@@ -44,7 +44,7 @@ jobs:
         run: npx tsc --noEmit
 
       - name: 🔍 Analyse de sécurité des dépendances
-        run: pnpm audit --audit-level moderate
+        run: pnpm audit --audit-level high
 
   # Job 2: Tests de construction
   build-test:
