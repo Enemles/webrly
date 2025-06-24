@@ -1,10 +1,10 @@
-name: 'Configuration Environnement'
-description: 'Configure Node.js, pnpm, installe les dependances et configure les variables environnement'
+name: 'Configuration de l''environnement'
+description: 'Configure l''environnement Node.js, pnpm et les variables d''environnement pour les tests'
 
 inputs:
   environment-type:
-    description: 'Type environnement (test, build, production)'
-    required: true
+    description: 'Type d''environnement (test, build, lighthouse, etc.)'
+    required: false
     default: 'test'
   
   install-playwright:
@@ -15,68 +15,40 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - name: Configuration Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-        cache: 'npm'
-
-    - name: Installation pnpm
+    - name: 📦 Installation de pnpm
       uses: pnpm/action-setup@v4
       with:
         version: 9
 
-    - name: Installation des dépendances
+    - name: 🟢 Installation de Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.11.1'
+        cache: 'pnpm'
+
+    - name: 🔧 Installation des dépendances
       shell: bash
       run: pnpm install --frozen-lockfile
 
-    - name: Installation Playwright (conditionnel)
+    - name: 🎭 Installation de Playwright
       if: inputs.install-playwright == 'true'
       shell: bash
-      run: npx playwright install
+      run: npx playwright install --with-deps chromium
 
-    - name: Nettoyage cache Next.js
-      if: inputs.environment-type == 'build'
+    - name: 🔧 Configuration des variables d'environnement
       shell: bash
       run: |
-        rm -rf .next
-        rm -rf node_modules/.cache
-
-    - name: Configuration variables d'environnement
-      shell: bash
-      run: |
-        ENV_TYPE="${{ inputs.environment-type }}"
-        
-        if [ "$ENV_TYPE" = "production" ]; then
-          # Production : utilise les vrais secrets GitHub
-          cat > .env << EOF
-        DATABASE_URL=${DATABASE_URL:-postgresql://testuser:testpass@localhost:5432/testdb}
-        STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY:-sk_test_51234567890123456789012345678901234567890123456789012345678901234}
-        NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=${NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY:-pk_test_51234567890123456789012345678901234567890123456789012345678901234}
-        CLERK_SECRET_KEY=${CLERK_SECRET_KEY:-sk_test_1234567890123456789012345678901234567890123456789012345678901234}
-        NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY:-pk_test_1234567890123456789012345678901234567890123456789012345678901234}
-        UPLOADTHING_SECRET=${UPLOADTHING_SECRET:-sk_live_test123456789012345678901234567890123456789012345678901234567890}
-        UPLOADTHING_APP_ID=${UPLOADTHING_APP_ID:-testapp123}
-        NEXTAUTH_SECRET=${NEXTAUTH_SECRET:-test-secret-for-ci-cd-only-not-production-safe}
-        NEXTAUTH_URL=${NEXTAUTH_URL:-http://localhost:3000}
-        NODE_ENV=${NODE_ENV:-production}
-        CI=true
-        EOF
+        if [ "${{ inputs.environment-type }}" = "production" ]; then
+          echo "🔒 Mode production : les secrets seront injectés automatiquement par l'environnement GitHub"
+          echo "CI=true" > .env
+          echo "NODE_ENV=production" >> .env
         else
-          # Test/Build : utilise des valeurs factices mais valides
-          cat > .env << EOF
-        DATABASE_URL=postgresql://testuser:testpass@localhost:5432/testdb
-        STRIPE_SECRET_KEY=sk_test_51234567890123456789012345678901234567890123456789012345678901234
-        NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_51234567890123456789012345678901234567890123456789012345678901234
-        CLERK_SECRET_KEY=sk_test_1234567890123456789012345678901234567890123456789012345678901234
-        NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_1234567890123456789012345678901234567890123456789012345678901234
-        UPLOADTHING_SECRET=sk_live_test123456789012345678901234567890123456789012345678901234567890
-        UPLOADTHING_APP_ID=testapp123
-        NEXTAUTH_SECRET=test-secret-for-ci-cd-only-not-production-safe
-        NEXTAUTH_URL=http://localhost:3000
-        NODE_ENV=${ENV_TYPE}
-        CI=true
-        EOF
+          echo "🧪 Mode test/dev : utilisation des valeurs par défaut"
+          cp env.example .env
+          echo "NODE_ENV=test" >> .env
+          echo "CI=true" >> .env
         fi
-        
-        echo "✅ Variables d'environnement configurées pour: $ENV_TYPE" 
+
+    - name: 🎯 Génération du client Prisma
+      shell: bash
+      run: npx prisma generate 
