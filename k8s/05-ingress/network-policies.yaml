@@ -1,0 +1,219 @@
+---
+# Network Policy pour isoler les microservices
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: microservices-isolation
+  namespace: webrly
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  # Autoriser le trafic depuis l'Ingress
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: ingress-nginx
+  # Autoriser la communication inter-services
+  - from:
+    - podSelector:
+        matchLabels:
+          service: auth
+    - podSelector:
+        matchLabels:
+          service: agency
+    - podSelector:
+        matchLabels:
+          service: crm
+    - podSelector:
+        matchLabels:
+          service: pipeline
+    - podSelector:
+        matchLabels:
+          service: funnel
+    - podSelector:
+        matchLabels:
+          service: media
+    - podSelector:
+        matchLabels:
+          service: billing
+    - podSelector:
+        matchLabels:
+          service: notification
+  egress:
+  # Autoriser l'accès aux bases de données
+  - to:
+    - podSelector:
+        matchLabels:
+          app: postgres-auth
+    ports:
+    - protocol: TCP
+      port: 5432
+  - to:
+    - podSelector:
+        matchLabels:
+          app: postgres-agency
+    ports:
+    - protocol: TCP
+      port: 5432
+  - to:
+    - podSelector:
+        matchLabels:
+          app: postgres-crm
+    ports:
+    - protocol: TCP
+      port: 5432
+  - to:
+    - podSelector:
+        matchLabels:
+          app: postgres-pipeline
+    ports:
+    - protocol: TCP
+      port: 5432
+  - to:
+    - podSelector:
+        matchLabels:
+          app: postgres-funnel
+    ports:
+    - protocol: TCP
+      port: 5432
+  - to:
+    - podSelector:
+        matchLabels:
+          app: postgres-media
+    ports:
+    - protocol: TCP
+      port: 5432
+  - to:
+    - podSelector:
+        matchLabels:
+          app: postgres-billing
+    ports:
+    - protocol: TCP
+      port: 5432
+  - to:
+    - podSelector:
+        matchLabels:
+          app: postgres-notification
+    ports:
+    - protocol: TCP
+      port: 5432
+  # Autoriser l'accès à Redis
+  - to:
+    - podSelector:
+        matchLabels:
+          app: redis-cache
+    ports:
+    - protocol: TCP
+      port: 6379
+  # Autoriser l'accès DNS
+  - to: []
+    ports:
+    - protocol: UDP
+      port: 53
+  # Autoriser l'accès HTTPS vers l'extérieur (APIs externes)
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 443
+---
+# Network Policy pour les bases de données
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: database-access
+  namespace: webrly
+spec:
+  podSelector:
+    matchExpressions:
+    - key: app
+      operator: In
+      values: ["postgres-auth", "postgres-agency", "postgres-crm", "postgres-pipeline", "postgres-funnel", "postgres-media", "postgres-billing", "postgres-notification"]
+  policyTypes:
+  - Ingress
+  ingress:
+  # Seuls les microservices peuvent accéder aux BDD
+  - from:
+    - podSelector:
+        matchLabels:
+          service: auth
+    ports:
+    - protocol: TCP
+      port: 5432
+  - from:
+    - podSelector:
+        matchLabels:
+          service: agency
+    ports:
+    - protocol: TCP
+      port: 5432
+  - from:
+    - podSelector:
+        matchLabels:
+          service: crm
+    ports:
+    - protocol: TCP
+      port: 5432
+  - from:
+    - podSelector:
+        matchLabels:
+          service: pipeline
+    ports:
+    - protocol: TCP
+      port: 5432
+  - from:
+    - podSelector:
+        matchLabels:
+          service: funnel
+    ports:
+    - protocol: TCP
+      port: 5432
+  - from:
+    - podSelector:
+        matchLabels:
+          service: media
+    ports:
+    - protocol: TCP
+      port: 5432
+  - from:
+    - podSelector:
+        matchLabels:
+          service: billing
+    ports:
+    - protocol: TCP
+      port: 5432
+  - from:
+    - podSelector:
+        matchLabels:
+          service: notification
+    ports:
+    - protocol: TCP
+      port: 5432
+---
+# Network Policy pour Redis
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: redis-access
+  namespace: webrly
+spec:
+  podSelector:
+    matchLabels:
+      app: redis-cache
+  policyTypes:
+  - Ingress
+  ingress:
+  # Tous les microservices peuvent accéder à Redis
+  - from:
+    - podSelector:
+        matchExpressions:
+        - key: service
+          operator: In
+          values: ["auth", "agency", "crm", "pipeline", "funnel", "media", "billing", "notification"]
+    ports:
+    - protocol: TCP
+      port: 6379
+    - protocol: TCP
+      port: 16379 

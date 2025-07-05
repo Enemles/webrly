@@ -1,0 +1,254 @@
+# ==========================================
+# 🌐 API GATEWAY - Ingress Controller
+# ==========================================
+# 
+# Rôle : Point d'entrée unique pour tous les microservices
+# Pattern : API Gateway pour routing intelligent
+# 
+# Fonctionnalités :
+# - Routage par path vers les microservices
+# - Rate limiting (protection DDoS)
+# - TLS/SSL automatique
+# - CORS pour les clients web
+# - Load balancing automatique
+# 
+# Architecture :
+# api.webrly.com/api/v1/auth/* → auth-service:3001
+# api.webrly.com/api/v1/agency/* → agency-service:3002
+# etc. pour les 8 microservices
+# ==========================================
+
+# ----------------------------------------
+# INGRESS - Configuration API Gateway
+# ----------------------------------------
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: webrly-api-gateway
+  namespace: webrly
+  labels:
+    app: webrly
+    component: api-gateway
+  annotations:
+    # ========================================
+    # CONFIGURATION NGINX
+    # ========================================
+    # Regex pour routing avancé
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    # Réécriture d'URL : /api/v1/auth/users → /users
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    
+    # ========================================
+    # RATE LIMITING (Protection DDoS)
+    # ========================================
+    # Limite : 100 requêtes par minute par IP
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    nginx.ingress.kubernetes.io/rate-limit-window: "1m"
+    
+    # ========================================
+    # TLS/SSL (Sécurité)
+    # ========================================
+    # Redirection HTTPS automatique
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    # Certificats automatiques Let's Encrypt
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    
+    # ========================================
+    # CORS (Cross-Origin Resource Sharing)
+    # ========================================
+    # Autorise tous les origins (pour démo)
+    # En production : restreindre aux domaines autorisés
+    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, DELETE, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization"
+
+spec:
+  # ========================================
+  # CONTROLLER ET TLS
+  # ========================================
+  ingressClassName: nginx  # Utilise Nginx Ingress Controller
+  
+  # Configuration TLS/SSL
+  tls:
+  - hosts:
+    - api.webrly.com  # Domaine principal API
+    secretName: webrly-api-tls  # Secret pour certificats
+  
+  # ========================================
+  # RÈGLES DE ROUTAGE
+  # ========================================
+  rules:
+  - host: api.webrly.com  # Domaine principal
+    http:
+      paths:
+      
+      # ----------------------------------------
+      # 🔐 AUTH SERVICE - Authentification
+      # ----------------------------------------
+      # Route : api.webrly.com/api/v1/auth/*
+      # Destination : auth-service:3001
+      - path: /api/v1/auth(/|$)(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: auth-service  # Service Kubernetes
+            port:
+              number: 3001     # Port du service
+      
+      # ----------------------------------------
+      # 🏢 AGENCY SERVICE - Gestion Agences
+      # ----------------------------------------
+      # Route : api.webrly.com/api/v1/agency/*
+      # Destination : agency-service:3002
+      - path: /api/v1/agency(/|$)(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: agency-service
+            port:
+              number: 3002
+      
+      # ----------------------------------------
+      # 📊 CRM SERVICE - Contacts & Leads
+      # ----------------------------------------
+      # Route : api.webrly.com/api/v1/crm/*
+      # Destination : crm-service:3003
+      - path: /api/v1/crm(/|$)(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: crm-service
+            port:
+              number: 3003
+      
+      # ----------------------------------------
+      # 📈 PIPELINE SERVICE - Sales Pipeline
+      # ----------------------------------------
+      # Route : api.webrly.com/api/v1/pipeline/*
+      # Destination : pipeline-service:3004
+      - path: /api/v1/pipeline(/|$)(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: pipeline-service
+            port:
+              number: 3004
+      
+      # ----------------------------------------
+      # 🎯 FUNNEL SERVICE - Landing Pages
+      # ----------------------------------------
+      # Route : api.webrly.com/api/v1/funnel/*
+      # Destination : funnel-service:3005
+      - path: /api/v1/funnel(/|$)(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: funnel-service
+            port:
+              number: 3005
+      
+      # ----------------------------------------
+      # 📁 MEDIA SERVICE - Upload & Storage
+      # ----------------------------------------
+      # Route : api.webrly.com/api/v1/media/*
+      # Destination : media-service:3006
+      - path: /api/v1/media(/|$)(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: media-service
+            port:
+              number: 3006
+      
+      # ----------------------------------------
+      # 💳 BILLING SERVICE - Stripe & Payments
+      # ----------------------------------------
+      # Route : api.webrly.com/api/v1/billing/*
+      # Destination : billing-service:3007
+      - path: /api/v1/billing(/|$)(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: billing-service
+            port:
+              number: 3007
+      
+      # ----------------------------------------
+      # 🔔 NOTIFICATION SERVICE - Emails & SMS
+      # ----------------------------------------
+      # Route : api.webrly.com/api/v1/notification/*
+      # Destination : notification-service:3008
+      - path: /api/v1/notification(/|$)(.*)
+        pathType: Prefix
+        backend:
+          service:
+            name: notification-service
+            port:
+              number: 3008
+      
+      # ----------------------------------------
+      # 🏥 HEALTH CHECK GLOBAL
+      # ----------------------------------------
+      # Route : api.webrly.com/health
+      # Pour monitoring externe (Load Balancer, etc.)
+      - path: /health
+        pathType: Exact
+        backend:
+          service:
+            name: auth-service  # Utilise auth comme service de référence
+            port:
+              number: 3001
+
+---
+# ----------------------------------------
+# NETWORK POLICY - Sécurité Ingress
+# ----------------------------------------
+# Autorise uniquement l'Ingress Controller à accéder aux services
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress-to-services
+  namespace: webrly
+  labels:
+    app: webrly
+    component: network-security
+spec:
+  # ========================================
+  # SÉLECTION ET TYPE DE POLITIQUE
+  # ========================================
+  podSelector: {}  # Applique à tous les pods du namespace
+  policyTypes:
+  - Ingress  # Politique sur le trafic entrant
+  
+  # ========================================
+  # RÈGLES D'INGRESS
+  # ========================================
+  ingress:
+  - from:
+    # Autorise uniquement l'Ingress Controller
+    - namespaceSelector:
+        matchLabels:
+          name: ingress-nginx  # Namespace de l'Ingress Controller
+    
+    # ========================================
+    # PORTS AUTORISÉS
+    # ========================================
+    # Tous les ports des 8 microservices
+    ports:
+    - protocol: TCP
+      port: 3001  # Auth Service
+    - protocol: TCP
+      port: 3002  # Agency Service
+    - protocol: TCP
+      port: 3003  # CRM Service
+    - protocol: TCP
+      port: 3004  # Pipeline Service
+    - protocol: TCP
+      port: 3005  # Funnel Service
+    - protocol: TCP
+      port: 3006  # Media Service
+    - protocol: TCP
+      port: 3007  # Billing Service
+    - protocol: TCP
+      port: 3008  # Notification Service 

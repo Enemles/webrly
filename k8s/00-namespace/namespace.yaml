@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: webrly
+  labels:
+    name: webrly
+    environment: production
+    managed-by: kubectl
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: webrly-monitoring
+  labels:
+    name: webrly-monitoring
+    environment: production
+    managed-by: kubectl 

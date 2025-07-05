@@ -1,0 +1,121 @@
+---
+# Configuration simple pour monitoring
+# (Version simplifiée sans Prometheus Operator pour démo)
+---
+# ConfigMap basique pour métriques
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: webrly-monitoring-config
+  namespace: webrly-monitoring
+  labels:
+    app: webrly-monitoring
+data:
+  monitoring.conf: |
+    # Configuration monitoring Webrly
+    # Services: 8 microservices
+    # Architecture: Kubernetes microservices
+    # 
+    # Pour monitoring complet, installer Prometheus Operator :
+    # helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+    # helm install prometheus prometheus-community/kube-prometheus-stack
+    
+    services:
+      - auth-service:3001
+      - agency-service:3002
+      - crm-service:3003
+      - pipeline-service:3004
+      - funnel-service:3005
+      - media-service:3006
+      - billing-service:3007
+      - notification-service:3008
+    
+    databases:
+      - postgres-auth
+      - postgres-agency
+      - postgres-crm
+      - postgres-pipeline
+      - postgres-funnel
+      - postgres-media
+      - postgres-billing
+      - postgres-notification
+      - redis-cluster
+    
+    metrics_endpoints:
+      - /metrics  # Standard Prometheus
+      - /health   # Health checks
+      - /ready    # Readiness checks
+---
+# Simple Grafana Dashboard ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: webrly-dashboard
+  namespace: webrly-monitoring
+  labels:
+    grafana_dashboard: "1"
+data:
+  webrly-overview.json: |
+    {
+      "dashboard": {
+        "id": null,
+        "title": "Webrly Microservices Overview - Demo",
+        "tags": ["webrly", "microservices", "rncp"],
+        "timezone": "browser",
+        "panels": [
+          {
+            "id": 1,
+            "title": "Architecture Overview",
+            "type": "text",
+            "content": "## 🏗️ Architecture Webrly\n\n**8 Microservices:**\n- Auth Service (:3001)\n- Agency Service (:3002)\n- CRM Service (:3003)\n- Pipeline Service (:3004)\n- Funnel Service (:3005)\n- Media Service (:3006)\n- Billing Service (:3007)\n- Notification Service (:3008)\n\n**Infrastructure:**\n- 8 PostgreSQL databases\n- Redis Cluster (Event Bus)\n- API Gateway (Ingress)\n- HPA Auto-scaling\n\n**Design Patterns:**\n- Circuit Breaker\n- Event-driven Architecture\n- Event Sourcing"
+          }
+        ],
+        "time": {
+          "from": "now-1h", 
+          "to": "now"
+        },
+        "refresh": "30s"
+      }
+    }
+---
+# Info sur installation monitoring complet (pour référence)
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: monitoring-installation-guide
+  namespace: webrly-monitoring
+data:
+  README.md: |
+    # 📊 Installation Monitoring Complet
+    
+    Cette démo utilise un monitoring basique. Pour un monitoring complet avec Prometheus + Grafana :
+    
+    ## Installation Prometheus Operator
+    ```bash
+    # Ajouter le repo Helm
+    helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+    helm repo update
+    
+    # Installer la stack complète
+    helm install prometheus prometheus-community/kube-prometheus-stack \
+      --namespace webrly-monitoring \
+      --create-namespace
+    
+    # Accéder à Grafana
+    kubectl port-forward -n webrly-monitoring service/prometheus-grafana 3000:80
+    # http://localhost:3000 (admin / prom-operator)
+    ```
+    
+    ## Services de monitoring installés
+    - Prometheus (métriques)
+    - Grafana (dashboards)
+    - AlertManager (alertes)
+    - Node Exporter (métriques système)
+    - ServiceMonitor CRDs (découverte services)
+    
+    ## Métriques disponibles après installation
+    - CPU/Memory par pod
+    - Latence des requêtes HTTP
+    - Statut des services
+    - Métriques base de données
+    - Alertes automatiques 

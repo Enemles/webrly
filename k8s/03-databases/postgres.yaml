@@ -1,0 +1,268 @@
+---
+# PostgreSQL StatefulSet pour Auth Service
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres-auth
+  namespace: webrly
+spec:
+  serviceName: postgres-auth-service
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres-auth
+  template:
+    metadata:
+      labels:
+        app: postgres-auth
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:15-alpine
+        env:
+        - name: POSTGRES_DB
+          value: "webrly_auth"
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: webrly-secrets
+              key: POSTGRES_USER
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: webrly-secrets
+              key: POSTGRES_PASSWORD
+        ports:
+        - containerPort: 5432
+        volumeMounts:
+        - name: postgres-auth-storage
+          mountPath: /var/lib/postgresql/data
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+  volumeClaimTemplates:
+  - metadata:
+      name: postgres-auth-storage
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-auth-service
+  namespace: webrly
+spec:
+  selector:
+    app: postgres-auth
+  ports:
+  - port: 5432
+    targetPort: 5432
+  clusterIP: None
+---
+# PostgreSQL StatefulSet pour Agency Service
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres-agency
+  namespace: webrly
+spec:
+  serviceName: postgres-agency-service
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres-agency
+  template:
+    metadata:
+      labels:
+        app: postgres-agency
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:15-alpine
+        env:
+        - name: POSTGRES_DB
+          value: "webrly_agency"
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: webrly-secrets
+              key: POSTGRES_USER
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: webrly-secrets
+              key: POSTGRES_PASSWORD
+        ports:
+        - containerPort: 5432
+        volumeMounts:
+        - name: postgres-agency-storage
+          mountPath: /var/lib/postgresql/data
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+  volumeClaimTemplates:
+  - metadata:
+      name: postgres-agency-storage
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-agency-service
+  namespace: webrly
+spec:
+  selector:
+    app: postgres-agency
+  ports:
+  - port: 5432
+    targetPort: 5432
+  clusterIP: None
+---
+# PostgreSQL StatefulSet pour CRM Service
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres-crm
+  namespace: webrly
+spec:
+  serviceName: postgres-crm-service
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres-crm
+  template:
+    metadata:
+      labels:
+        app: postgres-crm
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:15-alpine
+        env:
+        - name: POSTGRES_DB
+          value: "webrly_crm"
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: webrly-secrets
+              key: POSTGRES_USER
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: webrly-secrets
+              key: POSTGRES_PASSWORD
+        ports:
+        - containerPort: 5432
+        volumeMounts:
+        - name: postgres-crm-storage
+          mountPath: /var/lib/postgresql/data
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+  volumeClaimTemplates:
+  - metadata:
+      name: postgres-crm-storage
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-crm-service
+  namespace: webrly
+spec:
+  selector:
+    app: postgres-crm
+  ports:
+  - port: 5432
+    targetPort: 5432
+  clusterIP: None
+---
+# PostgreSQL StatefulSet pour Pipeline Service
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres-pipeline
+  namespace: webrly
+spec:
+  serviceName: postgres-pipeline-service
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres-pipeline
+  template:
+    metadata:
+      labels:
+        app: postgres-pipeline
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:15-alpine
+        env:
+        - name: POSTGRES_DB
+          value: "webrly_pipeline"
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: webrly-secrets
+              key: POSTGRES_USER
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: webrly-secrets
+              key: POSTGRES_PASSWORD
+        ports:
+        - containerPort: 5432
+        volumeMounts:
+        - name: postgres-pipeline-storage
+          mountPath: /var/lib/postgresql/data
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+  volumeClaimTemplates:
+  - metadata:
+      name: postgres-pipeline-storage
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-pipeline-service
+  namespace: webrly
+spec:
+  selector:
+    app: postgres-pipeline
+  ports:
+  - port: 5432
+    targetPort: 5432
+  clusterIP: None 

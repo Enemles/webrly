@@ -1,0 +1,134 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pipeline-service
+  namespace: webrly
+  labels:
+    app: pipeline-service
+    service: pipeline
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: pipeline-service
+  template:
+    metadata:
+      labels:
+        app: pipeline-service
+        service: pipeline
+    spec:
+      containers:
+      - name: pipeline-service
+        image: node:20-alpine
+        command:
+        - sh
+        - -c
+        - |
+          cat > server.js << 'EOF'
+          const http = require('http');
+          const server = http.createServer((req, res) => {
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+              service: 'pipeline-service',
+              status: 'healthy',
+              timestamp: new Date().toISOString(),
+              version: '1.0.0'
+            }));
+          });
+          server.listen(3004, () => {
+            console.log('Pipeline Service running on port 3004');
+          });
+          EOF
+          node server.js
+        ports:
+        - containerPort: 3004
+        env:
+        - name: NODE_ENV
+          valueFrom:
+            configMapKeyRef:
+              name: webrly-config
+              key: NODE_ENV
+        - name: DATABASE_URL
+          value: "postgresql://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@postgres-pipeline-service:5432/webrly_pipeline"
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: webrly-secrets
+              key: POSTGRES_USER
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: webrly-secrets
+              key: POSTGRES_PASSWORD
+        - name: REDIS_URL
+          value: "redis://redis-service:6379"
+        - name: AUTH_SERVICE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: microservices-config
+              key: AUTH_SERVICE_URL
+        - name: CRM_SERVICE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: microservices-config
+              key: CRM_SERVICE_URL
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "50m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 3004
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 3004
+          initialDelaySeconds: 30
+          periodSeconds: 30
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pipeline-service
+  namespace: webrly
+  labels:
+    app: pipeline-service
+spec:
+  selector:
+    app: pipeline-service
+  ports:
+  - port: 3004
+    targetPort: 3004
+  type: ClusterIP
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: pipeline-service-hpa
+  namespace: webrly
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: pipeline-service
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80 

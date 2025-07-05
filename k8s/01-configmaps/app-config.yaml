@@ -1,0 +1,115 @@
+# ==========================================
+# 🔧 CONFIGURATION WEBRLY MICROSERVICES
+# ==========================================
+# 
+# Ce fichier contient toute la configuration non-sensible
+# partagée entre les 8 microservices de l'architecture Webrly
+# 
+# Architecture: 8 microservices + Redis Cache + PostgreSQL
+# Pattern: Database-per-service + Circuit Breaker
+# ==========================================
+
+# ----------------------------------------
+# ConfigMap Principal - Variables globales
+# ----------------------------------------
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: webrly-config
+  namespace: webrly
+  labels:
+    app: webrly
+    component: configuration
+data:
+  # Environnement de déploiement
+  NODE_ENV: "production"
+  
+  # ========================================
+  # REDIS CACHE
+  # ========================================
+  # Redis sert de cache haute performance pour :
+  # 1. Sessions utilisateur (TTL 24h)
+  # 2. Données fréquemment consultées (TTL 1h)
+  # 3. Résultats de recherche (TTL 15min)
+  REDIS_HOST: "redis-cache-service"
+  REDIS_PORT: "6379"
+  CACHE_TTL_DEFAULT: "3600"        # TTL par défaut 1h
+  CACHE_TTL_SESSIONS: "86400"      # Sessions 24h
+  CACHE_TTL_SEARCH: "900"          # Recherches 15min
+  
+  # ========================================
+  # POSTGRESQL (Bases par microservice)
+  # ========================================
+  # Chaque microservice a sa propre base PostgreSQL
+  # Pattern: Database-per-service pour isolation
+  POSTGRES_HOST: "postgres-service"  # DNS interne K8s
+  POSTGRES_PORT: "5432"
+  
+  # ========================================
+  # CONFIGURATION MÉTIER WEBRLY
+  # ========================================
+  # Domain et URLs publiques
+  NEXT_PUBLIC_DOMAIN: "webrly.com"
+  NEXT_PUBLIC_SCHEME: "https"
+  
+  # Paramètres de facturation SaaS
+  NEXT_PUBLIC_PLATFORM_AGENY_PERCENT: "10"      # Commission agence (10%)
+  NEXT_PUBLIC_PLATFORM_ONETIME_FEE: "1000"      # Frais setup (10€)
+  NEXT_PUBLIC_PLATFORM_SUBSCRIPTION_PERCENT: "5" # Commission abonnement (5%)
+
+---
+# ----------------------------------------
+# ConfigMap Microservices - URLs et Patterns
+# ----------------------------------------
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: microservices-config
+  namespace: webrly
+  labels:
+    app: webrly
+    component: microservices-config
+data:
+  # ========================================
+  # URLs INTERNES MICROSERVICES
+  # ========================================
+  # Communication inter-services via DNS Kubernetes
+  # Format: http://[service-name]:[port]
+  # Ces URLs sont utilisées pour les appels REST synchrones
+  
+  AUTH_SERVICE_URL: "http://auth-service:3001"           # Authentification & autorisation
+  AGENCY_SERVICE_URL: "http://agency-service:3002"       # Gestion des agences
+  CRM_SERVICE_URL: "http://crm-service:3003"             # Contacts et leads
+  PIPELINE_SERVICE_URL: "http://pipeline-service:3004"   # Pipelines de vente
+  FUNNEL_SERVICE_URL: "http://funnel-service:3005"       # Funnels et landing pages
+  MEDIA_SERVICE_URL: "http://media-service:3006"         # Upload et stockage média
+  BILLING_SERVICE_URL: "http://billing-service:3007"     # Facturation et Stripe
+  NOTIFICATION_SERVICE_URL: "http://notification-service:3008"  # Notifications
+  
+  # ========================================
+  # CIRCUIT BREAKER PATTERN
+  # ========================================
+  # Protection contre les pannes en cascade
+  # Pattern implémenté avec Opossum.js dans chaque service
+  
+  CIRCUIT_BREAKER_TIMEOUT: "3000"        # Timeout 3 secondes par appel
+  CIRCUIT_BREAKER_ERROR_THRESHOLD: "50"  # Ouvre le circuit à 50% d'erreurs
+  CIRCUIT_BREAKER_RESET_TIMEOUT: "30000" # Reset automatique après 30 secondes
+  
+  # ========================================
+  # PERFORMANCE ET MONITORING
+  # ========================================
+  # Configuration pour optimisation et observabilité
+  
+  # Timeouts API
+  API_TIMEOUT_DEFAULT: "5000"          # Timeout API par défaut 5s
+  API_TIMEOUT_EXTERNAL: "10000"        # APIs externes (Stripe, Clerk) 10s
+  
+  # Rate limiting
+  RATE_LIMIT_PER_MINUTE: "100"         # 100 requêtes/minute par IP
+  RATE_LIMIT_BURST: "10"               # Burst de 10 requêtes
+  
+  # Monitoring
+  METRICS_COLLECTION_INTERVAL: "60"    # Métriques toutes les 60s
+  LOG_LEVEL: "info"                    # Niveau de logs (info, debug, warn, error)
+  HEALTH_CHECK_INTERVAL: "30"          # Health checks toutes les 30s 

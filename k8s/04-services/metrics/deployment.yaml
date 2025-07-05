@@ -1,0 +1,290 @@
+# ==========================================
+# 📊 METRICS SERVICE - Microservice de Métriques
+# ==========================================
+# 
+# Responsabilités :
+# - Agrégation des métriques business depuis tous les services
+# - Exposition endpoint Prometheus (/api/v1/metrics)
+# - Analytics temps réel et historique
+# - Cache des métriques avec Redis
+# 
+# Design Patterns :
+# - Aggregator Pattern (collecte depuis 8 microservices)
+# - Cache-Aside (métriques en cache Redis TTL 5min)
+# ==========================================
+
+# ----------------------------------------
+# DEPLOYMENT - Configuration du Microservice
+# ----------------------------------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: metrics-service
+  namespace: webrly
+  labels:
+    app: metrics-service
+    service: metrics
+    component: microservice  # Pour sélecteurs monitoring
+spec:
+  # ========================================
+  # RÉPLICATION ET SCALING
+  # ========================================
+  replicas: 2  # 2 replicas par défaut (moins de charge que les autres services)
+  
+  selector:
+    matchLabels:
+      app: metrics-service
+  
+  template:
+    metadata:
+      labels:
+        app: metrics-service
+        service: metrics
+        monitoring: enabled  # Pour ServiceMonitor Prometheus
+    spec:
+      containers:
+      - name: metrics-service
+        # ========================================
+        # IMAGE ET COMMANDE DE DÉMARRAGE
+        # ========================================
+        # Pour la démo : Node.js basique avec simulation métriques
+        # En production : Image custom avec vraie logique d'agrégation
+        image: node:20-alpine
+        command:
+        - sh
+        - -c
+        - |
+          # Serveur HTTP basique pour démonstration Aggregator Pattern
+          # En production : remplacer par vraie app microservice
+          cat > server.js << 'SCRIPT_EOF'
+          const http = require('http');
+          
+          // Simulation des métriques business (en production: requêtes aux autres services)
+          const getBusinessMetrics = () => {
+            const now = Date.now();
+            return {
+              // Métriques Agencies (depuis agency-service)
+              webrly_total_agencies: Math.floor(Math.random() * 10) + 5,
+              webrly_total_subaccounts: Math.floor(Math.random() * 20) + 12,
+              
+              // Métriques CRM (depuis crm-service)  
+              webrly_total_contacts: Math.floor(Math.random() * 500) + 1247,
+              webrly_new_contacts_today: Math.floor(Math.random() * 10) + 3,
+              
+              // Métriques Pipeline (depuis pipeline-service)
+              webrly_total_tickets: Math.floor(Math.random() * 20) + 89,
+              webrly_total_ticket_value: Math.floor(Math.random() * 5000) + 15600,
+              webrly_tickets_created_today: Math.floor(Math.random() * 5) + 2,
+              
+              // Métriques Funnel (depuis funnel-service)
+              webrly_total_funnels: Math.floor(Math.random() * 15) + 25,
+              webrly_published_funnels: Math.floor(Math.random() * 10) + 18,
+              webrly_total_funnel_visits: Math.floor(Math.random() * 1000) + 3456,
+              
+              // Métriques Billing (depuis billing-service)
+              webrly_active_subscriptions: Math.floor(Math.random() * 8) + 12,
+              webrly_monthly_revenue: Math.floor(Math.random() * 2000) + 8500,
+              
+              // Métriques Auth (depuis auth-service)
+              webrly_active_users: Math.floor(Math.random() * 10) + 18,
+              webrly_new_users_today: Math.floor(Math.random() * 3) + 1,
+              
+              // Métriques Notification (depuis notification-service)
+              webrly_emails_sent_today: Math.floor(Math.random() * 50) + 145,
+              
+              // Métriques Media (depuis media-service)
+              webrly_total_media_files: Math.floor(Math.random() * 100) + 567
+            };
+          };
+          
+          // Format Prometheus
+          const formatPrometheusMetrics = (metrics) => {
+            let output = '';
+            Object.entries(metrics).forEach(([key, value]) => {
+              output += `# HELP ${key} Business metric from Webrly aggregation\n`;
+              output += `# TYPE ${key} gauge\n`;
+              output += `${key} ${value}\n\n`;
+            });
+            return output;
+          };
+          
+          const server = http.createServer((req, res) => {
+            if (req.url === '/api/v1/metrics' || req.url === '/metrics') {
+              // Endpoint Prometheus - Aggregator Pattern
+              const metrics = getBusinessMetrics();
+              res.writeHead(200, { 'Content-Type': 'text/plain; version=0.0.4; charset=utf-8' });
+              res.end(formatPrometheusMetrics(metrics));
+            } else {
+              // Health check et informations du service
+              res.writeHead(200, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify({
+                service: 'metrics-service',
+                status: 'healthy',
+                timestamp: new Date().toISOString(),
+                version: '1.0.0',
+                database: 'webrly_metrics',
+                endpoints: ['/api/v1/metrics', '/metrics'],
+                features: ['aggregator-pattern', 'prometheus-export', 'business-analytics', 'cache-aside'],
+                description: 'Centralized metrics aggregation from 8 microservices'
+              }));
+            }
+          });
+          
+          server.listen(3009, () => {
+            console.log('📊 Metrics Service running on port 3009');
+            console.log('🔄 Aggregator Pattern enabled for business metrics');
+            console.log('📈 Prometheus endpoint: /api/v1/metrics');
+          });
+          SCRIPT_EOF
+          node server.js
+        
+        # ========================================
+        # NETWORKING
+        # ========================================
+        ports:
+        - containerPort: 3009  # Port standard Metrics Service
+          name: http
+          protocol: TCP
+        
+        # ========================================
+        # VARIABLES D'ENVIRONNEMENT
+        # ========================================
+        env:
+        # Configuration globale depuis ConfigMap
+        - name: NODE_ENV
+          valueFrom:
+            configMapKeyRef:
+              name: webrly-config
+              key: NODE_ENV
+        
+        # ----------------------------------------
+        # Base de données PostgreSQL spécifique
+        # Pattern: Database-per-service
+        # ----------------------------------------
+        - name: DATABASE_URL
+          value: "postgresql://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@postgres-metrics-service:5432/webrly_metrics"
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: webrly-secrets
+              key: POSTGRES_USER
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: webrly-secrets
+              key: POSTGRES_PASSWORD
+        
+        # ----------------------------------------
+        # Redis (Cache des métriques TTL 5min)
+        # ----------------------------------------
+        - name: REDIS_URL
+          value: "redis://redis-service:6379"
+        - name: METRICS_CACHE_TTL
+          value: "300"  # 5 minutes pour éviter surcharge des APIs
+        
+        # ----------------------------------------
+        # Configuration Aggregator Pattern
+        # ----------------------------------------
+        - name: AUTH_SERVICE_URL
+          value: "http://auth-service:3001"
+        - name: AGENCY_SERVICE_URL
+          value: "http://agency-service:3002"
+        - name: CRM_SERVICE_URL
+          value: "http://crm-service:3003"
+        - name: PIPELINE_SERVICE_URL
+          value: "http://pipeline-service:3004"
+        - name: FUNNEL_SERVICE_URL
+          value: "http://funnel-service:3005"
+        - name: MEDIA_SERVICE_URL
+          value: "http://media-service:3006"
+        - name: BILLING_SERVICE_URL
+          value: "http://billing-service:3007"
+        - name: NOTIFICATION_SERVICE_URL
+          value: "http://notification-service:3008"
+        
+        # ========================================
+        # RESSOURCES ET LIMITES
+        # ========================================
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "300m"
+        
+        # ========================================
+        # HEALTH CHECKS
+        # ========================================
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 3009
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 3009
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 5
+          failureThreshold: 3
+
+---
+# ----------------------------------------
+# SERVICE - Exposition et Service Discovery
+# ----------------------------------------
+apiVersion: v1
+kind: Service
+metadata:
+  name: metrics-service
+  namespace: webrly
+  labels:
+    app: metrics-service
+    monitoring: enabled
+    prometheus-scrape: enabled
+spec:
+  selector:
+    app: metrics-service
+  ports:
+  - port: 3009
+    targetPort: 3009
+    protocol: TCP
+    name: http-metrics
+  type: ClusterIP
+
+---
+# ----------------------------------------
+# HPA - Auto-scaling Horizontal
+# ----------------------------------------
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: metrics-service-hpa
+  namespace: webrly
+  labels:
+    app: metrics-service
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: metrics-service
+  minReplicas: 1
+  maxReplicas: 4
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 60
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 70

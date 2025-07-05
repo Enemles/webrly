@@ -1,0 +1,143 @@
+# Media Service avec S3 au lieu d'UploadThing
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: media-service
+  namespace: webrly
+  labels:
+    app: media-service
+    tier: application
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: media-service
+  template:
+    metadata:
+      labels:
+        app: media-service
+        tier: application
+    spec:
+      containers:
+      - name: media-service
+        image: node:20-alpine
+        ports:
+        - containerPort: 3006
+        env:
+        # Configuration de base
+        - name: PORT
+          value: "3006"
+        - name: NODE_ENV
+          value: "production"
+          
+        # AWS S3 Configuration (remplace UploadThing)
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: AWS_ACCESS_KEY_ID
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: AWS_SECRET_ACCESS_KEY
+        - name: AWS_S3_BUCKET_NAME
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: AWS_S3_BUCKET_NAME
+        - name: AWS_S3_REGION
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: AWS_S3_REGION
+        - name: AWS_CLOUDFRONT_DOMAIN
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: AWS_CLOUDFRONT_DOMAIN
+              
+        # Services internes (Event Bus, Auth, etc.)
+        - name: REDIS_URL
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: REDIS_URL
+        - name: AUTH_SERVICE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: AUTH_SERVICE_URL
+              
+        # Circuit Breaker pour services internes uniquement
+        # (S3 n'a pas besoin de Circuit Breaker - ultra fiable)
+        - name: CIRCUIT_BREAKER_TIMEOUT
+          valueFrom:
+            configMapKeyRef:
+              name: app-config
+              key: CIRCUIT_BREAKER_TIMEOUT
+              
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 3006
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3006
+          initialDelaySeconds: 30
+          periodSeconds: 30
+
+---
+# Service reste identique
+apiVersion: v1
+kind: Service
+metadata:
+  name: media-service
+  namespace: webrly
+  labels:
+    app: media-service
+spec:
+  selector:
+    app: media-service
+  ports:
+  - port: 3006
+    targetPort: 3006
+  type: ClusterIP
+
+---
+# HPA reste identique  
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: media-service-hpa
+  namespace: webrly
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: media-service
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80 

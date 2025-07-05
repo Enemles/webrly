@@ -1,0 +1,343 @@
+---
+# PostgreSQL StatefulSet pour Funnel Service
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres-funnel
+  namespace: webrly
+spec:
+  serviceName: postgres-funnel-service
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres-funnel
+  template:
+    metadata:
+      labels:
+        app: postgres-funnel
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:15-alpine
+        env:
+        - name: POSTGRES_DB
+          value: "webrly_funnel"
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: webrly-secrets
+              key: POSTGRES_USER
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: webrly-secrets
+              key: POSTGRES_PASSWORD
+        ports:
+        - containerPort: 5432
+        volumeMounts:
+        - name: postgres-funnel-storage
+          mountPath: /var/lib/postgresql/data
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+  volumeClaimTemplates:
+  - metadata:
+      name: postgres-funnel-storage
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-funnel-service
+  namespace: webrly
+spec:
+  selector:
+    app: postgres-funnel
+  ports:
+  - port: 5432
+    targetPort: 5432
+  clusterIP: None
+---
+# PostgreSQL StatefulSet pour Media Service
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres-media
+  namespace: webrly
+spec:
+  serviceName: postgres-media-service
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres-media
+  template:
+    metadata:
+      labels:
+        app: postgres-media
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:15-alpine
+        env:
+        - name: POSTGRES_DB
+          value: "webrly_media"
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: webrly-secrets
+              key: POSTGRES_USER
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: webrly-secrets
+              key: POSTGRES_PASSWORD
+        ports:
+        - containerPort: 5432
+        volumeMounts:
+        - name: postgres-media-storage
+          mountPath: /var/lib/postgresql/data
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+  volumeClaimTemplates:
+  - metadata:
+      name: postgres-media-storage
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-media-service
+  namespace: webrly
+spec:
+  selector:
+    app: postgres-media
+  ports:
+  - port: 5432
+    targetPort: 5432
+  clusterIP: None
+---
+# PostgreSQL StatefulSet pour Billing Service
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres-billing
+  namespace: webrly
+spec:
+  serviceName: postgres-billing-service
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres-billing
+  template:
+    metadata:
+      labels:
+        app: postgres-billing
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:15-alpine
+        env:
+        - name: POSTGRES_DB
+          value: "webrly_billing"
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: webrly-secrets
+              key: POSTGRES_USER
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: webrly-secrets
+              key: POSTGRES_PASSWORD
+        ports:
+        - containerPort: 5432
+        volumeMounts:
+        - name: postgres-billing-storage
+          mountPath: /var/lib/postgresql/data
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+  volumeClaimTemplates:
+  - metadata:
+      name: postgres-billing-storage
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-billing-service
+  namespace: webrly
+spec:
+  selector:
+    app: postgres-billing
+  ports:
+  - port: 5432
+    targetPort: 5432
+  clusterIP: None
+---
+# PostgreSQL StatefulSet pour Notification Service
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres-notification
+  namespace: webrly
+spec:
+  serviceName: postgres-notification-service
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres-notification
+  template:
+    metadata:
+      labels:
+        app: postgres-notification
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:15-alpine
+        env:
+        - name: POSTGRES_DB
+          value: "webrly_notification"
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: webrly-secrets
+              key: POSTGRES_USER
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: webrly-secrets
+              key: POSTGRES_PASSWORD
+        ports:
+        - containerPort: 5432
+        volumeMounts:
+        - name: postgres-notification-storage
+          mountPath: /var/lib/postgresql/data
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+  volumeClaimTemplates:
+  - metadata:
+      name: postgres-notification-storage
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-notification-service
+  namespace: webrly
+spec:
+  selector:
+    app: postgres-notification
+  ports:
+  - port: 5432
+    targetPort: 5432
+  clusterIP: None 
+---
+# PostgreSQL StatefulSet pour Metrics Service
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres-metrics
+  namespace: webrly
+  labels:
+    app: postgres-metrics
+    service: metrics
+    component: database
+spec:
+  serviceName: postgres-metrics-service
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres-metrics
+  template:
+    metadata:
+      labels:
+        app: postgres-metrics
+        service: metrics
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:15-alpine
+        env:
+        - name: POSTGRES_DB
+          value: "webrly_metrics"
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: webrly-secrets
+              key: POSTGRES_USER
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: webrly-secrets
+              key: POSTGRES_PASSWORD
+        ports:
+        - containerPort: 5432
+        volumeMounts:
+        - name: postgres-metrics-storage
+          mountPath: /var/lib/postgresql/data
+        resources:
+          requests:
+            memory: "256Mi"  # Peut être plus pour historique métriques
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+  volumeClaimTemplates:
+  - metadata:
+      name: postgres-metrics-storage
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 2Gi  # Plus d'espace pour historique des métriques
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-metrics-service
+  namespace: webrly
+  labels:
+    app: postgres-metrics
+    service: metrics
+spec:
+  selector:
+    app: postgres-metrics
+  ports:
+  - port: 5432
+    targetPort: 5432
+  clusterIP: None
