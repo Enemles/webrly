@@ -1,0 +1,131 @@
+name: 🧪 Tests Unitaires
+
+on:
+  push:
+    branches: [main, develop]
+    paths: 
+      - 'src/**/*.ts'
+      - 'src/**/*.tsx'
+      - '**/*.test.ts'
+      - '**/*.test.tsx'
+      - 'vitest.config.ts'
+      - 'package.json'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'src/**/*.ts'
+      - 'src/**/*.tsx'
+      - '**/*.test.ts'
+      - '**/*.test.tsx'
+      - 'vitest.config.ts'
+      - 'package.json'
+  workflow_dispatch:
+    inputs:
+      coverage:
+        description: 'Générer le rapport de couverture'
+        required: false
+        default: true
+        type: boolean
+
+concurrency:
+  group: unit-tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  unit-tests:
+    name: 🧪 Tests unitaires rapides
+    runs-on: ubuntu-latest
+    env:
+      # Variables nécessaires pour les tests unitaires - valeurs factices mais valides
+      DATABASE_URL: postgresql://testuser:testpass@localhost:5432/testdb
+      STRIPE_SECRET_KEY: sk_test_51234567890123456789012345678901234567890123456789012345678901234
+      NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: pk_test_51234567890123456789012345678901234567890123456789012345678901234
+      CLERK_SECRET_KEY: sk_test_1234567890123456789012345678901234567890123456789012345678901234
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_1234567890123456789012345678901234567890123456789012345678901234
+      UPLOADTHING_SECRET: sk_live_test123456789012345678901234567890123456789012345678901234567890
+      UPLOADTHING_APP_ID: testapp123
+      NEXTAUTH_SECRET: test-secret-for-ci-cd-only-not-production-safe
+      NEXTAUTH_URL: http://localhost:3000
+      NODE_ENV: test
+      CI: true
+    steps:
+      - name: 📥 Récupération du code
+        uses: actions/checkout@v4
+
+      - name: 🔧 Configuration de l'environnement
+        uses: ./.github/actions/setup-environment
+        with:
+          environment-type: 'test'
+
+      - name: 🧪 Exécution des tests unitaires
+        run: pnpm test:run
+
+      - name: 📊 Génération du rapport de couverture
+        if: github.event.inputs.coverage == 'true' || github.event_name != 'workflow_dispatch'
+        run: pnpm test:coverage
+
+      - name: 📊 Upload du rapport de couverture
+        if: (github.event.inputs.coverage == 'true' || github.event_name != 'workflow_dispatch') && always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report-${{ github.sha }}
+          path: coverage/
+          retention-days: 30
+
+      - name: 📈 Résumé de la couverture
+        if: github.event.inputs.coverage == 'true' || github.event_name != 'workflow_dispatch'
+        run: |
+          echo "## 📊 Résumé de la couverture des tests" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ -f "coverage/coverage-summary.json" ]; then
+            echo "📄 **Rapport détaillé disponible dans les artefacts**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "```" >> $GITHUB_STEP_SUMMARY
+            node -e "
+              const coverage = require('./coverage/coverage-summary.json');
+              const total = coverage.total;
+              console.log('Statements: ' + total.statements.pct + '%');
+              console.log('Branches: ' + total.branches.pct + '%');
+              console.log('Functions: ' + total.functions.pct + '%');
+              console.log('Lines: ' + total.lines.pct + '%');
+            " >> $GITHUB_STEP_SUMMARY
+            echo "```" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ Rapport de couverture non disponible" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: 📈 Commentaire PR avec couverture
+        if: github.event_name == 'pull_request' && (github.event.inputs.coverage == 'true' || github.event_name != 'workflow_dispatch')
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            try {
+              const coverage = JSON.parse(fs.readFileSync('coverage/coverage-summary.json', 'utf8'));
+              const total = coverage.total;
+              
+              const getStatus = (pct) => pct >= 70 ? '✅' : '❌';
+              const getColor = (pct) => pct >= 80 ? '🟢' : pct >= 70 ? '🟡' : '🔴';
+              
+              const comment = `## 📊 Rapport de couverture des tests unitaires
+              
+              | Métrique | Pourcentage | Status |
+              |----------|-------------|--------|
+              | 🏢 Statements | ${total.statements.pct}% ${getColor(total.statements.pct)} | ${getStatus(total.statements.pct)} |
+              | 🌿 Branches | ${total.branches.pct}% ${getColor(total.branches.pct)} | ${getStatus(total.branches.pct)} |
+              | 🔧 Functions | ${total.functions.pct}% ${getColor(total.functions.pct)} | ${getStatus(total.functions.pct)} |
+              | 📄 Lines | ${total.lines.pct}% ${getColor(total.lines.pct)} | ${getStatus(total.lines.pct)} |
+              
+              **Seuil minimum:** 70% pour toutes les métriques
+              **Tests exécutés:** ${Object.keys(coverage).length - 1} fichiers testés
+              `;
+              
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment
+              });
+            } catch (error) {
+              console.log('Pas de rapport de couverture disponible:', error.message);
+            } 
