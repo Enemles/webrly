@@ -166,72 +166,91 @@ describe('Utils', () => {
     })
   })
 
-  describe('logger - fonction de logging conditionnel', () => {
-    it('devrait logger en mode development', () => {
+  describe('logger - système de logging structuré', () => {
+    it('devrait logger en mode development avec grouping', () => {
       // Arrange
-      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+      const consoleGroupSpy = vi.spyOn(console, 'group').mockImplementation(() => {})
+      const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+      const consoleGroupEndSpy = vi.spyOn(console, 'groupEnd').mockImplementation(() => {})
       vi.stubEnv('NODE_ENV', 'development')
 
       // Act
-      logger('test message', { data: 'test' })
+      logger.info('test message', { component: 'test', metadata: { data: 'test' } })
 
       // Assert
-      expect(consoleSpy).toHaveBeenCalledWith(
-        '%c[DEV]:',
-        'background-color: yellow; color: black',
-        ['test message', { data: 'test' }]
+      expect(consoleGroupSpy).toHaveBeenCalledWith(
+        '%c[INFO] test message', 
+        'color: #059669; background: #d1fae5'
       )
+      expect(consoleLogSpy).toHaveBeenCalledWith('🧩 Component:', 'test')
+      expect(consoleLogSpy).toHaveBeenCalledWith('📊 Metadata:', { data: 'test' })
+      expect(consoleGroupEndSpy).toHaveBeenCalled()
 
-      consoleSpy.mockRestore()
+      consoleGroupSpy.mockRestore()
+      consoleLogSpy.mockRestore()
+      consoleGroupEndSpy.mockRestore()
       vi.unstubAllEnvs()
     })
 
-    it('ne devrait pas logger en mode production', () => {
+    it('devrait logger en JSON en mode production', () => {
       // Arrange
       const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
       vi.stubEnv('NODE_ENV', 'production')
 
       // Act
-      logger('test message')
-
-      // Assert
-      expect(consoleSpy).not.toHaveBeenCalled()
-
-      consoleSpy.mockRestore()
-      vi.unstubAllEnvs()
-    })
-
-    it('ne devrait pas logger en mode test', () => {
-      // Arrange
-      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
-      vi.stubEnv('NODE_ENV', 'test')
-
-      // Act
-      logger('test message')
-
-      // Assert
-      expect(consoleSpy).not.toHaveBeenCalled()
-
-      consoleSpy.mockRestore()
-      vi.unstubAllEnvs()
-    })
-
-    it('devrait gérer plusieurs arguments', () => {
-      // Arrange
-      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
-      vi.stubEnv('NODE_ENV', 'development')
-
-      // Act
-      logger('message', 123, { obj: 'test' }, ['array'])
+      logger.warn('test message', { component: 'test' })
 
       // Assert
       expect(consoleSpy).toHaveBeenCalledWith(
-        '%c[DEV]:',
-        'background-color: yellow; color: black',
-        ['message', 123, { obj: 'test' }, ['array']]
+        expect.stringMatching(/"level":"warn".*"message":"test message"/)
       )
 
       consoleSpy.mockRestore()
+      vi.unstubAllEnvs()
+    })
+
+    it('devrait logger différents niveaux correctement', () => {
+      // Arrange
+      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+      vi.stubEnv('NODE_ENV', 'production')
+
+      // Act
+      logger.debug('debug message')
+      logger.info('info message')
+      logger.error('error message', { error: new Error('test error') })
+
+      // Assert
+      expect(consoleSpy).toHaveBeenCalledTimes(3)
+
+      consoleSpy.mockRestore()
+      vi.unstubAllEnvs()
+    })
+
+    it('devrait gérer le contexte métier complet', () => {
+      // Arrange
+      const consoleGroupSpy = vi.spyOn(console, 'group').mockImplementation(() => {})
+      const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+      vi.stubEnv('NODE_ENV', 'development')
+
+      // Act
+      logger.critical('system failure', {
+        component: 'database',
+        userId: 'user-123',
+        action: 'payment-processing',
+        metadata: { orderId: '456', amount: 100 }
+      })
+
+      // Assert
+      expect(consoleGroupSpy).toHaveBeenCalledWith(
+        '%c[CRITICAL] system failure',
+        'color: #ffffff; background: #dc2626; font-weight: bold'
+      )
+      expect(consoleLogSpy).toHaveBeenCalledWith('🧩 Component:', 'database')
+      expect(consoleLogSpy).toHaveBeenCalledWith('👤 User:', 'user-123')
+      expect(consoleLogSpy).toHaveBeenCalledWith('🎯 Action:', 'payment-processing')
+
+      consoleGroupSpy.mockRestore()
+      consoleLogSpy.mockRestore()
       vi.unstubAllEnvs()
     })
   })
