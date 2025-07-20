@@ -274,7 +274,7 @@ Node Exporter expose les métriques système Linux (CPU, RAM, disque, réseau...
 - **Réseau** : Bytes envoyés/reçus, erreurs
 - **Système** : Uptime, nombre de processus
 
-### **Endpoint :** `http://YOUR_SERVER:9100/metrics`
+### **Endpoint :** `http://YOUR_SERVER:9101/metrics`
 
 ---
 
@@ -289,8 +289,8 @@ cAdvisor collecte les métriques des conteneurs Docker en temps réel.
 - **Réseau** : Trafic entrant/sortant
 - **Disque** : I/O des conteneurs
 
-### **Interface Web :** `http://YOUR_COOLIFY_SERVER:8080`
-### **Métriques :** `http://YOUR_COOLIFY_SERVER:8080/metrics`
+### **Interface Web :** `http://YOUR_COOLIFY_SERVER:8889`
+### **Métriques :** `http://YOUR_COOLIFY_SERVER:8889/metrics`
 
 ---
 

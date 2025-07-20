@@ -14,7 +14,7 @@ Votre système d'alertes surveille automatiquement :
 
 ### **🎨 Grafana - Dashboard Principal**
 ```
-URL: http://174.138.2.56:3000
+URL: http://134.122.66.187:3000
 Login: admin / ChangeThisPassword123!
 ```
 
@@ -25,7 +25,7 @@ Login: admin / ChangeThisPassword123!
 
 ### **🚨 Alertmanager - Gestion des Alertes**
 ```
-URL: http://174.138.2.56:9093
+URL: http://134.122.66.187:9093
 ```
 
 **Fonctionnalités :**
@@ -36,7 +36,7 @@ URL: http://174.138.2.56:9093
 
 ### **📈 Prometheus - Métriques Brutes**
 ```
-URL: http://174.138.2.56:9090
+URL: http://134.122.66.187:9090
 ```
 
 **Pour le debug :**
@@ -107,7 +107,7 @@ docker-compose restart alertmanager
 ### **3. Tester les notifications**
 ```bash
 # Simuler une alerte (API v2)
-curl -XPOST http://174.138.2.56:9093/api/v2/alerts -H 'Content-Type: application/json' -d '[
+curl -XPOST http://134.122.66.187:9093/api/v2/alerts -H 'Content-Type: application/json' -d '[
   {
     "labels": {
       "alertname": "TestAlert",
@@ -139,7 +139,7 @@ docker ps | grep webrly
 #### **`NextJSCriticalMemoryUsage`**
 ```bash
 # 1. Vérifier la consommation
-curl -s "http://174.138.2.56:9090/api/v1/query?query=nextjs_process_resident_memory_bytes"
+curl -s "http://134.122.66.187:9090/api/v1/query?query=nextjs_process_resident_memory_bytes"
 
 # 2. Redémarrer l'app si > 800MB
 # Via Coolify interface
@@ -156,7 +156,7 @@ curl -s "http://174.138.2.56:9090/api/v1/query?query=nextjs_process_resident_mem
 #### **`NextJSHighErrorRate`**
 ```bash
 # 1. Vérifier les logs d'erreur
-curl -s "http://174.138.2.56:9090/api/v1/query?query=rate(nextjs_http_requests_total{status_code=~\"5..\"}[5m])"
+curl -s "http://134.122.66.187:9090/api/v1/query?query=rate(nextjs_http_requests_total{status_code=~\"5..\"}[5m])"
 
 # 2. Identifier les endpoints problématiques
 # Grafana → Dashboard → Panel "Erreurs par Route"
@@ -196,16 +196,16 @@ docker-compose logs -f prometheus
 docker-compose exec prometheus promtool check rules /etc/prometheus/rules/nextjs.yml
 
 # Recharger la config sans redémarrage
-curl -X POST http://174.138.2.56:9090/-/reload
+curl -X POST http://134.122.66.187:9090/-/reload
 
 # Tester une requête PromQL
-curl -s "http://174.138.2.56:9090/api/v1/query?query=up"
+curl -s "http://134.122.66.187:9090/api/v1/query?query=up"
 ```
 
 ### **Gestion des Silences**
 ```bash
 # Créer un silence (via API v2)
-curl -XPOST http://174.138.2.56:9093/api/v2/silences -H 'Content-Type: application/json' -d '{
+curl -XPOST http://134.122.66.187:9093/api/v2/silences -H 'Content-Type: application/json' -d '{
   "matchers": [
     {
       "name": "alertname",
