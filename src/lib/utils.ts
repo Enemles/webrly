@@ -43,10 +43,188 @@ export function convertDecimalToNumber<T>(obj: T): T {
   return obj;
 }
 
-export const logger = (...args: any[]) => {
-  if (process.env.NODE_ENV === "development") {
-    console.log("%c[DEV]:", "background-color: yellow; color: black", args);
+// === SYSTÈME DE LOGGING STRUCTURÉ ===
+
+type LogLevel = 'debug' | 'info' | 'warn' | 'error' | 'critical';
+type LogContext = {
+  component?: string;
+  userId?: string;
+  sessionId?: string;
+  action?: string;
+  metadata?: Record<string, any>;
+  error?: Error;
+};
+
+interface StructuredLog {
+  timestamp: string;
+  level: LogLevel;
+  message: string;
+  context: LogContext;
+  environment: string;
+  version?: string;
+}
+
+class Logger {
+  private isDev = process.env.NODE_ENV === 'development';
+  private version = process.env.NEXT_PUBLIC_APP_VERSION || 'unknown';
+  
+  private formatLog(level: LogLevel, message: string, context: LogContext = {}): StructuredLog {
+    return {
+      timestamp: new Date().toISOString(),
+      level,
+      message,
+      context,
+      environment: process.env.NODE_ENV || 'unknown',
+      version: this.version
+    };
   }
+  
+  private output(log: StructuredLog) {
+    const { level, message, context, timestamp } = log;
+    
+    if (this.isDev) {
+      // Logging coloré pour le développement
+      const colors = {
+        debug: 'color: #6b7280; background: #f3f4f6',
+        info: 'color: #059669; background: #d1fae5', 
+        warn: 'color: #d97706; background: #fef3c7',
+        error: 'color: #dc2626; background: #fee2e2',
+        critical: 'color: #ffffff; background: #dc2626; font-weight: bold'
+      };
+      
+      console.group(`%c[${level.toUpperCase()}] ${message}`, colors[level]);
+      console.log('⏰ Time:', timestamp);
+      if (context.component) console.log('🧩 Component:', context.component);
+      if (context.userId) console.log('👤 User:', context.userId);
+      if (context.action) console.log('🎯 Action:', context.action);
+      if (context.metadata) console.log('📊 Metadata:', context.metadata);
+      if (context.error) {
+        console.log('❌ Error:', context.error.message);
+        console.log('📋 Stack:', context.error.stack);
+      }
+      console.groupEnd();
+    } else {
+      // JSON structuré pour la production
+      console.log(JSON.stringify(log));
+    }
+    
+    // Envoi vers monitoring externe si configuré
+    this.sendToExternal(log);
+  }
+  
+  private sendToExternal(log: StructuredLog) {
+    // Intégration Sentry - seulement si configuré
+    if (process.env.SENTRY_DSN && (log.level === 'error' || log.level === 'critical')) {
+      // TODO Phase 2: Décommenter après installation de Sentry
+      // import * as Sentry from "@sentry/nextjs";
+      // Sentry.captureException(log.context.error || new Error(log.message), { 
+      //   extra: log,
+      //   tags: { component: log.context.component }
+      // });
+      
+      // En attendant, log pour debug
+      if (this.isDev) {
+        console.log('🔍 [SENTRY] Would send to Sentry:', log.message);
+      }
+    }
+
+    // Monitoring externe - seulement si configuré  
+    if (process.env.MONITORING_ENDPOINT && process.env.MONITORING_API_KEY) {
+      // TODO Phase 3: Intégration DataDog/New Relic
+      if (this.isDev) {
+        console.log('📊 [MONITORING] Would send to external:', log.message);
+      }
+    }
+  }
+  
+  debug(message: string, context?: LogContext) {
+    this.output(this.formatLog('debug', message, context));
+  }
+  
+  info(message: string, context?: LogContext) {
+    this.output(this.formatLog('info', message, context));
+  }
+  
+  warn(message: string, context?: LogContext) {
+    this.output(this.formatLog('warn', message, context));
+  }
+  
+  error(message: string, context?: LogContext) {
+    this.output(this.formatLog('error', message, context));
+  }
+  
+  critical(message: string, context: LogContext = {}) {
+    this.output(this.formatLog('critical', message, context));
+    
+    // Alertes critiques - seulement si webhook configuré
+    if (!this.isDev && process.env.WEBHOOK_CRITICAL_ALERTS) {
+      this.triggerCriticalAlert(message, context);
+    } else if (this.isDev) {
+      // En développement, simulation de l'alerte
+      console.warn('🚨 [ALERT SIMULATION] Critical alert would be sent:', message);
+    }
+  }
+  
+  private async triggerCriticalAlert(message: string, context: LogContext) {
+    if (!process.env.WEBHOOK_CRITICAL_ALERTS) {
+      console.warn('WEBHOOK_CRITICAL_ALERTS not configured, skipping alert');
+      return;
+    }
+
+    try {
+      const payload = {
+        text: `🚨 CRITICAL ALERT - Webrly Production`,
+        attachments: [{
+          color: 'danger',
+          title: message,
+          fields: [
+            { title: 'Environment', value: process.env.NODE_ENV, short: true },
+            { title: 'Timestamp', value: new Date().toISOString(), short: true },
+            { title: 'Component', value: context.component || 'Unknown', short: true },
+            { title: 'Version', value: process.env.NEXT_PUBLIC_APP_VERSION || 'Unknown', short: true }
+          ],
+          footer: 'Webrly MCO System'
+        }]
+      };
+
+      const response = await fetch(process.env.WEBHOOK_CRITICAL_ALERTS, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        console.error('Failed to send critical alert:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error sending critical alert:', error);
+      // Fallback: au moins logger l'erreur
+      console.error('CRITICAL UNDELIVERED:', { message, context });
+    }
+  }
+}
+
+export const logger = new Logger();
+
+// Helper pour tracer les performances
+export const withPerfLog = <T extends (...args: any[]) => any>(
+  fn: T,
+  fnName: string,
+  component?: string
+): T => {
+  return ((...args: any[]) => {
+    const start = performance.now();
+    const result = fn(...args);
+    const duration = performance.now() - start;
+    
+    logger.debug(`Performance: ${fnName}`, {
+      component,
+      action: 'performance',
+      metadata: { duration: `${duration.toFixed(2)}ms` }
+    });
+    
+    return result;
+  }) as T;
 };
 
 

@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 📚 Documentation
+    url: https://github.com/Enemles/webrly/blob/main/README.md
+    about: Consultez la documentation du projet
+  - name: 💬 Discussions  
+    url: https://github.com/Enemles/webrly/discussions
+    about: Questions générales et discussions communautaires
+  - name: � Monitoring
+    url: https://grafana.webrly.com
+    about: Dashboard de monitoring en temps réel

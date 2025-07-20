@@ -1,38 +1,46 @@
 ---
-name: Bug report
-about: Create a report to help us improve
-title: ''
-labels: ''
+name: 🐛 Bug Report
+about: Signaler un bug pour améliorer Webrly
+title: '[BUG] '
+labels: ['bug', 'needs-triage']
 assignees: ''
-
 ---
 
-**Describe the bug**
-A clear and concise description of what the bug is.
+## 🐛 Description du problème
+Une description claire et concise du bug.
 
-**To Reproduce**
-Steps to reproduce the behavior:
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
+## 🔄 Étapes pour reproduire
+1. Aller sur '...'
+2. Cliquer sur '...'
+3. Faire défiler jusqu'à '...'
+4. Observer l'erreur
 
-**Expected behavior**
-A clear and concise description of what you expected to happen.
+## ✅ Comportement attendu
+Description claire de ce qui devrait se passer.
 
-**Screenshots**
-If applicable, add screenshots to help explain your problem.
+## ❌ Comportement actuel
+Description de ce qui se passe réellement.
 
-**Desktop (please complete the following information):**
- - OS: [e.g. iOS]
- - Browser [e.g. chrome, safari]
- - Version [e.g. 22]
+## 📱 Environnement
+- **OS**: [ex: macOS 14.5]
+- **Navigateur**: [ex: Chrome 126]
+- **Version de Webrly**: [ex: v1.2.0]
+- **Device**: [ex: Desktop, Mobile]
 
-**Smartphone (please complete the following information):**
- - Device: [e.g. iPhone6]
- - OS: [e.g. iOS8.1]
- - Browser [e.g. stock browser, safari]
- - Version [e.g. 22]
+## 📸 Captures d'écran
+Si applicable, ajoutez des captures d'écran.
 
-**Additional context**
-Add any other context about the problem here.
+## 📝 Informations supplémentaires
+Tout autre contexte utile sur le problème.
+
+## 🔧 Solutions tentées
+- [ ] Vider le cache navigateur
+- [ ] Tester en navigation privée
+- [ ] Tester sur un autre navigateur
+- [ ] Redémarrer l'application
+
+## 📊 Impact
+- [ ] Bloque l'utilisation
+- [ ] Gêne mineure
+- [ ] Problème cosmétique
+- [ ] Autre: _______
