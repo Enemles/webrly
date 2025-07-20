@@ -3,6 +3,8 @@
 Tous les changements notables de ce projet seront documentés dans ce fichier.
 
 
+### [2.6.2](https://github.com/Enemles/webrly/compare/v2.6.1...v2.6.2) (2025-07-20)
+
 ### [2.6.1](https://github.com/Enemles/webrly/compare/v2.6.0...v2.6.1) (2025-06-15)
 
 
