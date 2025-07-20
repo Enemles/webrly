@@ -22,6 +22,19 @@ jobs:
     name: Generate Changelog and Release
     runs-on: ubuntu-22.04
     if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    env:
+      # Variables nécessaires pour le build - valeurs factices mais valides
+      DATABASE_URL: postgresql://testuser:testpass@localhost:5432/testdb
+      STRIPE_SECRET_KEY: sk_test_51234567890123456789012345678901234567890123456789012345678901234
+      NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: pk_test_51234567890123456789012345678901234567890123456789012345678901234
+      CLERK_SECRET_KEY: sk_test_1234567890123456789012345678901234567890123456789012345678901234
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_1234567890123456789012345678901234567890123456789012345678901234
+      UPLOADTHING_SECRET: sk_live_test123456789012345678901234567890123456789012345678901234567890
+      UPLOADTHING_APP_ID: testapp123
+      NEXTAUTH_SECRET: test-secret-for-ci-cd-only-not-production-safe
+      NEXTAUTH_URL: http://localhost:3000
+      NODE_ENV: production
+      CI: true
 
     steps:
       - name: Checkout repository
@@ -30,38 +43,13 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
+      - name: Configuration de l'environnement
+        uses: ./.github/actions/setup-environment
         with:
-          version: 9
+          environment-type: 'build'
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20.11.1'
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: |
-          pnpm add -g standard-version
-          pnpm install --frozen-lockfile
-
-      - name: Setup environment variables for build
-        run: |
-          # Créer un .env minimal pour que le build passe
-          echo "STRIPE_SECRET_KEY=sk_test_dummy_key_for_build" > .env
-          echo "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_dummy_key_for_build" >> .env
-          echo "CLERK_SECRET_KEY=sk_test_dummy_key_for_build" >> .env
-          echo "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_dummy_key_for_build" >> .env
-          echo "DATABASE_URL=postgresql://dummy:dummy@localhost:5432/dummy" >> .env
-          echo "NEXTAUTH_SECRET=dummy-secret-for-build" >> .env
-          echo "NEXTAUTH_URL=https://webrly.com" >> .env
-          echo "UPLOADTHING_SECRET=sk_live_dummykey123456789012345678901234567890123456789012345678" >> .env
-          echo "UPLOADTHING_APP_ID=dummyapp1234" >> .env
-          echo "NODE_ENV=production" >> .env
-
-      - name: Generate Prisma client
-        run: npx prisma generate
+      - name: Install standard-version
+        run: pnpm add -g standard-version
 
       - name: Configure Git
         run: |

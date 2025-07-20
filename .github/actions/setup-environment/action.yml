@@ -1,0 +1,54 @@
+name: 'Configuration de l''environnement'
+description: 'Configure l''environnement Node.js, pnpm et les variables d''environnement pour les tests'
+
+inputs:
+  environment-type:
+    description: 'Type d''environnement (test, build, lighthouse, etc.)'
+    required: false
+    default: 'test'
+  
+  install-playwright:
+    description: 'Installer Playwright'
+    required: false
+    default: 'false'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: 📦 Installation de pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: 9
+
+    - name: 🟢 Installation de Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.11.1'
+        cache: 'pnpm'
+
+    - name: 🔧 Installation des dépendances
+      shell: bash
+      run: pnpm install --frozen-lockfile
+
+    - name: 🎭 Installation de Playwright
+      if: inputs.install-playwright == 'true'
+      shell: bash
+      run: npx playwright install --with-deps chromium
+
+    - name: 🔧 Configuration des variables d'environnement
+      shell: bash
+      run: |
+        if [ "${{ inputs.environment-type }}" = "production" ]; then
+          echo "🔒 Mode production : les secrets seront injectés automatiquement par l'environnement GitHub"
+          echo "CI=true" > .env
+          echo "NODE_ENV=production" >> .env
+        else
+          echo "🧪 Mode test/dev : utilisation des valeurs par défaut"
+          cp env.example .env
+          echo "NODE_ENV=test" >> .env
+          echo "CI=true" >> .env
+        fi
+
+    - name: 🎯 Génération du client Prisma
+      shell: bash
+      run: npx prisma generate 

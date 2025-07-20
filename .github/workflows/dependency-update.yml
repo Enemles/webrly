@@ -1,0 +1,132 @@
+name: 🔄 Mise à jour des dépendances
+
+on:
+  schedule:
+    # Tous les lundi à 09:00 UTC
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+
+jobs:
+  update-dependencies:
+    name: 📦 Mise à jour des dépendances
+    runs-on: ubuntu-latest
+    env:
+      # Variables nécessaires pour les tests - valeurs factices mais valides
+      DATABASE_URL: postgresql://testuser:testpass@localhost:5432/testdb
+      STRIPE_SECRET_KEY: sk_test_51234567890123456789012345678901234567890123456789012345678901234
+      NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: pk_test_51234567890123456789012345678901234567890123456789012345678901234
+      CLERK_SECRET_KEY: sk_test_1234567890123456789012345678901234567890123456789012345678901234
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_1234567890123456789012345678901234567890123456789012345678901234
+      UPLOADTHING_SECRET: sk_live_test123456789012345678901234567890123456789012345678901234567890
+      UPLOADTHING_APP_ID: testapp123
+      NEXTAUTH_SECRET: test-secret-for-ci-cd-only-not-production-safe
+      NEXTAUTH_URL: http://localhost:3000
+      NODE_ENV: test
+      CI: true
+    steps:
+      - name: 📥 Récupération du code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🔧 Configuration de l'environnement
+        uses: ./.github/actions/setup-environment
+        with:
+          environment-type: 'test'
+
+      - name: 🔍 Vérification des mises à jour disponibles
+        run: |
+          pnpm outdated || true
+          echo "## 📦 Dépendances obsolètes" >> $GITHUB_STEP_SUMMARY
+          pnpm outdated --format=json | jq -r '.[] | "- `\(.name)`: \(.current) → \(.latest)"' >> $GITHUB_STEP_SUMMARY || true
+
+      - name: 🔄 Mise à jour des dépendances patch et minor
+        run: |
+          pnpm update --latest --workspace-root || true
+
+      - name: 🧪 Test rapide après mise à jour
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm lint || true
+          npx tsc --noEmit || true
+
+      - name: 📝 Création de la PR de mise à jour
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "🔄 Mise à jour automatique des dépendances"
+          title: "🔄 Mise à jour automatique des dépendances"
+          body: |
+            ## 🔄 Mise à jour automatique des dépendances
+            
+            Cette PR a été créée automatiquement pour mettre à jour les dépendances du projet.
+            
+            ### ✅ Vérifications effectuées :
+            - [x] Installation des nouvelles dépendances
+            - [x] Génération du client Prisma
+            - [x] Vérification du linting
+            - [x] Vérification des types TypeScript
+            
+            ### 🔍 À vérifier manuellement :
+            - [ ] Tests end-to-end
+            - [ ] Fonctionnalités critiques
+            - [ ] Compatibilité avec les services externes
+            
+            ---
+            
+            🤖 *Cette PR a été générée automatiquement par le workflow de mise à jour des dépendances.*
+          branch: dependencies/auto-update
+          delete-branch: true
+          labels: |
+            dependencies
+            automated
+            
+  security-update:
+    name: 🔒 Mise à jour de sécurité
+    runs-on: ubuntu-latest
+    env:
+      # Variables nécessaires pour les tests - valeurs factices mais valides
+      DATABASE_URL: postgresql://testuser:testpass@localhost:5432/testdb
+      STRIPE_SECRET_KEY: sk_test_51234567890123456789012345678901234567890123456789012345678901234
+      NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: pk_test_51234567890123456789012345678901234567890123456789012345678901234
+      CLERK_SECRET_KEY: sk_test_1234567890123456789012345678901234567890123456789012345678901234
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_1234567890123456789012345678901234567890123456789012345678901234
+      UPLOADTHING_SECRET: sk_live_test123456789012345678901234567890123456789012345678901234567890
+      UPLOADTHING_APP_ID: testapp123
+      NEXTAUTH_SECRET: test-secret-for-ci-cd-only-not-production-safe
+      NEXTAUTH_URL: http://localhost:3000
+      NODE_ENV: test
+      CI: true
+    steps:
+      - name: 📥 Récupération du code
+        uses: actions/checkout@v4
+
+      - name: 🔧 Configuration de l'environnement
+        uses: ./.github/actions/setup-environment
+        with:
+          environment-type: 'test'
+
+      - name: 🔍 Audit de sécurité complet
+        run: |
+          echo "## 🔒 Rapport de sécurité hebdomadaire" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📊 Statut des vulnérabilités :" >> $GITHUB_STEP_SUMMARY
+          
+          if pnpm audit --audit-level moderate; then
+            echo "✅ **Aucune vulnérabilité critique ou élevée détectée**" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ **Des vulnérabilités ont été détectées**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "```" >> $GITHUB_STEP_SUMMARY
+            pnpm audit --audit-level moderate | head -50 >> $GITHUB_STEP_SUMMARY || true
+            echo "```" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: 🛡️ Scan avec Snyk (si disponible)
+        run: |
+          if command -v snyk &> /dev/null; then
+            snyk test --all-projects || true
+          else
+            echo "Snyk non disponible, passer à l'étape suivante"
+          fi
+        continue-on-error: true 

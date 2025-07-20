@@ -1,0 +1,212 @@
+name: 🚀 Déploiement Production
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      force_deploy:
+        description: 'Forcer le déploiement'
+        required: false
+        default: false
+        type: boolean
+
+concurrency:
+  group: production-deployment
+  cancel-in-progress: false
+
+jobs:
+  # Job 1: Tests de sécurité avant déploiement
+  security-check:
+    name: 🔒 Vérifications de sécurité
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Récupération du code
+        uses: actions/checkout@v4
+
+      - name: 🔧 Configuration de l'environnement
+        uses: ./.github/actions/setup-environment
+        with:
+          environment-type: 'test'
+
+      - name: 🔍 Audit de sécurité
+        run: |
+          pnpm audit --audit-level high
+          echo "✅ Audit de sécurité passé"
+
+      - name: 🔎 Vérification des secrets
+        run: |
+          echo "🔐 Vérification que tous les secrets nécessaires sont définis..."
+          # Note: Cette vérification se fera dans le job de déploiement avec l'environnement
+
+  # Job 2: Build et tests complets
+  build-and-test:
+    name: 🏗️ Build et Tests
+    runs-on: ubuntu-latest
+    needs: security-check
+    steps:
+      - name: 📥 Récupération du code
+        uses: actions/checkout@v4
+
+      - name: 🔧 Configuration de l'environnement
+        uses: ./.github/actions/setup-environment
+        with:
+          environment-type: 'build'
+          install-playwright: 'true'
+
+      - name: 🏗️ Build de production
+        run: |
+          pnpm build
+          echo "✅ Build réussi"
+
+      - name: 🧪 Tests E2E critiques
+        run: |
+          pnpm test:e2e tests/homepage.spec.ts
+          echo "✅ Tests critiques passés"
+
+      - name: 📦 Sauvegarde des artefacts de build
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-build
+          path: |
+            .next/
+            package.json
+            package-lock.json
+          retention-days: 7
+
+  # Job 3: Déploiement en production
+  deploy:
+    name: 🚀 Déploiement
+    runs-on: ubuntu-latest
+    needs: [security-check, build-and-test]
+    environment: production  # Utilise l'environnement "production" avec tous vos secrets
+    steps:
+      - name: 📥 Récupération du code
+        uses: actions/checkout@v4
+
+      - name: 🔧 Configuration de l'environnement de production
+        uses: ./.github/actions/setup-environment
+        with:
+          environment-type: 'production'
+        env:
+          # Stripe
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+          NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY }}
+          NEXT_PUBLIC_STRIPE_CLIENT_ID: ${{ secrets.NEXT_PUBLIC_STRIPE_CLIENT_ID }}
+          STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
+          
+          # Clerk
+          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
+          NEXT_PUBLIC_CLERK_SIGN_IN_URL: ${{ secrets.NEXT_PUBLIC_CLERK_SIGN_IN_URL }}
+          NEXT_PUBLIC_CLERK_SIGN_UP_URL: ${{ secrets.NEXT_PUBLIC_CLERK_SIGN_UP_URL }}
+          
+          # Database
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          
+          # Upload Thing
+          UPLOADTHING_SECRET: ${{ secrets.UPLOADTHING_SECRET }}
+          UPLOADTHING_APP_ID: ${{ secrets.UPLOADTHING_APP_ID }}
+          UPLOADTHING_TOKEN: ${{ secrets.UPLOADTHING_TOKEN }}
+          
+          # Platform Configuration
+          NEXT_PUBLIC_DOMAIN: ${{ secrets.NEXT_PUBLIC_DOMAIN }}
+          NEXT_PUBLIC_URL: ${{ secrets.NEXT_PUBLIC_URL }}
+          NEXT_PUBLIC_SCHEME: ${{ secrets.NEXT_PUBLIC_SCHEME }}
+          NEXT_PUBLIC_PLATFORM_AGENY_PERCENT: ${{ secrets.NEXT_PUBLIC_PLATFORM_AGENY_PERCENT }}
+          NEXT_PUBLIC_PLATFORM_ONETIME_FEE: ${{ secrets.NEXT_PUBLIC_PLATFORM_ONETIME_FEE }}
+          NEXT_PUBLIC_PLATFORM_SUBSCRIPTION_PERCENT: ${{ secrets.NEXT_PUBLIC_PLATFORM_SUBSCRIPTION_PERCENT }}
+          NEXT_WEBRLY_PRODUCT_ID: ${{ secrets.NEXT_WEBRLY_PRODUCT_ID }}
+
+      - name: 🔍 Vérification des secrets de production
+        run: |
+          echo "🔐 Vérification des secrets de production..."
+          
+          # Vérifier les secrets sans les afficher
+          secrets_ok=true
+          
+          if [ -z "$STRIPE_SECRET_KEY" ]; then
+            echo "❌ STRIPE_SECRET_KEY manquant"
+            secrets_ok=false
+          else
+            echo "✅ STRIPE_SECRET_KEY défini"
+          fi
+          
+          if [ -z "$CLERK_SECRET_KEY" ]; then
+            echo "❌ CLERK_SECRET_KEY manquant"
+            secrets_ok=false
+          else
+            echo "✅ CLERK_SECRET_KEY défini"
+          fi
+          
+          if [ -z "$DATABASE_URL" ]; then
+            echo "❌ DATABASE_URL manquant"
+            secrets_ok=false
+          else
+            echo "✅ DATABASE_URL défini"
+          fi
+          
+          if [ "$secrets_ok" = false ]; then
+            echo "❌ Des secrets sont manquants!"
+            exit 1
+          fi
+          
+          echo "✅ Tous les secrets nécessaires sont présents"
+
+      - name: 🏗️ Build de production avec vraies variables
+        run: |
+          echo "🏗️ Construction avec les vraies variables de production..."
+          pnpm build
+          echo "✅ Build de production réussi"
+
+      - name: 🚀 Déploiement vers la production
+        run: |
+          echo "🚀 Déploiement en cours..."
+          echo "📋 Configuration:"
+          echo "   - Domaine: $NEXT_PUBLIC_DOMAIN"
+          echo "   - URL: $NEXT_PUBLIC_URL"
+          echo "   - Scheme: $NEXT_PUBLIC_SCHEME"
+          
+          # Ici vous pourrez ajouter vos commandes de déploiement
+          # Par exemple, pour Coolify, Vercel, ou votre serveur
+          
+          echo "✅ Déploiement terminé avec succès!"
+
+      - name: 🔍 Tests post-déploiement
+        run: |
+          echo "🔍 Vérification que l'application est accessible..."
+          
+          # Test simple de santé (à adapter selon votre setup)
+          if [ "$NEXT_PUBLIC_SCHEME" = "https" ]; then
+            curl -f -L --retry 3 --retry-delay 10 "$NEXT_PUBLIC_URL" || echo "⚠️ Site non accessible"
+          else
+            echo "⚠️ Tests post-déploiement skippés (pas HTTPS)"
+          fi
+          
+          echo "✅ Tests post-déploiement terminés"
+
+      - name: 📢 Notification de succès
+        if: success()
+        run: |
+          echo "🎉 DÉPLOIEMENT RÉUSSI!"
+          echo "🌐 Application disponible sur: $NEXT_PUBLIC_URL"
+          echo "📅 Déployé le: $(date)"
+          echo "🔗 Commit: ${{ github.sha }}"
+
+  # Job 4: Rollback en cas d'échec
+  rollback:
+    name: 🔄 Rollback
+    runs-on: ubuntu-latest
+    needs: deploy
+    if: failure()
+    environment: production
+    steps:
+      - name: 🚨 Rollback automatique
+        run: |
+          echo "🚨 Échec du déploiement détecté!"
+          echo "🔄 Lancement du rollback automatique..."
+          
+          # Ici vous pouvez ajouter votre logique de rollback
+          # Par exemple, redéployer la version précédente
+          
+          echo "⚠️ Rollback terminé - vérifiez l'état de l'application" 

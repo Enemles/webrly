@@ -67,7 +67,7 @@ const FunnelEditor = ({ funnelPageId, liveMode }: Props) => {
         <Button
           variant={'ghost'}
           size={'icon'}
-          className="w-6 h-6 bg-slate-600 p-[2px] fixed top-0 left-0 z-[100]"
+          className="w-6 h-6 bg-slate-600 p-[2px] fixed top-[20px] left-[80px] z-[100]"
           onClick={handleUnpreview}
         >
           <EyeOff />

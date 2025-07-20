@@ -213,7 +213,7 @@ curl https://webrly.fr/api/metrics | grep "webrly_total_agencies"
 
 ### **Vérifier dans Prometheus :**
 
-1. Aller sur `http://174.138.2.56:9090`
+1. Aller sur `http://134.122.66.187:9090`
 2. **Status → Targets** → Vérifier que `nextjs-app` est "UP"
 3. **Graph** → Taper `webrly_total_agencies` → Execute
 

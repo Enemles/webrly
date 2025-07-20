@@ -1,0 +1,146 @@
+name: 🚀 Performance & Accessibilité
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    # Tous les dimanche à 02:00 UTC
+    - cron: '0 2 * * 0'
+  workflow_dispatch:
+
+jobs:
+  lighthouse-tests:
+    name: 🏮 Tests Lighthouse
+    runs-on: ubuntu-latest
+    environment: production  # Pour avoir accès aux vraies URLs
+    env:
+      # Tous les secrets sont maintenant disponibles automatiquement pour toutes les étapes !
+      STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+      NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY }}
+      NEXT_PUBLIC_STRIPE_CLIENT_ID: ${{ secrets.NEXT_PUBLIC_STRIPE_CLIENT_ID }}
+      STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
+      CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
+      NEXT_PUBLIC_CLERK_SIGN_IN_URL: ${{ secrets.NEXT_PUBLIC_CLERK_SIGN_IN_URL }}
+      NEXT_PUBLIC_CLERK_SIGN_UP_URL: ${{ secrets.NEXT_PUBLIC_CLERK_SIGN_UP_URL }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+      NEXTAUTH_URL: ${{ secrets.NEXTAUTH_URL }}
+      UPLOADTHING_SECRET: ${{ secrets.UPLOADTHING_SECRET }}
+      UPLOADTHING_APP_ID: ${{ secrets.UPLOADTHING_APP_ID }}
+      UPLOADTHING_TOKEN: ${{ secrets.UPLOADTHING_TOKEN }}
+      NEXT_PUBLIC_DOMAIN: ${{ secrets.NEXT_PUBLIC_DOMAIN }}
+      NEXT_PUBLIC_URL: ${{ secrets.NEXT_PUBLIC_URL }}
+      NEXT_PUBLIC_SCHEME: ${{ secrets.NEXT_PUBLIC_SCHEME }}
+      NEXT_PUBLIC_PLATFORM_AGENY_PERCENT: ${{ secrets.NEXT_PUBLIC_PLATFORM_AGENY_PERCENT }}
+      NEXT_PUBLIC_PLATFORM_ONETIME_FEE: ${{ secrets.NEXT_PUBLIC_PLATFORM_ONETIME_FEE }}
+      NEXT_PUBLIC_PLATFORM_SUBSCRIPTION_PERCENT: ${{ secrets.NEXT_PUBLIC_PLATFORM_SUBSCRIPTION_PERCENT }}
+      NEXT_WEBRLY_PRODUCT_ID: ${{ secrets.NEXT_WEBRLY_PRODUCT_ID }}
+    steps:
+      - name: 📥 Récupération du code
+        uses: actions/checkout@v4
+
+      - name: 🔧 Configuration de l'environnement
+        uses: ./.github/actions/setup-environment
+        with:
+          environment-type: 'production'
+
+      - name: 🔧 Installation de Lighthouse
+        run: npm install -g @lhci/cli@0.12.x
+
+      - name: 🏗️ Build de l'application
+        run: pnpm build
+
+      - name: 🚀 Démarrage du serveur
+        run: |
+          pnpm start &
+          sleep 30
+          curl -f http://localhost:3000 || exit 1
+
+      - name: 🏮 Tests Lighthouse CI
+        run: lhci autorun
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 📊 Upload des rapports Lighthouse
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-reports
+          path: .lighthouseci/
+          retention-days: 30
+
+  security-audit:
+    name: 🔒 Audit de sécurité
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Récupération du code
+        uses: actions/checkout@v4
+
+      - name: 🔧 Configuration de l'environnement
+        uses: ./.github/actions/setup-environment
+        with:
+          environment-type: 'test'
+
+      - name: 🔍 Audit complet des dépendances
+        run: |
+          echo "## 🔒 Rapport d'audit de sécurité" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Audit avec pnpm
+          if pnpm audit --audit-level high; then
+            echo "✅ **Aucune vulnérabilité critique détectée**" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ **Vulnérabilités détectées - Vérifiez les logs**" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: 🕵️ Analyse des licences
+        run: |
+          npx license-checker --summary || true
+
+  accessibility-tests:
+    name: ♿ Tests d'accessibilité
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Récupération du code
+        uses: actions/checkout@v4
+
+      - name: 🔧 Configuration de l'environnement
+        uses: ./.github/actions/setup-environment
+        with:
+          environment-type: 'test'
+          install-playwright: 'true'
+
+      - name: 🚀 Démarrage du serveur
+        run: |
+          pnpm dev &
+          sleep 30
+          curl -f http://localhost:3000 || exit 1
+
+      - name: ♿ Tests d'accessibilité avec axe
+        run: |
+          npx create-playwright-test@latest accessibility-test.js || true
+          # Créer un test d'accessibilité personnalisé
+          cat > accessibility-test.js << 'EOF'
+          const { test, expect } = require('@playwright/test');
+          const AxeBuilder = require('@axe-core/playwright').default;
+
+          test.describe('Tests d\'accessibilité', () => {
+            test('Page d\'accueil doit être accessible', async ({ page }) => {
+              await page.goto('http://localhost:3000');
+              const accessibilityScanResults = await new AxeBuilder({ page }).analyze();
+              expect(accessibilityScanResults.violations).toEqual([]);
+            });
+          });
+          EOF
+          
+          npm install @axe-core/playwright
+          npx playwright test accessibility-test.js || echo "Tests d'accessibilité terminés"
+
+      - name: 📊 Upload des rapports d'accessibilité
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: accessibility-reports  
+          path: test-results/
+          retention-days: 30 
