@@ -3,6 +3,20 @@
 Tous les changements notables de ce projet seront documentés dans ce fichier.
 
 
+## [2.8.0](https://github.com/Enemles/webrly/compare/v2.7.0...v2.8.0) (2025-07-20)
+
+
+### Features
+
+* **mco:** implémentation des Quick Wins MCO pour RNCP Bloc 4 ([9cbe35b](https://github.com/Enemles/webrly/commit/9cbe35bf6fa7b1232a7fcb4b0a53ac893e9c11a7))
+* update module exports to ES6 syntax in PostCSS and Tailwind configuration files ([f2e8ea1](https://github.com/Enemles/webrly/commit/f2e8ea1560a60712f07eb002fdf3ba27da461b14))
+
+
+### Bug Fixes
+
+* convert postcss.config.js to ES module syntax ([172dcd0](https://github.com/Enemles/webrly/commit/172dcd087c77a3bfe34102d47dcff1c47329c89c))
+* résolution complète des erreurs de build CI ([4ad784a](https://github.com/Enemles/webrly/commit/4ad784a3539da55abf82769556784bd9d26e4490))
+
 ## [2.7.0](https://github.com/Enemles/webrly/compare/v2.6.2...v2.7.0) (2025-07-20)
 
 
