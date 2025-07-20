@@ -42,7 +42,11 @@ export const getAgencyDetails = async (agencyId: string) => {
 
     return agencyDetails;
   } catch (error) {
-    logger(error);
+    logger.error('Failed to get agency details', {
+      component: 'agency-service',
+      action: 'get-agency-details',
+      error: error as Error
+    });
   }
 };
 
