@@ -3,6 +3,16 @@
 Tous les changements notables de ce projet seront documentés dans ce fichier.
 
 
+## [2.7.0](https://github.com/Enemles/webrly/compare/v2.6.2...v2.7.0) (2025-07-20)
+
+
+### Features
+
+* add Next.js configuration and update module type in package.json; refactor path resolution in vitest config ([876d86b](https://github.com/Enemles/webrly/commit/876d86bd9bc594164177192598d73ac35561ab88))
+* ajout de la configuration de l'environnement, des workflows CI/CD et des fichiers de documentation pour le projet Webrly ([f6908e0](https://github.com/Enemles/webrly/commit/f6908e01be8981a909644e904d0395fc21f950b8))
+* ajout de tests unitaires dans le workflow CI/CD, mise à jour de la configuration pour exécuter les tests et générer des rapports de couverture ([43ae3ed](https://github.com/Enemles/webrly/commit/43ae3ed21310cd4f9fbb9e4497ee3a6495ff4b13))
+* ajout de variables d'environnement pour les workflows CI/CD, incluant des clés de test et des configurations nécessaires pour le build et les tests ([6f0d531](https://github.com/Enemles/webrly/commit/6f0d531886aa95c3b9794d507bc31a49d6fb4227))
+
 ### [2.6.2](https://github.com/Enemles/webrly/compare/v2.6.1...v2.6.2) (2025-07-20)
 
 ### [2.6.1](https://github.com/Enemles/webrly/compare/v2.6.0...v2.6.1) (2025-06-15)
