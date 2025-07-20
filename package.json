@@ -1,6 +1,7 @@
 {
   "name": "webrly",
   "version": "2.6.2",
+  "type": "module",
   "private": true,
   "scripts": {
     "dev": "prisma generate && next dev",
