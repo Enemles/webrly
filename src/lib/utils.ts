@@ -113,18 +113,45 @@ class Logger {
   }
   
   private sendToExternal(log: StructuredLog) {
-    // Intégration Sentry - seulement si configuré
+    // Intégration Sentry - maintenant activée
     if (process.env.SENTRY_DSN && (log.level === 'error' || log.level === 'critical')) {
-      // TODO Phase 2: Décommenter après installation de Sentry
-      // import * as Sentry from "@sentry/nextjs";
-      // Sentry.captureException(log.context.error || new Error(log.message), { 
-      //   extra: log,
-      //   tags: { component: log.context.component }
-      // });
-      
-      // En attendant, log pour debug
-      if (this.isDev) {
-        console.log('🔍 [SENTRY] Would send to Sentry:', log.message);
+      try {
+        // Import dynamique pour éviter les erreurs si Sentry n'est pas disponible
+        import('@sentry/nextjs').then((Sentry) => {
+          const error = log.context.error || new Error(log.message);
+          
+          Sentry.captureException(error, {
+            extra: {
+              structuredLog: log,
+              timestamp: log.timestamp,
+              environment: log.environment
+            },
+            tags: {
+              component: log.context.component,
+              action: log.context.action,
+              level: log.level,
+              mco_system: 'webrly'
+            },
+            user: log.context.userId ? { id: log.context.userId } : undefined,
+            contexts: {
+              mco: {
+                version: log.version,
+                metadata: log.context.metadata
+              }
+            },
+            level: log.level === 'critical' ? 'fatal' : 'error'
+          });
+        }).catch(() => {
+          // Sentry non disponible, fallback vers console
+          if (this.isDev) {
+            console.log('🔍 [SENTRY] Module not available, error logged to console only');
+          }
+        });
+      } catch (error) {
+        // Fallback silencieux
+        if (this.isDev) {
+          console.warn('Failed to send to Sentry:', error);
+        }
       }
     }
 
