@@ -3,6 +3,14 @@
 Tous les changements notables de ce projet seront documentés dans ce fichier.
 
 
+## [2.9.0](https://github.com/Enemles/webrly/compare/v2.8.0...v2.9.0) (2025-07-21)
+
+
+### Features
+
+* Add Sentry integration for client and server configurations ([bb047fa](https://github.com/Enemles/webrly/commit/bb047fa27647f78fb3006eb05de5fa8cb97fc0b1))
+* Complete MCO Short-term phase implementation ([55796fb](https://github.com/Enemles/webrly/commit/55796fb7aff0264727b50a8fc05b496094766bb5)), closes [#25](https://github.com/Enemles/webrly/issues/25)
+
 ## [2.8.0](https://github.com/Enemles/webrly/compare/v2.7.0...v2.8.0) (2025-07-20)
 
 
