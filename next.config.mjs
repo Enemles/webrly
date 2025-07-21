@@ -1,5 +1,3 @@
-import { withSentryConfig } from "@sentry/nextjs";
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
@@ -14,23 +12,25 @@ const nextConfig = {
   reactStrictMode: false,
 }
 
-// Configuration Sentry
+// TEMPORAIREMENT - Sentry désactivé pour fix des 502/504
+// Configuration Sentry simple à réactiver plus tard
+export default nextConfig;
+
+/*
+// Configuration Sentry complète à réactiver
+import { withSentryConfig } from "@sentry/nextjs";
+
 const sentryConfig = {
-  // Désactiver le tunnel Sentry en développement
   tunnelRoute: process.env.NODE_ENV === 'production' ? '/monitoring/tunnel' : undefined,
-  
-  // Options de build
   silent: process.env.NODE_ENV === 'development',
   org: process.env.SENTRY_ORG,
   project: process.env.SENTRY_PROJECT || 'webrly',
-  
-  // Sourcemaps seulement en production
   widenClientFileUpload: process.env.NODE_ENV === 'production',
   hideSourceMaps: true,
   disableLogger: process.env.NODE_ENV === 'production',
 };
 
-// Exporter la configuration avec ou sans Sentry selon la disponibilité du DSN
 export default process.env.SENTRY_DSN 
   ? withSentryConfig(nextConfig, sentryConfig)
   : nextConfig;
+*/

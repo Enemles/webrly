@@ -113,39 +113,32 @@ class Logger {
   }
   
   private sendToExternal(log: StructuredLog) {
-    // Intégration Sentry - maintenant activée
+    // TEMPORAIREMENT DÉSACTIVÉ - Import dynamique Sentry causait des 502/504
+    // Réactivation après stabilisation du déploiement
+    
+    // Simple logging pour debug en production
+    if (!this.isDev && (log.level === 'error' || log.level === 'critical')) {
+      console.error('🚨 [PRODUCTION_ERROR]', {
+        message: log.message,
+        level: log.level,
+        component: log.context.component,
+        error: log.context.error?.message,
+        timestamp: log.timestamp
+      });
+    }
+    
+    // TODO: Réactiver Sentry après fix du déploiement
+    /*
     if (process.env.SENTRY_DSN && (log.level === 'error' || log.level === 'critical')) {
       try {
-        // Import dynamique pour éviter les erreurs si Sentry n'est pas disponible
         import('@sentry/nextjs').then((Sentry) => {
           const error = log.context.error || new Error(log.message);
-          
           Sentry.captureException(error, {
-            extra: {
-              structuredLog: log,
-              timestamp: log.timestamp,
-              environment: log.environment
-            },
-            tags: {
-              component: log.context.component,
-              action: log.context.action,
-              level: log.level,
-              mco_system: 'webrly'
-            },
-            user: log.context.userId ? { id: log.context.userId } : undefined,
-            contexts: {
-              mco: {
-                version: log.version,
-                metadata: log.context.metadata
-              }
-            },
-            level: log.level === 'critical' ? 'fatal' : 'error'
+            extra: { structuredLog: log },
+            tags: { component: log.context.component, mco_system: 'webrly' }
           });
         }).catch(() => {
-          // Sentry non disponible, fallback vers console
-          if (this.isDev) {
-            console.log('🔍 [SENTRY] Module not available, error logged to console only');
-          }
+          console.log('🔍 [SENTRY] Module not available');
         });
       } catch (error) {
         // Fallback silencieux
@@ -154,6 +147,7 @@ class Logger {
         }
       }
     }
+    */
 
     // Monitoring externe - seulement si configuré  
     if (process.env.MONITORING_ENDPOINT && process.env.MONITORING_API_KEY) {
