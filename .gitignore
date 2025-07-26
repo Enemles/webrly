@@ -60,3 +60,5 @@ monitoring/
 
 export-data.js
 import-data.js
+# Sentry Config File
+.env.sentry-build-plugin

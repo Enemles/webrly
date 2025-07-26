@@ -1,12 +1,16 @@
 #!/bin/bash
 
-# Script de test MCO - Validation des Quick Wins
-# Usage: ./test-mco.sh
+# 🔧 Script de Test MCO - Webrly Production
+# Usage: ./test-mco.sh [webhook|logging|all]
 
-echo "🧪 Test des améliorations MCO Webrly"
-echo "====================================="
+set -e
 
-# Colors
+# Configuration
+DOMAIN="https://webrly.fr"
+WEBHOOK_SECRET="alertmanager_secret_2024_mco"  # À adapter selon votre secret
+
+# Couleurs pour l'affichage
+RED='\033[0;31m'
 GREEN='\033[0;32m'
 RED='\033[0;31m'
 YELLOW='\033[1;33m'
