@@ -3,6 +3,14 @@
 Tous les changements notables de ce projet seront documentés dans ce fichier.
 
 
+## [2.10.0](https://github.com/Enemles/webrly/compare/v2.9.1...v2.10.0) (2025-07-26)
+
+
+### Features
+
+* Add MCO testing scripts and documentation for production validation ([0de3e49](https://github.com/Enemles/webrly/commit/0de3e49ace44929b6fc19646a781220d98084725))
+* Integrate Sentry for error tracking and monitoring ([55f5fc7](https://github.com/Enemles/webrly/commit/55f5fc76b85023c403cf08780aafd86ecb9ee6fd))
+
 ### [2.9.1](https://github.com/Enemles/webrly/compare/v2.9.0...v2.9.1) (2025-07-21)
 
 ## [2.9.0](https://github.com/Enemles/webrly/compare/v2.8.0...v2.9.0) (2025-07-21)
