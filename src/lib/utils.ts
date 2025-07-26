@@ -113,30 +113,30 @@ class Logger {
   }
   
   private sendToExternal(log: StructuredLog) {
-    // TEMPORAIREMENT DÉSACTIVÉ - Import dynamique Sentry causait des 502/504
-    // Réactivation après stabilisation du déploiement
-    
-    // Simple logging pour debug en production
-    if (!this.isDev && (log.level === 'error' || log.level === 'critical')) {
-      console.error('🚨 [PRODUCTION_ERROR]', {
-        message: log.message,
-        level: log.level,
-        component: log.context.component,
-        error: log.context.error?.message,
-        timestamp: log.timestamp
-      });
-    }
-    
-    // TODO: Réactiver Sentry après fix du déploiement
-    /*
+    // Intégration Sentry pour erreurs critiques et normales
     if (process.env.SENTRY_DSN && (log.level === 'error' || log.level === 'critical')) {
       try {
         import('@sentry/nextjs').then((Sentry) => {
           const error = log.context.error || new Error(log.message);
           Sentry.captureException(error, {
-            extra: { structuredLog: log },
-            tags: { component: log.context.component, mco_system: 'webrly' }
+            extra: { 
+              structuredLog: log,
+              userId: log.context.userId,
+              action: log.context.action,
+              metadata: log.context.metadata
+            },
+            tags: { 
+              component: log.context.component || 'unknown',
+              mco_system: 'webrly',
+              level: log.level,
+              environment: log.environment
+            },
+            level: log.level === 'critical' ? 'fatal' : 'error'
           });
+          
+          if (this.isDev) {
+            console.log('✅ [SENTRY] Error sent successfully');
+          }
         }).catch(() => {
           console.log('🔍 [SENTRY] Module not available');
         });
@@ -147,7 +147,17 @@ class Logger {
         }
       }
     }
-    */
+    
+    // Simple logging pour debug en production (backup)
+    if (!this.isDev && (log.level === 'error' || log.level === 'critical')) {
+      console.error('🚨 [PRODUCTION_ERROR]', {
+        message: log.message,
+        level: log.level,
+        component: log.context.component,
+        error: log.context.error?.message,
+        timestamp: log.timestamp
+      });
+    }
 
     // Monitoring externe - seulement si configuré  
     if (process.env.MONITORING_ENDPOINT && process.env.MONITORING_API_KEY) {

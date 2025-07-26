@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import * as Sentry from '@sentry/nextjs';
 import { DM_Sans } from 'next/font/google'
 import './globals.css'
 import { Toaster } from '@/components/ui/toaster'
@@ -8,9 +9,14 @@ import ModalProvider from '@/providers/modal-provider'
 
 const font = DM_Sans({ subsets: ['latin'] })
 
-export const metadata: Metadata = {
-  title: 'Weberly',
-  description: 'All in one Agency Solution',
+export function generateMetadata(): Metadata {
+  return {
+    title: 'Weberly',
+    description: 'All in one Agency Solution',
+    other: {
+      ...Sentry.getTraceData()
+    }
+  };
 }
 
 export default function RootLayout({
