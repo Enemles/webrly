@@ -3,6 +3,14 @@
 Tous les changements notables de ce projet seront documentés dans ce fichier.
 
 
+## [2.11.0](https://github.com/Enemles/webrly/compare/v2.10.0...v2.11.0) (2025-08-08)
+
+
+### Features
+
+* Mise à jour du README et suppression des workflows CI/CD ([18f717f](https://github.com/Enemles/webrly/commit/18f717fb8831a1e00caa90a5234913480c902d8c))
+* Update monitoring documentation with specific IP addresses for web interfaces ([84acf4a](https://github.com/Enemles/webrly/commit/84acf4aefb6d6f177a2505153e973e6e934a819a))
+
 ## [2.10.0](https://github.com/Enemles/webrly/compare/v2.9.1...v2.10.0) (2025-07-26)
 
 
