@@ -87,7 +87,7 @@ pnpm test:coverage    # Couverture de tests
   ```
 - **Webhook Stripe**: reconfigurer l'URL si domaine changé
 
-#### Déploiement sur VPS (Docker)
+#### Déploiement sur VPS (Seulement un exemple avec Docker car non mis en place)
 ```dockerfile
 FROM node:20-alpine AS builder
 WORKDIR /app
