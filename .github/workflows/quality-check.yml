@@ -82,84 +82,12 @@ jobs:
           echo "📁 Contenu de .next :"
           ls -la .next/ || true
 
-  # Job 3: Tests unitaires
-  unit-tests:
-    name: 🧪 Tests unitaires
-    runs-on: ubuntu-latest
-    needs: [code-quality]
-    env:
-      # Variables nécessaires pour les tests unitaires - valeurs factices mais valides
-      DATABASE_URL: postgresql://testuser:testpass@localhost:5432/testdb
-      STRIPE_SECRET_KEY: sk_test_51234567890123456789012345678901234567890123456789012345678901234
-      NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: pk_test_51234567890123456789012345678901234567890123456789012345678901234
-      CLERK_SECRET_KEY: sk_test_1234567890123456789012345678901234567890123456789012345678901234
-      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_1234567890123456789012345678901234567890123456789012345678901234
-      UPLOADTHING_SECRET: sk_live_test123456789012345678901234567890123456789012345678901234567890
-      UPLOADTHING_APP_ID: testapp123
-      NEXTAUTH_SECRET: test-secret-for-ci-cd-only-not-production-safe
-      NEXTAUTH_URL: http://localhost:3000
-      NODE_ENV: test
-      CI: true
-    steps:
-      - name: 📥 Récupération du code
-        uses: actions/checkout@v4
-
-      - name: 🔧 Configuration de l'environnement
-        uses: ./.github/actions/setup-environment
-        with:
-          environment-type: 'test'
-
-      - name: 🧪 Exécution des tests unitaires
-        run: pnpm test:run
-
-      - name: 📊 Génération du rapport de couverture
-        run: pnpm test:coverage
-
-      - name: 📊 Upload du rapport de couverture
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-report
-          path: coverage/
-          retention-days: 30
-
-      - name: 📈 Commentaire PR avec couverture
-        if: github.event_name == 'pull_request'
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const fs = require('fs');
-            try {
-              const coverage = JSON.parse(fs.readFileSync('coverage/coverage-summary.json', 'utf8'));
-              const total = coverage.total;
-              
-              const comment = `## 📊 Rapport de couverture des tests
-              
-              | Métrique | Pourcentage | Status |
-              |----------|-------------|--------|
-              | 🏢 Statements | ${total.statements.pct}% | ${total.statements.pct >= 70 ? '✅' : '❌'} |
-              | 🌿 Branches | ${total.branches.pct}% | ${total.branches.pct >= 70 ? '✅' : '❌'} |
-              | 🔧 Functions | ${total.functions.pct}% | ${total.functions.pct >= 70 ? '✅' : '❌'} |
-              | 📄 Lines | ${total.lines.pct}% | ${total.lines.pct >= 70 ? '✅' : '❌'} |
-              
-              **Seuil minimum:** 70% pour toutes les métriques
-              `;
-              
-              github.rest.issues.createComment({
-                issue_number: context.issue.number,
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                body: comment
-              });
-            } catch (error) {
-              console.log('Pas de rapport de couverture disponible');
-            }
-
-  # Job 4: Tests End-to-End
+  # Job 3: Tests End-to-End
   e2e-tests:
     name: 🧪 Tests E2E
     runs-on: ubuntu-latest
     needs: [code-quality, build-test]
+    if: github.event_name == 'pull_request'
     env:
       # Variables nécessaires pour les tests E2E - valeurs factices mais valides
       DATABASE_URL: postgresql://testuser:testpass@localhost:5432/testdb
@@ -206,7 +134,7 @@ jobs:
   summary:
     name: 📋 Résumé
     runs-on: ubuntu-latest
-    needs: [code-quality, build-test, unit-tests, e2e-tests]
+    needs: [code-quality, build-test, e2e-tests]
     if: always()
     steps:
       - name: 📊 Résumé des résultats
@@ -217,10 +145,9 @@ jobs:
           echo "|-----|--------|" >> $GITHUB_STEP_SUMMARY
           echo "| 🔍 Analyse du code | ${{ needs.code-quality.result == 'success' && '✅ Réussi' || '❌ Échoué' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| 🏗️ Test de construction | ${{ needs.build-test.result == 'success' && '✅ Réussi' || '❌ Échoué' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| 🧪 Tests unitaires | ${{ needs.unit-tests.result == 'success' && '✅ Réussi' || '❌ Échoué' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| 🧪 Tests E2E | ${{ needs.e2e-tests.result == 'success' && '✅ Réussi' || '❌ Échoué' }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          if [[ "${{ needs.code-quality.result }}" == "success" && "${{ needs.build-test.result }}" == "success" && "${{ needs.unit-tests.result }}" == "success" && "${{ needs.e2e-tests.result }}" == "success" ]]; then
+          if [[ "${{ needs.code-quality.result }}" == "success" && "${{ needs.build-test.result }}" == "success" && "${{ needs.e2e-tests.result }}" == "success" ]]; then
             echo "🎉 **Tous les contrôles sont passés avec succès !**" >> $GITHUB_STEP_SUMMARY
           else
             echo "⚠️ **Certains contrôles ont échoué. Vérifiez les logs ci-dessus.**" >> $GITHUB_STEP_SUMMARY

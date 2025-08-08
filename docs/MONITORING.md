@@ -28,7 +28,7 @@ Prometheus est une base de données de séries temporelles qui collecte des mét
 
 ### **Comment vous en servir ?**
 
-#### Interface Web : `http://YOUR_MONITORING_IP:9090`
+#### Interface Web : `http://134.122.66.187:9090`
 
 **1. Explorer les métriques disponibles :**
 - Onglet "Graph" → Tapez le début d'une métrique → Autocomplétion
@@ -117,7 +117,7 @@ Alertmanager reçoit les alertes de Prometheus et les route vers les bons canaux
 
 ### **Comment vous en servir ?**
 
-#### Interface Web : `http://YOUR_MONITORING_IP:9093`
+#### Interface Web : `http://134.122.66.187:9093`
 
 **1. Voir les alertes actives :**
 - Page principale : alertes en cours
@@ -206,8 +206,8 @@ Grafana transforme vos métriques Prometheus en graphiques et dashboards interac
 
 ### **Comment vous en servir ?**
 
-#### Interface Web : `http://YOUR_MONITORING_IP:3000`
-**Login :** admin / ChangeThisPassword123!
+#### Interface Web : `http://134.122.66.187:3000`
+**Login :** admin / adminPass
 
 **1. Configuration initiale :**
 ```bash
