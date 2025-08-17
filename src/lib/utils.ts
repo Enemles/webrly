@@ -65,7 +65,9 @@ interface StructuredLog {
 }
 
 class Logger {
-  private isDev = process.env.NODE_ENV === 'development';
+  private get isDev() {
+    return process.env.NODE_ENV === 'development'
+  }
   private version = process.env.NEXT_PUBLIC_APP_VERSION || 'unknown';
   
   private formatLog(level: LogLevel, message: string, context: LogContext = {}): StructuredLog {
