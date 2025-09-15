@@ -54,6 +54,11 @@ const SendInvitation: React.FC<SendInvitationProps> = ({ agencyId }) => {
 
   const onSubmit = async (values: z.infer<typeof userDataSchema>) => {
     try {
+      // Validation côté client avant l'envoi
+      if (!values.email?.trim()) {
+        throw new Error('L\'email est requis');
+      }
+      
       const res = await sendInvitation(values.role, values.email, agencyId)
       await saveActivityLogsNotification({
         agencyId: agencyId,
@@ -64,12 +69,15 @@ const SendInvitation: React.FC<SendInvitationProps> = ({ agencyId }) => {
         title: 'Success',
         description: 'Created and sent invitation',
       })
+      // Reset le formulaire après succès
+      form.reset()
     } catch (error) {
-      console.log(error)
+      console.error('Erreur lors de l\'envoi de l\'invitation:', error)
+      const errorMessage = error instanceof Error ? error.message : 'Could not send invitation'
       toast({
         variant: 'destructive',
-        title: 'Oppse!',
-        description: 'Could not send invitation',
+        title: 'Erreur!',
+        description: errorMessage,
       })
     }
   }
