@@ -3,6 +3,14 @@
 Tous les changements notables de ce projet seront documentés dans ce fichier.
 
 
+## [2.13.0](https://github.com/Enemles/webrly/compare/v2.12.1...v2.13.0) (2025-09-15)
+
+
+### Features
+
+* Ajout d'une page de démonstration pour le logger et mise à jour du README ([544bae9](https://github.com/Enemles/webrly/commit/544bae99c3b4bbd928da034cf78cabffbce715fb))
+* Amélioration de la validation des invitations et gestion des erreurs ([fe7cfbd](https://github.com/Enemles/webrly/commit/fe7cfbdad3f3e039a9155dca9d7b7ea1926aa146))
+
 ### [2.12.1](https://github.com/Enemles/webrly/compare/v2.12.0...v2.12.1) (2025-08-08)
 
 ## [2.12.0](https://github.com/Enemles/webrly/compare/v2.11.0...v2.12.0) (2025-08-08)
