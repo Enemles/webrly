@@ -155,7 +155,7 @@ pnpm start
 - Vous pouvez inviter des membres de l'équipe et leur attribuer des droits d'accès spécifiques à chaque sous-compte
 
 #### 6. Gestion des membres et des accès
-- Invitez des collaborateurs par email pour qu'ils rejoignent votre agence sur Plura
+- Invitez des collaborateurs par email pour qu'ils rejoignent votre agence sur Webrly
 - Définissez les niveaux d'accès de chaque membre (par sous-compte)
 - Les membres invités voient une page "non autorisé" tant que vous ne leur avez pas donné accès
 

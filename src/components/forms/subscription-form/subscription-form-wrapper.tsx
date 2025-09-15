@@ -64,7 +64,9 @@ const SubscriptionFormWrapper = ({ customerId, planExists }: Props) => {
         )
         
         if (!subscriptionResponse.ok) {
-          throw new Error('Failed to create subscription')
+          const errorData = await subscriptionResponse.json().catch(() => ({}))
+          console.error('Subscription error:', errorData)
+          throw new Error(errorData.message || 'Failed to create subscription')
         }
         
         const subscriptionResponseData = await subscriptionResponse.json()

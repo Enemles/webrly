@@ -253,6 +253,17 @@ export const sendInvitation = async (
   email: string,
   agencyId: string
 ) => {
+  // Validation des paramètres
+  if (!email || !agencyId || !role) {
+    throw new Error('Email, agencyId et role sont requis');
+  }
+
+  // Validation du format email
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    throw new Error('Format d\'email invalide');
+  }
+
   const existingInvitation = await db.invitation.findUnique({
     where: { email }
   });

@@ -77,7 +77,7 @@ export const HeroContainerScroll: React.FC<HeroContainerScrollProps> = ({}) => {
             <TypewriterEffect cursorClassName="bg-green-500 dark:bg-green-500"/>
           </p>
           <div className="bg-gradient-to-r from-primary to-secondary-foreground text-transparent bg-clip-text relative">
-            <h1 className="text-9xl font-bold text-center md:text-[300px] z-[99999]">
+            <h1 className="text-7xl font-bold text-center md:text-[300px] z-[99999]">
               Webrly
             </h1>
           </div>
