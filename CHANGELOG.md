@@ -3,6 +3,13 @@
 Tous les changements notables de ce projet seront documentés dans ce fichier.
 
 
+### [2.13.6](https://github.com/Enemles/webrly/compare/v2.13.5...v2.13.6) (2026-05-16)
+
+
+### Bug Fixes
+
+* **billing:** guard charges.list quand customerId vide + ajoute script seed charges ([6d5377c](https://github.com/Enemles/webrly/commit/6d5377caae32efc3ccfc680e63584448eda138a4))
+
 ### [2.13.5](https://github.com/Enemles/webrly/compare/v2.13.4...v2.13.5) (2026-05-16)
 
 
