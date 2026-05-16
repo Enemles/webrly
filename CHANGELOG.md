@@ -3,6 +3,13 @@
 Tous les changements notables de ce projet seront documentés dans ce fichier.
 
 
+### [2.13.8](https://github.com/Enemles/webrly/compare/v2.13.7...v2.13.8) (2026-05-16)
+
+
+### Bug Fixes
+
+* agency/user update guards + Webrly SVG placeholder + per-boutique palettes ([e5ba703](https://github.com/Enemles/webrly/commit/e5ba703a3998f831ebc20b125638cc6001f4669e))
+
 ### [2.13.7](https://github.com/Enemles/webrly/compare/v2.13.6...v2.13.7) (2026-05-16)
 
 
