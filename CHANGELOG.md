@@ -3,6 +3,13 @@
 Tous les changements notables de ce projet seront documentés dans ce fichier.
 
 
+### [2.13.14](https://github.com/Enemles/webrly/compare/v2.13.13...v2.13.14) (2026-05-16)
+
+
+### Bug Fixes
+
+* user sa forms ([0a00c50](https://github.com/Enemles/webrly/commit/0a00c50338166a768f55dc800a32c5b21ebf120f))
+
 ### [2.13.13](https://github.com/Enemles/webrly/compare/v2.13.12...v2.13.13) (2026-05-16)
 
 
