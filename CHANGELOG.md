@@ -3,6 +3,13 @@
 Tous les changements notables de ce projet seront documentés dans ce fichier.
 
 
+### [2.13.7](https://github.com/Enemles/webrly/compare/v2.13.6...v2.13.7) (2026-05-16)
+
+
+### Bug Fixes
+
+* webrly logo placeholder + per-boutique color palettes + team assignments ([dc0c4f9](https://github.com/Enemles/webrly/commit/dc0c4f91c9eee8239b5758440d0ad8ed850f347a))
+
 ### [2.13.6](https://github.com/Enemles/webrly/compare/v2.13.5...v2.13.6) (2026-05-16)
 
 
