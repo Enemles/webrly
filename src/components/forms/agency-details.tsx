@@ -138,14 +138,14 @@ const AgencyDetails = ({ data }: Props) => {
       async (formData) => {
         let custId = data?.customerId
 
-        // Créer customer Stripe si nouvelle agence
-        if (!data?.id) {
+        // Créer customer Stripe si pas encore lié (nouvelle agence OU agence seed sans customer)
+        if (!custId) {
           custId = await createStripeCustomer(formData)
         }
 
         // Initialiser l'utilisateur
         await initUser({ role: 'AGENCY_OWNER' })
-        
+
         if (!custId) {
           throw new Error('Customer ID is required')
         }
