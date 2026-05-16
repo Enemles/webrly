@@ -165,7 +165,6 @@ const SubAccountDetails: React.FC<SubAccountDetailsProps> = ({
             />
             <div className="flex md:flex-row gap-4">
               <FormField
-                disabled={isLoading}
                 control={form.control}
                 name="name"
                 render={({ field }) => (
@@ -183,7 +182,6 @@ const SubAccountDetails: React.FC<SubAccountDetailsProps> = ({
                 )}
               />
               <FormField
-                disabled={isLoading}
                 control={form.control}
                 name="companyEmail"
                 render={({ field }) => (
@@ -202,7 +200,6 @@ const SubAccountDetails: React.FC<SubAccountDetailsProps> = ({
             </div>
             <div className="flex md:flex-row gap-4">
               <FormField
-                disabled={isLoading}
                 control={form.control}
                 name="companyPhone"
                 render={({ field }) => (
@@ -240,7 +237,6 @@ const SubAccountDetails: React.FC<SubAccountDetailsProps> = ({
             />
             <div className="flex md:flex-row gap-4">
               <FormField
-                disabled={isLoading}
                 control={form.control}
                 name="city"
                 render={({ field }) => (
@@ -258,7 +254,6 @@ const SubAccountDetails: React.FC<SubAccountDetailsProps> = ({
                 )}
               />
               <FormField
-                disabled={isLoading}
                 control={form.control}
                 name="state"
                 render={({ field }) => (
@@ -276,7 +271,6 @@ const SubAccountDetails: React.FC<SubAccountDetailsProps> = ({
                 )}
               />
               <FormField
-                disabled={isLoading}
                 control={form.control}
                 name="zipCode"
                 render={({ field }) => (
