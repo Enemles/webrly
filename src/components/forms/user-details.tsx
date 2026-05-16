@@ -198,6 +198,9 @@ const UserDetails = ({ id, type, userData, subAccounts }: Props) => {
 
 
   const onSubmit = async (values: z.infer<typeof userDataSchema>) => {
+    console.log('[user-details/onSubmit] values client:', values)
+    console.log('[user-details/onSubmit] userData prop:', userData)
+    console.log('[user-details/onSubmit] data.user:', data?.user)
     if (!id) return
     if (userData || data?.user) {
       const updatedUser = await updateUser(values)
@@ -245,7 +248,6 @@ const UserDetails = ({ id, type, userData, subAccounts }: Props) => {
             className="space-y-4"
           >
             <FormField
-              disabled={form.formState.isSubmitting}
               control={form.control}
               name="avatarUrl"
               render={({ field }) => (
@@ -264,7 +266,6 @@ const UserDetails = ({ id, type, userData, subAccounts }: Props) => {
             />
 
             <FormField
-              disabled={form.formState.isSubmitting}
               control={form.control}
               name="name"
               render={({ field }) => (
@@ -282,7 +283,6 @@ const UserDetails = ({ id, type, userData, subAccounts }: Props) => {
               )}
             />
             <FormField
-              disabled={form.formState.isSubmitting}
               control={form.control}
               name="email"
               render={({ field }) => (
@@ -303,7 +303,6 @@ const UserDetails = ({ id, type, userData, subAccounts }: Props) => {
               )}
             />
             <FormField
-              disabled={form.formState.isSubmitting}
               control={form.control}
               name="role"
               render={({ field }) => (

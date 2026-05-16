@@ -84,6 +84,8 @@ const SubAccountDetails: React.FC<SubAccountDetailsProps> = ({
   })
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    console.log('[subaccount-details/onSubmit] values client:', values)
+    console.log('[subaccount-details/onSubmit] details prop:', details)
     try {
       const response = await upsertSubAccount({
         id: details?.id ? details.id : v4(),
@@ -145,7 +147,6 @@ const SubAccountDetails: React.FC<SubAccountDetailsProps> = ({
             className="space-y-4"
           >
             <FormField
-              disabled={isLoading}
               control={form.control}
               name="subAccountLogo"
               render={({ field }) => (
@@ -221,7 +222,6 @@ const SubAccountDetails: React.FC<SubAccountDetailsProps> = ({
             </div>
 
             <FormField
-              disabled={isLoading}
               control={form.control}
               name="address"
               render={({ field }) => (
@@ -295,7 +295,6 @@ const SubAccountDetails: React.FC<SubAccountDetailsProps> = ({
               />
             </div>
             <FormField
-              disabled={isLoading}
               control={form.control}
               name="country"
               render={({ field }) => (
