@@ -3,6 +3,13 @@
 Tous les changements notables de ce projet seront documentés dans ce fichier.
 
 
+### [2.13.2](https://github.com/Enemles/webrly/compare/v2.13.1...v2.13.2) (2026-05-16)
+
+
+### Bug Fixes
+
+* **site:** force dynamic rendering pour éviter prerender Stripe/DB ([35c363b](https://github.com/Enemles/webrly/commit/35c363b3ad7fe59afdb11258774654a0be6f2cb9))
+
 ### [2.13.1](https://github.com/Enemles/webrly/compare/v2.13.0...v2.13.1) (2026-05-16)
 
 
