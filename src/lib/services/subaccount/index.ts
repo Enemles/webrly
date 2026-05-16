@@ -5,7 +5,27 @@ import { SubAccount } from '@prisma/client'
 import { v4 } from 'uuid'
 
 export const upsertSubAccount = async (subAccount: SubAccount) => {
-  if (!subAccount.companyEmail) return null
+  console.log('[upsertSubAccount] payload reçu:', JSON.stringify({
+    id: subAccount.id,
+    name: subAccount.name,
+    agencyId: subAccount.agencyId,
+    companyEmail: subAccount.companyEmail,
+    keys: Object.keys(subAccount),
+  }))
+  if (!subAccount.companyEmail) {
+    console.warn('[upsertSubAccount] companyEmail manquant, abandon')
+    return null
+  }
+  if (!subAccount.id) {
+    console.warn('[upsertSubAccount] id manquant, abandon')
+    return null
+  }
+  const existing = await db.subAccount.findUnique({ where: { id: subAccount.id }, select: { id: true } })
+  console.log('[upsertSubAccount] sub-account existant ?', !!existing)
+  if (!existing && !subAccount.name) {
+    console.warn('[upsertSubAccount] name manquant pour création, abandon')
+    return null
+  }
   const agencyOwner = await db.user.findFirst({
     where: {
       Agency: {
@@ -14,15 +34,19 @@ export const upsertSubAccount = async (subAccount: SubAccount) => {
       role: 'AGENCY_OWNER',
     }
   })
-  if (!agencyOwner) return console.log('Could not create subaccount')
+  if (!agencyOwner) {
+    console.warn('[upsertSubAccount] agency owner introuvable pour agencyId', subAccount.agencyId)
+    return null
+  }
   const permissionId = v4()
-  const response = await db.subAccount.upsert({
-    where: {
-      id: subAccount.id,
-    },
-    update: subAccount,
-    create: {
-      ...subAccount,
+  try {
+    const response = await db.subAccount.upsert({
+      where: {
+        id: subAccount.id,
+      },
+      update: subAccount,
+      create: {
+        ...subAccount,
       Permissions: {
         create: {
           access: true,
@@ -78,7 +102,11 @@ export const upsertSubAccount = async (subAccount: SubAccount) => {
       },
     }
   })
-  return response
+    return response
+  } catch (error) {
+    console.error('[upsertSubAccount] Prisma error:', error)
+    throw error
+  }
 }
 
 export const getSubaccountDetails = async (subaccountId: string) => {

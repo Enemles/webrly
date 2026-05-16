@@ -2,21 +2,23 @@ import {withSentryConfig} from '@sentry/nextjs';
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: [
-      'uploadthing.com',
-      'utfs.io',
-      'img.clerk.com',
-      'subdomain',
-      'files.stripe.com',
-      'ui-avatars.com',
-      'placehold.co',
-      'api.dicebear.com',
+    remotePatterns: [
+      { protocol: 'https', hostname: 'uploadthing.com' },
+      { protocol: 'https', hostname: 'utfs.io' },
+      { protocol: 'https', hostname: 'img.clerk.com' },
+      { protocol: 'https', hostname: 'files.stripe.com' },
+      { protocol: 'https', hostname: 'ui-avatars.com' },
+      { protocol: 'https', hostname: 'placehold.co' },
+      { protocol: 'https', hostname: 'api.dicebear.com' },
     ],
     dangerouslyAllowSVG: true,
     contentDispositionType: 'attachment',
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
   reactStrictMode: false,
+  experimental: {
+    instrumentationHook: true,
+  },
 }
 
 export default withSentryConfig(nextConfig, {

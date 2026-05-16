@@ -213,27 +213,39 @@ export const changeUserPermissions = async (
 }
 
 export const updateUser = async (user: Partial<User>) => {
+  console.log('[updateUser] payload reçu:', JSON.stringify({ ...user, keys: Object.keys(user) }))
   if (!user.email) {
-    console.warn('updateUser: appelé sans email, abandon')
+    console.warn('[updateUser] email manquant, abandon')
     return null
   }
-  const { email, ...rest } = user
+  const { email, id, createdAt, updatedAt, agencyId, ...rest } = user
   if (Object.keys(rest).length === 0) {
-    console.warn('updateUser: payload vide pour', email)
+    console.warn('[updateUser] payload vide pour', email)
     return null
   }
-  const response = await db.user.update({
-    where: { email },
-    data: rest,
-  })
+  try {
+    const response = await db.user.update({
+      where: { email },
+      data: rest,
+    })
 
-  await clerkClient.users.updateUserMetadata(response.id, {
-    privateMetadata: {
-      role: user.role || 'SUBACCOUNT_USER',
-    },
-  })
+    if (response.id) {
+      try {
+        await clerkClient.users.updateUserMetadata(response.id, {
+          privateMetadata: {
+            role: user.role || 'SUBACCOUNT_USER',
+          },
+        })
+      } catch (clerkErr) {
+        console.warn('[updateUser] Clerk metadata sync skipped (probablement un user seedé sans compte Clerk):', (clerkErr as Error).message)
+      }
+    }
 
-  return response
+    return response
+  } catch (error) {
+    console.error('[updateUser] error:', error)
+    throw error
+  }
 }
 
 export const getUser = async (id: string) => {
