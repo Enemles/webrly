@@ -16,6 +16,7 @@
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
     "db:setup:local": "npm run docker:start && npm run db:push",
+    "db:seed": "npx -y tsx prisma/seed.ts",
     "db:export": "node export-data.js",
     "db:import": "node import-data.js",
     "db:duplicate": "npm run db:export && npm run db:import",
