@@ -6,14 +6,12 @@ const db = new PrismaClient()
 const CLERK_USER_ID = process.env.SEED_CLERK_USER_ID
 const CLERK_USER_EMAIL = process.env.SEED_CLERK_USER_EMAIL
 const SEED_NAME = process.env.SEED_NAME || 'Démo Owner'
-const SEED_AVATAR =
-  process.env.SEED_AVATAR ||
-  `https://ui-avatars.com/api/?name=${encodeURIComponent('Demo Owner')}&size=256&background=6366f1&color=ffffff&bold=true&format=png`
+const BASE_URL = process.env.SEED_BASE_URL || 'https://webrly.selmene.dev'
+const PLACEHOLDER_LOGO = `${BASE_URL}/webrly-logo.svg`
+const SEED_AVATAR = process.env.SEED_AVATAR || PLACEHOLDER_LOGO
 
 const AGENCY_NAME = 'Pulse Commerce — Démo'
-const AGENCY_LOGO_COLOR = '6366f1' // indigo
-const logo = (name: string, bg: string) =>
-  `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&size=256&background=${bg}&color=ffffff&bold=true&format=png`
+const logo = (_name: string, _bg: string) => PLACEHOLDER_LOGO
 const mediaImg = (label: string, bg: string) =>
   `https://placehold.co/800x600/${bg}/ffffff/png?text=${encodeURIComponent(label)}`
 
@@ -48,7 +46,13 @@ const slug = (s: string) =>
   s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
     .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
 
-const TAG_COLORS = ['#ef4444', '#f97316', '#eab308', '#22c55e', '#06b6d4', '#3b82f6', '#8b5cf6', '#ec4899']
+const TEAM_MEMBER_DEFS: { name: string; email: string; role: Role }[] = [
+  { name: 'Camille Vasseur', email: 'camille.vasseur@pulse-commerce.fr', role: Role.AGENCY_ADMIN },
+  { name: 'Mathieu Laurent', email: 'mathieu.laurent@pulse-commerce.fr', role: Role.SUBACCOUNT_USER },
+  { name: 'Sarah Khaled', email: 'sarah.khaled@pulse-commerce.fr', role: Role.SUBACCOUNT_USER },
+  { name: 'Théo Marin', email: 'theo.marin@pulse-commerce.fr', role: Role.SUBACCOUNT_USER },
+  { name: 'Élodie Roux', email: 'elodie.roux@pulse-commerce.fr', role: Role.SUBACCOUNT_USER },
+]
 
 function makeContact(subAccountId: string) {
   const first = pick(FIRST_NAMES)
@@ -82,6 +86,8 @@ type BoutiqueSpec = {
   pipelineName: string
   funnels: FunnelSpec[]
   tags: string[]
+  lanePalette: [string, string, string, string, string, string]
+  tagPalette: string[]
 }
 
 const BOUTIQUES: BoutiqueSpec[] = [
@@ -96,6 +102,8 @@ const BOUTIQUES: BoutiqueSpec[] = [
     phone: '+33 4 91 00 00 00',
     pipelineName: 'Cycle de vente B2C',
     tags: ['VIP', 'Nouveau client', 'Abonné newsletter', 'Black Friday', 'Restaurant', 'Cadeau entreprise'],
+    lanePalette: ['#a8a29e', '#f59e0b', '#ea580c', '#b45309', '#65a30d', '#7c2d12'],
+    tagPalette: ['#fbbf24', '#f97316', '#d97706', '#84cc16', '#dc2626', '#7c2d12', '#0ea5e9', '#10b981'],
     funnels: [
       {
         name: 'Coffret Découverte',
@@ -132,6 +140,8 @@ const BOUTIQUES: BoutiqueSpec[] = [
     phone: '+33 1 42 00 00 00',
     pipelineName: 'Pipeline collections',
     tags: ['Pré-commande', 'Influenceur', 'Boutique partenaire', 'Édition limitée', 'Retour', 'VIP'],
+    lanePalette: ['#d4d4d8', '#e879f9', '#f472b6', '#a855f7', '#10b981', '#be185d'],
+    tagPalette: ['#f9a8d4', '#ec4899', '#be185d', '#a855f7', '#7c3aed', '#fb7185', '#06b6d4', '#22c55e'],
     funnels: [
       {
         name: 'Collection Automne',
@@ -179,6 +189,8 @@ const BOUTIQUES: BoutiqueSpec[] = [
     phone: '+33 4 72 00 00 00',
     pipelineName: 'Funnel ventes B2C',
     tags: ['Précommande', 'Live', 'Retour SAV', 'Gros panier', 'B2B', 'Abonné'],
+    lanePalette: ['#94a3b8', '#06b6d4', '#0ea5e9', '#3b82f6', '#14b8a6', '#475569'],
+    tagPalette: ['#0ea5e9', '#06b6d4', '#14b8a6', '#3b82f6', '#6366f1', '#8b5cf6', '#f59e0b', '#ef4444'],
     funnels: [
       {
         name: 'Black Friday Tech',
@@ -291,14 +303,14 @@ function bodyContent(funnel: FunnelSpec): string {
   ])
 }
 
-function makeLanes() {
+function makeLanes(palette: [string, string, string, string, string, string]) {
   const stages = [
-    { name: 'Nouveau lead', color: '#94a3b8' },
-    { name: 'Premier contact', color: '#3b82f6' },
-    { name: 'Devis envoyé', color: '#f59e0b' },
-    { name: 'Négociation', color: '#a855f7' },
-    { name: 'Gagné', color: '#22c55e' },
-    { name: 'Perdu', color: '#ef4444' },
+    { name: 'Nouveau lead', color: palette[0] },
+    { name: 'Premier contact', color: palette[1] },
+    { name: 'Devis envoyé', color: palette[2] },
+    { name: 'Négociation', color: palette[3] },
+    { name: 'Gagné', color: palette[4] },
+    { name: 'Perdu', color: palette[5] },
   ]
   return stages.map((s, i) => ({
     id: randomUUID(),
@@ -338,6 +350,10 @@ async function cleanup() {
     console.log(`  ↳ Supprimé agence ${ag.id}`)
   }
 
+  const teamEmails = TEAM_MEMBER_DEFS.map(t => t.email)
+  const deletedTeam = await db.user.deleteMany({ where: { email: { in: teamEmails } } })
+  if (deletedTeam.count) console.log(`  ↳ Supprimé ${deletedTeam.count} anciens membres d'équipe démo`)
+
   const ghostFunnels = await db.funnel.findMany({
     where: { subDomainName: { in: BOUTIQUES.flatMap(b => b.funnels.map(f => f.subDomain)) } },
   })
@@ -369,7 +385,7 @@ async function seed() {
     data: {
       id: agencyId,
       name: AGENCY_NAME,
-      agencyLogo: logo('Pulse Commerce', AGENCY_LOGO_COLOR),
+      agencyLogo: PLACEHOLDER_LOGO,
       companyEmail: 'studio@pulse-commerce.fr',
       companyPhone: '+33 1 86 00 00 00',
       address: '12 rue de la Paix',
@@ -385,6 +401,22 @@ async function seed() {
   })
   console.log(`  ↳ agencyId = ${agencyId}`)
 
+  console.log('\n👥 Création de l\'équipe…')
+  const teamUsers = await Promise.all(
+    TEAM_MEMBER_DEFS.map(t => db.user.create({
+      data: {
+        id: randomUUID(),
+        email: t.email,
+        name: t.name,
+        avatarUrl: PLACEHOLDER_LOGO,
+        role: t.role,
+        agencyId,
+        createdAt: daysAgo(randInt(30, 90)),
+      },
+    })),
+  )
+  console.log(`  ↳ ${teamUsers.length} membres ajoutés à l'équipe`)
+
   for (const b of BOUTIQUES) {
     console.log(`\n🛍  ${b.name}…`)
     const subId = randomUUID()
@@ -393,7 +425,7 @@ async function seed() {
         id: subId,
         agencyId,
         name: b.name,
-        subAccountLogo: logo(b.name, b.brandColor),
+        subAccountLogo: PLACEHOLDER_LOGO,
         companyEmail: b.email,
         companyPhone: b.phone,
         address: `${randInt(1, 99)} rue ${pick(['de la République', 'des Lilas', 'du Faubourg', 'Saint-Honoré', 'Voltaire'])}`,
@@ -404,7 +436,10 @@ async function seed() {
         goal: randInt(8, 20),
         SidebarOption: { create: SUBACCOUNT_DEFAULT_SIDEBAR(subId) },
         Permissions: {
-          create: { id: randomUUID(), email: CLERK_USER_EMAIL!, access: true },
+          create: [
+            { id: randomUUID(), email: CLERK_USER_EMAIL!, access: true },
+            ...TEAM_MEMBER_DEFS.map(t => ({ id: randomUUID(), email: t.email, access: true })),
+          ],
         },
       },
     })
@@ -414,7 +449,7 @@ async function seed() {
         data: {
           id: randomUUID(),
           name: t,
-          color: pick(TAG_COLORS),
+          color: pick(b.tagPalette),
           subAccountId: subId,
         },
       })),
@@ -436,7 +471,7 @@ async function seed() {
         id: pipelineId,
         name: b.pipelineName,
         subAccountId: subId,
-        Lane: { create: makeLanes() },
+        Lane: { create: makeLanes(b.lanePalette) },
       },
     })
 
@@ -452,6 +487,7 @@ async function seed() {
       const subjectBase = pick(ticketSubjects)
       const tagSet = new Set<string>()
       while (tagSet.size < Math.min(2, tags.length)) tagSet.add(pick(tags).id)
+      const assignedUserId = Math.random() < 0.75 ? pick(teamUsers).id : null
       await db.ticket.create({
         data: {
           id: randomUUID(),
@@ -469,6 +505,7 @@ async function seed() {
           laneId: lane.id,
           order: i,
           customerId: customer.id,
+          assignedUserId,
           Tags: { connect: Array.from(tagSet).map(id => ({ id })) },
           createdAt: daysAgo(randInt(0, 60)),
           updatedAt: daysAgo(randInt(0, 14)),
