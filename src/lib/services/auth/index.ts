@@ -213,9 +213,18 @@ export const changeUserPermissions = async (
 }
 
 export const updateUser = async (user: Partial<User>) => {
+  if (!user.email) {
+    console.warn('updateUser: appelé sans email, abandon')
+    return null
+  }
+  const { email, ...rest } = user
+  if (Object.keys(rest).length === 0) {
+    console.warn('updateUser: payload vide pour', email)
+    return null
+  }
   const response = await db.user.update({
-    where: { email: user.email },
-    data: { ...user },
+    where: { email },
+    data: rest,
   })
 
   await clerkClient.users.updateUserMetadata(response.id, {

@@ -62,6 +62,12 @@ export const deleteAgency = async (agencyId: string) => {
 
 export const upsertAgency = async (agency: Agency, price?: Plan) => {
   if (!agency.companyEmail) return null
+  if (!agency.id) return null
+  const existing = await db.agency.findUnique({ where: { id: agency.id }, select: { id: true } })
+  if (!existing && !agency.name) {
+    console.warn('upsertAgency: agency.name manquant pour création, abandon')
+    return null
+  }
   try {
     const agencyDetails = await db.agency.upsert({
       where: {
