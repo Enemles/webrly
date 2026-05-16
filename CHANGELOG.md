@@ -3,6 +3,13 @@
 Tous les changements notables de ce projet seront documentés dans ce fichier.
 
 
+### [2.13.12](https://github.com/Enemles/webrly/compare/v2.13.11...v2.13.12) (2026-05-16)
+
+
+### Bug Fixes
+
+* hardening agency/user/subaccount upserts + nouveau DSN Sentry + logo webrly placeholder ([6e8be44](https://github.com/Enemles/webrly/commit/6e8be441f862f287cdb0feffc16e9f35268b4436))
+
 ### [2.13.11](https://github.com/Enemles/webrly/compare/v2.13.10...v2.13.11) (2026-05-16)
 
 
