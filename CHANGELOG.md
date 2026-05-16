@@ -3,6 +3,13 @@
 Tous les changements notables de ce projet seront documentés dans ce fichier.
 
 
+### [2.13.3](https://github.com/Enemles/webrly/compare/v2.13.2...v2.13.3) (2026-05-16)
+
+
+### Bug Fixes
+
+* **middleware:** expose /api/health en public pour le healthcheck Coolify ([16f7996](https://github.com/Enemles/webrly/commit/16f79966fa6847c89d811d8a515f1c7a5f4a73e2))
+
 ### [2.13.2](https://github.com/Enemles/webrly/compare/v2.13.1...v2.13.2) (2026-05-16)
 
 
