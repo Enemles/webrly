@@ -3,6 +3,13 @@
 Tous les changements notables de ce projet seront documentés dans ce fichier.
 
 
+### [2.13.11](https://github.com/Enemles/webrly/compare/v2.13.10...v2.13.11) (2026-05-16)
+
+
+### Bug Fixes
+
+* user/subaccount update hardening + clerk sync non-blocking + remotePatterns ([dfd46bb](https://github.com/Enemles/webrly/commit/dfd46bba0cda5cf4683c7600ab7ee70435529af0))
+
 ### [2.13.10](https://github.com/Enemles/webrly/compare/v2.13.9...v2.13.10) (2026-05-16)
 
 
