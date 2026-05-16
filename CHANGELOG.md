@@ -3,6 +3,13 @@
 Tous les changements notables de ce projet seront documentés dans ce fichier.
 
 
+### [2.13.10](https://github.com/Enemles/webrly/compare/v2.13.9...v2.13.10) (2026-05-16)
+
+
+### Bug Fixes
+
+* create Stripe customer when missing, not only for new agencies ([8478143](https://github.com/Enemles/webrly/commit/8478143ce59b9d0bff38562199e9a9eb621093f7))
+
 ### [2.13.9](https://github.com/Enemles/webrly/compare/v2.13.8...v2.13.9) (2026-05-16)
 
 ### [2.13.8](https://github.com/Enemles/webrly/compare/v2.13.7...v2.13.8) (2026-05-16)
