@@ -1,6 +1,6 @@
 {
   "name": "webrly",
-  "version": "2.13.14",
+  "version": "2.13.15",
   "type": "module",
   "private": true,
   "scripts": {
