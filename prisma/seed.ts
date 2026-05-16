@@ -8,10 +8,14 @@ const CLERK_USER_EMAIL = process.env.SEED_CLERK_USER_EMAIL
 const SEED_NAME = process.env.SEED_NAME || 'Démo Owner'
 const SEED_AVATAR =
   process.env.SEED_AVATAR ||
-  'https://api.dicebear.com/9.x/initials/svg?seed=Demo%20Owner'
+  `https://ui-avatars.com/api/?name=${encodeURIComponent('Demo Owner')}&size=256&background=6366f1&color=ffffff&bold=true&format=png`
 
 const AGENCY_NAME = 'Pulse Commerce — Démo'
-const DEMO_MEDIA_PREFIX = 'https://picsum.photos/seed/webrly-'
+const AGENCY_LOGO_COLOR = '6366f1' // indigo
+const logo = (name: string, bg: string) =>
+  `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&size=256&background=${bg}&color=ffffff&bold=true&format=png`
+const mediaImg = (label: string, bg: string) =>
+  `https://placehold.co/800x600/${bg}/ffffff/png?text=${encodeURIComponent(label)}`
 
 function fail(msg: string): never {
   console.error(`\n❌ ${msg}\n`)
@@ -69,7 +73,7 @@ type FunnelSpec = {
 type BoutiqueSpec = {
   name: string
   slug: string
-  logo: string
+  brandColor: string
   industry: string
   city: string
   zipCode: string
@@ -84,7 +88,7 @@ const BOUTIQUES: BoutiqueSpec[] = [
   {
     name: 'Maison Olive',
     slug: 'maison-olive',
-    logo: `${DEMO_MEDIA_PREFIX}maison-olive/256/256`,
+    brandColor: 'd97706',
     industry: 'Épicerie fine méditerranéenne',
     city: 'Marseille',
     zipCode: '13001',
@@ -120,7 +124,7 @@ const BOUTIQUES: BoutiqueSpec[] = [
   {
     name: 'Bloom Studio',
     slug: 'bloom-studio',
-    logo: `${DEMO_MEDIA_PREFIX}bloom-studio/256/256`,
+    brandColor: 'be185d',
     industry: 'Mode et accessoires éthiques',
     city: 'Paris',
     zipCode: '75011',
@@ -167,7 +171,7 @@ const BOUTIQUES: BoutiqueSpec[] = [
   {
     name: 'Pixel Pro',
     slug: 'pixel-pro',
-    logo: `${DEMO_MEDIA_PREFIX}pixel-pro/256/256`,
+    brandColor: '1d4ed8',
     industry: 'Accessoires tech premium',
     city: 'Lyon',
     zipCode: '69002',
@@ -365,7 +369,7 @@ async function seed() {
     data: {
       id: agencyId,
       name: AGENCY_NAME,
-      agencyLogo: `${DEMO_MEDIA_PREFIX}pulse-commerce/256/256`,
+      agencyLogo: logo('Pulse Commerce', AGENCY_LOGO_COLOR),
       companyEmail: 'studio@pulse-commerce.fr',
       companyPhone: '+33 1 86 00 00 00',
       address: '12 rue de la Paix',
@@ -389,7 +393,7 @@ async function seed() {
         id: subId,
         agencyId,
         name: b.name,
-        subAccountLogo: b.logo,
+        subAccountLogo: logo(b.name, b.brandColor),
         companyEmail: b.email,
         companyPhone: b.phone,
         address: `${randInt(1, 99)} rue ${pick(['de la République', 'des Lilas', 'du Faubourg', 'Saint-Honoré', 'Voltaire'])}`,
@@ -550,7 +554,7 @@ async function seed() {
           subAccountId: subId,
           name: `${b.slug}-asset-${i + 1}.jpg`,
           type: 'image/jpeg',
-          link: `${DEMO_MEDIA_PREFIX}${b.slug}-asset-${i + 1}-${randomUUID().slice(0, 6)}/800/600`,
+          link: `${mediaImg(`${b.name} #${i + 1}`, b.brandColor)}&v=${randomUUID().slice(0, 6)}`,
           createdAt: daysAgo(randInt(0, 45)),
         },
       })),
