@@ -3,6 +3,14 @@
 Tous les changements notables de ce projet seront documentés dans ce fichier.
 
 
+### [2.13.5](https://github.com/Enemles/webrly/compare/v2.13.4...v2.13.5) (2026-05-16)
+
+
+### Bug Fixes
+
+* **billing:** skip charges.list quand l'agence n'a pas de customerId Stripe ([474512a](https://github.com/Enemles/webrly/commit/474512ab86c8a56b0d7556d569b646a8cb820e65))
+* **demo:** logos via ui-avatars + placehold.co (whitelistés) ([8506229](https://github.com/Enemles/webrly/commit/8506229587952907ce4c4bd34057c9d40c10e2f0))
+
 ### [2.13.4](https://github.com/Enemles/webrly/compare/v2.13.3...v2.13.4) (2026-05-16)
 
 ### [2.13.3](https://github.com/Enemles/webrly/compare/v2.13.2...v2.13.3) (2026-05-16)
