@@ -61,11 +61,27 @@ export const deleteAgency = async (agencyId: string) => {
 }
 
 export const upsertAgency = async (agency: Agency, price?: Plan) => {
-  if (!agency.companyEmail) return null
-  if (!agency.id) return null
+  console.log('[upsertAgency] payload reçu:', JSON.stringify({
+    id: agency.id,
+    name: agency.name,
+    companyEmail: agency.companyEmail,
+    agencyLogo: agency.agencyLogo?.slice(0, 60),
+    customerId: agency.customerId,
+    connectAccountId: agency.connectAccountId,
+    keys: Object.keys(agency),
+  }))
+  if (!agency.companyEmail) {
+    console.warn('[upsertAgency] companyEmail manquant, abandon')
+    return null
+  }
+  if (!agency.id) {
+    console.warn('[upsertAgency] id manquant, abandon')
+    return null
+  }
   const existing = await db.agency.findUnique({ where: { id: agency.id }, select: { id: true } })
+  console.log('[upsertAgency] agence existante ?', !!existing)
   if (!existing && !agency.name) {
-    console.warn('upsertAgency: agency.name manquant pour création, abandon')
+    console.warn('[upsertAgency] name manquant pour création, abandon')
     return null
   }
   try {
@@ -117,6 +133,7 @@ export const upsertAgency = async (agency: Agency, price?: Plan) => {
     })
     return agencyDetails
   } catch (error) {
-    console.log(error)
+    console.error('[upsertAgency] Prisma error:', error)
+    throw error
   }
 }
