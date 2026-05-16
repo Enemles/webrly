@@ -3,6 +3,13 @@
 Tous les changements notables de ce projet seront documentés dans ce fichier.
 
 
+### [2.13.1](https://github.com/Enemles/webrly/compare/v2.13.0...v2.13.1) (2026-05-16)
+
+
+### Bug Fixes
+
+* **logger-demo:** échappement apostrophe pour passer le build ([153792b](https://github.com/Enemles/webrly/commit/153792bf1d6a6ab18d3bd3a5bfb324841e29dcbf))
+
 ## [2.13.0](https://github.com/Enemles/webrly/compare/v2.12.1...v2.13.0) (2025-09-15)
 
 
