@@ -9,6 +9,8 @@ import stripe from "@/lib/stripe";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 
+export const dynamic = 'force-dynamic'
+
 export default async function Home() {
   const prices = await stripe.prices.list({
     product: process.env.NEXT_WEBRLY_PRODUCT_ID,
