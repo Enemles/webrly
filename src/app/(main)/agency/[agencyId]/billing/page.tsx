@@ -41,10 +41,12 @@ const Billing = async ({ params }: Props) => {
     (c) => c.priceId === agencySubscription?.Subscription?.priceId
   )
 
-  const charges = await stripe.charges.list({
-    limit: 50,
-    customer: agencySubscription?.customerId,
-  })
+  const charges = agencySubscription?.customerId
+    ? await stripe.charges.list({
+        limit: 50,
+        customer: agencySubscription.customerId,
+      })
+    : { data: [] as Awaited<ReturnType<typeof stripe.charges.list>>['data'] }
 
   const allCharges = [
     ...charges.data.map((charge) => ({
