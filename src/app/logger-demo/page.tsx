@@ -56,7 +56,7 @@ export default function LoggerDemoPage() {
       </div>
 
       <div className="text-sm text-gray-600 dark:text-gray-400">
-        <p>Astuce: en production, les logs sont sérialisés en JSON (non colorés) pour l'agrégation.</p>
+        <p>Astuce: en production, les logs sont sérialisés en JSON (non colorés) pour l&apos;agrégation.</p>
       </div>
     </main>
   )
