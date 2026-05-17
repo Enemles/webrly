@@ -1,6 +1,7 @@
 'use server'
 
 import { db } from "@/lib/db"
+import { signupsTotal } from "@/lib/real-metrics"
 import { saveActivityLogsNotification } from "@/lib/services/notification"
 import { clerkClient, currentUser } from '@clerk/nextjs'
 import { redirect } from "next/navigation"
@@ -120,6 +121,11 @@ export const initUser = async (newUser: Partial<User>) => {
     userName = emailUsername
   }
 
+  const existingUser = await db.user.findUnique({
+    where: { email: user.emailAddresses[0].emailAddress },
+    select: { id: true },
+  })
+
   const userData = await db.user.upsert({
     where: {
       email: user.emailAddresses[0].emailAddress,
@@ -133,6 +139,11 @@ export const initUser = async (newUser: Partial<User>) => {
       role: newUser.role || 'SUBACCOUNT_USER',
     }
   })
+
+  if (!existingUser) {
+    signupsTotal.inc()
+  }
+
   await clerkClient.users.updateUserMetadata(user.id, {
     privateMetadata: {
       role: newUser.role || 'SUBACCOUNT_USER',

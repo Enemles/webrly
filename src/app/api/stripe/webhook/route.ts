@@ -3,6 +3,7 @@ import { headers } from 'next/headers'
 import Stripe from 'stripe'
 import { subscriptionCreated } from '@/lib/stripe/stripe-actions'
 import stripe from '@/lib/stripe'
+import { stripePaymentTotal } from '@/lib/real-metrics'
 
 const stripeWebhookEvents = new Set([
   'product.created',
@@ -31,6 +32,7 @@ export async function POST(req: NextRequest) {
     stripeEvent = stripe.webhooks.constructEvent(body, sig, webhookSecret)
   } catch (error: any) {
     console.log(`🔴 Error ${error.message}`)
+    stripePaymentTotal.inc({ status: 'invalid_signature', event_type: 'unknown' })
     return new NextResponse(`Webhook Error: ${error.message}`, { status: 400 })
   }
 
@@ -51,6 +53,7 @@ export async function POST(req: NextRequest) {
                 subscription.customer as string
               )
               console.log('CREATED FROM WEBHOOK 💳', subscription)
+              stripePaymentTotal.inc({ status: 'success', event_type: stripeEvent.type })
             } else {
               console.log(
                 'SKIPPED AT CREATED FROM WEBHOOK 💳 because subscription status is not active',
@@ -71,6 +74,7 @@ export async function POST(req: NextRequest) {
     }
   } catch (error) {
     console.log(error)
+    stripePaymentTotal.inc({ status: 'error', event_type: stripeEvent?.type ?? 'unknown' })
     return new NextResponse('🔴 Webhook Error', { status: 400 })
   }
   return NextResponse.json(

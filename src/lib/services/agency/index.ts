@@ -1,6 +1,7 @@
 'use server'
 
 import { db } from "@/lib/db"
+import { agencyCreatedTotal } from "@/lib/real-metrics"
 import { logger } from "@/lib/utils"
 import { Agency, Plan } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
@@ -131,6 +132,9 @@ export const upsertAgency = async (agency: Agency, price?: Plan) => {
         },
       },
     })
+    if (!existing) {
+      agencyCreatedTotal.inc()
+    }
     return agencyDetails
   } catch (error) {
     console.error('[upsertAgency] Prisma error:', error)
