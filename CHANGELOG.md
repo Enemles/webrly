@@ -3,6 +3,13 @@
 Tous les changements notables de ce projet seront documentés dans ce fichier.
 
 
+## [2.14.0](https://github.com/Enemles/webrly/compare/v2.13.15...v2.14.0) (2026-05-17)
+
+
+### Features
+
+* **metrics:** secure /api/metrics + add business event counters ([6519a26](https://github.com/Enemles/webrly/commit/6519a26013b39e1a384e11a2b1d1e66bbb535943))
+
 ### [2.13.15](https://github.com/Enemles/webrly/compare/v2.13.14...v2.13.15) (2026-05-16)
 
 
