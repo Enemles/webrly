@@ -1,6 +1,7 @@
 'use server'
 
 import { db } from "@/lib/db"
+import { boutiqueCreatedTotal } from "@/lib/real-metrics"
 import { SubAccount } from '@prisma/client'
 import { v4 } from 'uuid'
 
@@ -102,6 +103,9 @@ export const upsertSubAccount = async (subAccount: SubAccount) => {
       },
     }
   })
+    if (!existing) {
+      boutiqueCreatedTotal.inc()
+    }
     return response
   } catch (error) {
     console.error('[upsertSubAccount] Prisma error:', error)

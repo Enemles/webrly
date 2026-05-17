@@ -83,6 +83,32 @@ export const ticketsCreatedToday = new client.Gauge({
   registers: [register],
 });
 
+// Compteurs incrémentés au runtime par les Server Actions / webhooks
+export const signupsTotal = new client.Counter({
+  name: 'webrly_signups_total',
+  help: 'Total user signups (first time initUser hits the create branch)',
+  registers: [register],
+});
+
+export const agencyCreatedTotal = new client.Counter({
+  name: 'webrly_agency_created_total',
+  help: 'Total agencies created (upsertAgency create branch)',
+  registers: [register],
+});
+
+export const boutiqueCreatedTotal = new client.Counter({
+  name: 'webrly_boutique_created_total',
+  help: 'Total sub-accounts (boutiques) created (upsertSubAccount create branch)',
+  registers: [register],
+});
+
+export const stripePaymentTotal = new client.Counter({
+  name: 'webrly_stripe_payment_total',
+  help: 'Total Stripe webhook events processed for platform subscriptions',
+  labelNames: ['status', 'event_type'] as const,
+  registers: [register],
+});
+
 // Fonction pour mettre à jour toutes les métriques réelles
 export async function updateRealMetrics() {
   try {
