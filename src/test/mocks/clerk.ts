@@ -40,8 +40,8 @@ export const setupClerkMocks = () => {
   // Mock @clerk/nextjs
   vi.mock('@clerk/nextjs', () => ({
     currentUser: mockCurrentUser,
-    clerkClient: mockClerkClient,
-    auth: vi.fn(() => ({
+    clerkClient: vi.fn(() => mockClerkClient),
+    auth: vi.fn(async () => ({
       userId: 'user_test123',
       sessionId: 'sess_test123',
       orgId: null,
@@ -56,8 +56,8 @@ export const setupClerkMocks = () => {
   // Mock @clerk/nextjs/server
   vi.mock('@clerk/nextjs/server', () => ({
     currentUser: mockCurrentUser,
-    clerkClient: mockClerkClient,
-    auth: vi.fn(() => ({
+    clerkClient: vi.fn(() => mockClerkClient),
+    auth: vi.fn(async () => ({
       userId: 'user_test123',
       sessionId: 'sess_test123',
       orgId: null,

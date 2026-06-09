@@ -3,7 +3,7 @@
 import { db } from "@/lib/db"
 import { signupsTotal } from "@/lib/real-metrics"
 import { saveActivityLogsNotification } from "@/lib/services/notification"
-import { clerkClient, currentUser } from '@clerk/nextjs'
+import { clerkClient, currentUser } from '@clerk/nextjs/server'
 import { redirect } from "next/navigation"
 import { Role, User } from '@prisma/client'
 
@@ -77,7 +77,7 @@ export const verifyAndAcceptInvitation = async () => {
     })
 
     if (userDetails) {
-      await clerkClient.users.updateUserMetadata(user.id, {
+      await (await clerkClient()).users.updateUserMetadata(user.id, {
         privateMetadata: {
           role: userDetails.role || 'SUBACCOUNT_USER',
         },
@@ -144,7 +144,7 @@ export const initUser = async (newUser: Partial<User>) => {
     signupsTotal.inc()
   }
 
-  await clerkClient.users.updateUserMetadata(user.id, {
+  await (await clerkClient()).users.updateUserMetadata(user.id, {
     privateMetadata: {
       role: newUser.role || 'SUBACCOUNT_USER',
     },
@@ -242,7 +242,7 @@ export const updateUser = async (user: Partial<User>) => {
 
     if (response.id) {
       try {
-        await clerkClient.users.updateUserMetadata(response.id, {
+        await (await clerkClient()).users.updateUserMetadata(response.id, {
           privateMetadata: {
             role: user.role || 'SUBACCOUNT_USER',
           },
@@ -270,7 +270,7 @@ export const getUser = async (id: string) => {
 }
 
 export const deleteUser = async (userId: string) => {
-  await clerkClient.users.updateUserMetadata(userId, {
+  await (await clerkClient()).users.updateUserMetadata(userId, {
     privateMetadata: {
       role: undefined,
     },
@@ -309,7 +309,7 @@ export const sendInvitation = async (
   });
 
   try {
-    const invitation = await clerkClient.invitations.createInvitation({
+    const invitation = await (await clerkClient()).invitations.createInvitation({
       emailAddress: email,
       redirectUrl: process.env.NEXT_PUBLIC_URL,
       publicMetadata: {

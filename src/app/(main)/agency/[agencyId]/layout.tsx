@@ -1,6 +1,6 @@
 import BlurPage from "@/components/global/blur-page";
 import Sidebar from "@/components/sidebar/sidebarServer";
-import { currentUser } from '@clerk/nextjs';
+import { currentUser } from '@clerk/nextjs/server';
 import { db } from '@/lib/db';
 import { redirect } from 'next/navigation';
 import React from "react";
