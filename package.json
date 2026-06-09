@@ -1,6 +1,6 @@
 {
   "name": "webrly",
-  "version": "2.15.0",
+  "version": "2.15.1",
   "type": "module",
   "private": true,
   "engines": {
