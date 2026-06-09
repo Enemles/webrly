@@ -28,6 +28,11 @@ runs:
 
     - name: 🔧 Installation des dépendances
       shell: bash
+      # NODE_ENV=development force l'installation des devDependencies (typescript, etc.),
+      # nécessaires à `next build` pour résoudre les alias @/* du tsconfig. Sans ça, le job
+      # build (NODE_ENV=production) skippe les devDeps -> "Module not found: Can't resolve '@/lib/*'".
+      env:
+        NODE_ENV: development
       run: pnpm install --frozen-lockfile
 
     - name: 🎭 Installation de Playwright
