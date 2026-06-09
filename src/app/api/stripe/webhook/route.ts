@@ -27,7 +27,10 @@ export async function POST(req: NextRequest) {
       console.log(
         '🔴 Error Stripe webhook secret or the signature does not exist.'
       )
-      return
+      return new NextResponse(
+        'Webhook Error: missing signature or secret',
+        { status: 400 }
+      )
     }
     stripeEvent = stripe.webhooks.constructEvent(body, sig, webhookSecret)
   } catch (error: any) {
