@@ -3,7 +3,9 @@ import { PrismaClient } from '@prisma/client'
 
 // Types d'aide pour les mocks
 export type MockedPrismaClient = {
-  [K in keyof PrismaClient]: PrismaClient[K] extends object
+  [K in keyof PrismaClient]: PrismaClient[K] extends (...args: any[]) => any
+    ? ReturnType<typeof vi.fn>
+    : PrismaClient[K] extends object
     ? {
         [P in keyof PrismaClient[K]]: PrismaClient[K][P] extends Function
           ? ReturnType<typeof vi.fn>
