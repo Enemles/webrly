@@ -3,6 +3,20 @@
 Tous les changements notables de ce projet seront documentés dans ce fichier.
 
 
+## [2.15.0](https://github.com/Enemles/webrly/compare/v2.14.0...v2.15.0) (2026-06-09)
+
+
+### Features
+
+* **auth:** migrer Clerk v4 -> v6 (Next 14 inchangé) ([d08d0a3](https://github.com/Enemles/webrly/commit/d08d0a3f9d67a147fa95dcd626e1dbc96cab4810))
+
+
+### Bug Fixes
+
+* **ci:** installer les devDependencies pour le build ([93017ca](https://github.com/Enemles/webrly/commit/93017cacc1816d9b62f67fdde350ffd2a2ae37bc))
+* **notification:** skip proprement quand l'agencyId est introuvable ([58ecc9a](https://github.com/Enemles/webrly/commit/58ecc9a8b2ef410430616b9cfbccee973f37c62a))
+* **tests:** verdir la baseline tsc + vitest ([7426a4e](https://github.com/Enemles/webrly/commit/7426a4ed78118d8e6e0f3fe70315bac628d7c65a))
+
 ## [2.14.0](https://github.com/Enemles/webrly/compare/v2.13.15...v2.14.0) (2026-05-17)
 
 
