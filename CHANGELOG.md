@@ -3,6 +3,13 @@
 Tous les changements notables de ce projet seront documentés dans ce fichier.
 
 
+### [2.14.1](https://github.com/Enemles/webrly/compare/v2.14.0...v2.14.1) (2026-06-09)
+
+
+### Bug Fixes
+
+* **notification:** skip proprement quand l'agencyId est introuvable ([58ecc9a](https://github.com/Enemles/webrly/commit/58ecc9a8b2ef410430616b9cfbccee973f37c62a))
+
 ## [2.14.0](https://github.com/Enemles/webrly/compare/v2.13.15...v2.14.0) (2026-05-17)
 
 
