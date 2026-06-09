@@ -219,17 +219,25 @@ describe.skip('Notification Service', () => {
     })
 
     describe('gestion des erreurs', () => {
-      it('devrait lever une erreur si ni agencyId ni subaccountId fournis', async () => {
+      it('devrait skip (warn + early return) si ni agencyId ni subaccountId fournis', async () => {
         // Arrange
         const description = 'Test action'
         const userData = createMockUser()
+        const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
         mockLoggedInUser()
         mockPrisma.user.findUnique.mockResolvedValue(userData)
 
-        // Act & Assert
-        await expect(
-          saveActivityLogsNotification({ description })
-        ).rejects.toThrow('You need to provide atleast an agency Id or subaccount Id')
+        // Act
+        const result = await saveActivityLogsNotification({ description })
+
+        // Assert
+        expect(result).toBeUndefined()
+        expect(consoleWarnSpy).toHaveBeenCalledWith(
+          '[saveActivityLogsNotification] ni agencyId ni subaccountId, skip'
+        )
+        expect(mockPrisma.notification.create).not.toHaveBeenCalled()
+
+        consoleWarnSpy.mockRestore()
       })
 
       it('devrait récupérer l\'agencyId depuis le subaccount si pas fourni', async () => {

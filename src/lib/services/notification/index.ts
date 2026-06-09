@@ -56,14 +56,17 @@ export const saveActivityLogsNotification = async ({
   let foundAgencyId = agencyId
   if (!foundAgencyId) {
     if (!subaccountId) {
-      throw new Error(
-        'You need to provide atleast an agency Id or subaccount Id'
-      )
+      console.warn('[saveActivityLogsNotification] ni agencyId ni subaccountId, skip')
+      return
     }
     const response = await db.subAccount.findUnique({
       where: { id: subaccountId },
     })
     if (response) foundAgencyId = response.agencyId
+  }
+  if (!foundAgencyId) {
+    console.warn('[saveActivityLogsNotification] agencyId introuvable pour subaccountId', subaccountId)
+    return
   }
   if (subaccountId) {
     await db.notification.create({
