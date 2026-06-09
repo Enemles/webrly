@@ -11,10 +11,11 @@ import { Badge } from "@/components/ui/badge"
 import CreateContactButton from "./_components/create-contact-btn"
 
 type Props = {
-  params: { subaccountId: string }
+  params: Promise<{ subaccountId: string }>
 }
 
-const SubaccountContactPage = async ({ params }: Props) => {
+const SubaccountContactPage = async (props: Props) => {
+  const params = await props.params;
   const contacts = await db.subAccount.findUnique({
     where: { id: params.subaccountId },
     include: {

@@ -5,11 +5,12 @@ import { currentUser } from "@clerk/nextjs/server";
 import { Plan } from "@prisma/client";
 import { redirect } from "next/navigation";
 
-const Page = async ({
-  searchParams,
-}: {
-  searchParams: { plan: Plan; state: string; code: string }
-}) => {
+const Page = async (
+  props: {
+    searchParams: Promise<{ plan: Plan; state: string; code: string }>
+  }
+) => {
+  const searchParams = await props.searchParams;
   const agencyId = await verifyAndAcceptInvitation()
 
   const user = await getAuthUserDetails()

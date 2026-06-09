@@ -16,9 +16,6 @@ const nextConfig = {
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
   reactStrictMode: false,
-  experimental: {
-    instrumentationHook: true,
-  },
 }
 
 export default withSentryConfig(nextConfig, {

@@ -9,13 +9,14 @@ import PipelineSettings from '../_components/pipeline-settings'
 import PipelineView from '../_components/pipeline-view'
 
 type Props = {
-  params: {
+  params: Promise<{
     subaccountId: string,
     pipelineId: string
-  }
+  }>
 }
 
-const Pipelines = async ({ params }: Props) => {
+const Pipelines = async (props: Props) => {
+  const params = await props.params;
   const pipelineDetails = await getPipelineDetails(params.pipelineId)
 
   if (!pipelineDetails) {

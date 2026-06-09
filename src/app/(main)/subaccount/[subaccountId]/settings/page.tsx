@@ -6,10 +6,11 @@ import { currentUser } from '@clerk/nextjs/server'
 import React from 'react'
 
 type Props = {
-  params: { subaccountId: string }
+  params: Promise<{ subaccountId: string }>
 }
 
-const SubaccountSettingPage = async ({ params }: Props) => {
+const SubaccountSettingPage = async (props: Props) => {
+  const params = await props.params;
   const authUser = await currentUser()
   if (!authUser) return
   const userDetails = await db.user.findUnique({

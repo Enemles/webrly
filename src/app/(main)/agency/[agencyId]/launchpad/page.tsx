@@ -9,15 +9,17 @@ import Link from 'next/link'
 import React from 'react'
 
 type Props = {
-  params: {
+  params: Promise<{
     agencyId: string;
-  }
-  searchParams: {
+  }>
+  searchParams: Promise<{
     code: string;
-  }
+  }>
 }
 
-const LaunchPad = async ({ params, searchParams }: Props) => {
+const LaunchPad = async (props: Props) => {
+  const searchParams = await props.searchParams;
+  const params = await props.params;
 
   const agencyDetails = await db.agency.findUnique({ where: { id: params.agencyId } })
 

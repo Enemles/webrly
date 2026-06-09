@@ -19,7 +19,7 @@ const stripeWebhookEvents = new Set([
 export async function POST(req: NextRequest) {
   let stripeEvent: Stripe.Event
   const body = await req.text()
-  const sig = headers().get('Stripe-Signature')
+  const sig = (await headers()).get('Stripe-Signature')
   const webhookSecret =
     process.env.STRIPE_WEBHOOK_SECRET_LIVE ?? process.env.STRIPE_WEBHOOK_SECRET
   try {

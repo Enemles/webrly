@@ -7,10 +7,11 @@ import { getAuthUserGroup } from '@/lib/services/auth'
 import { getAgencyDetails } from '@/lib/services/agency'
 
 type Props = {
-  params: { agencyId: string }
+  params: Promise<{ agencyId: string }>
 }
 
-const TeamPage = async ({ params }: Props) => {
+const TeamPage = async (props: Props) => {
+  const params = await props.params;
   // Le layout gère déjà l'auth, plus besoin de vérifications redondantes
   const teamMembers = await getAuthUserGroup(params.agencyId)
   const agencyDetails = await getAgencyDetails(params.agencyId)

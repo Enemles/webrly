@@ -7,12 +7,18 @@ import React from "react";
 
 type Props = {
   children: React.ReactNode;
-  params: {
+  params: Promise<{
     agencyId: string;
-  }
+  }>
 }
 
-const layout = async ({ children, params }: Props) => {
+const layout = async (props: Props) => {
+  const params = await props.params;
+
+  const {
+    children
+  } = props;
+
   const authUser = await currentUser()
   if (!authUser) return redirect('/sign-in')
 

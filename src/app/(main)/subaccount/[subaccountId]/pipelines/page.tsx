@@ -3,14 +3,15 @@ import React from 'react'
 import { getPipelinesAction, createPipelineAction } from '@/lib/actions/pipeline'
 
 type Props = {
-  params: {
+  params: Promise<{
     subaccountId: string
-  }
+  }>
 }
 
-const Pipelines = async ({ params }: Props) => {
+const Pipelines = async (props: Props) => {
+  const params = await props.params;
   // Le layout gère déjà l'auth, plus besoin de vérifications redondantes
-  
+
   // Utilisation du service d'action au lieu d'accès direct à la DB
   const existingPipelines = await getPipelinesAction(params.subaccountId)
 

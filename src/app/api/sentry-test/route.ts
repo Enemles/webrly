@@ -72,7 +72,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       metadata: { 
         testType: 'server-post-error',
         userAgent: request.headers.get('user-agent'),
-        ip: request.ip
+        ip: request.headers.get('x-forwarded-for') ?? 'unknown'
       }
     });
 

@@ -7,10 +7,16 @@ import React from 'react'
 
 type Props = {
   children: React.ReactNode
-  params: { subaccountId: string }
+  params: Promise<{ subaccountId: string }>
 }
 
-const SubaccountLayout = async ({ children, params }: Props) => {
+const SubaccountLayout = async (props: Props) => {
+  const params = await props.params;
+
+  const {
+    children
+  } = props;
+
   const authUser = await currentUser()
   if (!authUser) return redirect('/sign-in')
 

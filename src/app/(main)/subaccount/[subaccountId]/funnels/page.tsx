@@ -7,7 +7,8 @@ import BlurPage from '@/components/global/blur-page'
 import CreateFunnelForm from '@/components/forms/create-funnel-form'
 import { getFunnels } from '@/lib/services/funnel'
 
-const Funnels = async ({ params }: { params: { subaccountId: string } }) => {
+const Funnels = async (props: { params: Promise<{ subaccountId: string }> }) => {
+  const params = await props.params;
   const funnels = await getFunnels(params.subaccountId)
   if (!funnels) return null
 
