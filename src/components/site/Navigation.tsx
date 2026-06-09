@@ -2,7 +2,8 @@ import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 
-import { UserButton, currentUser } from "@clerk/nextjs";
+import { UserButton } from "@clerk/nextjs";
+import { currentUser } from "@clerk/nextjs/server";
 
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";

@@ -1,7 +1,7 @@
 import AgencyDetails from '@/components/forms/agency-details';
 import UserDetails from '@/components/forms/user-details';
 import { db } from '@/lib/db';
-import { currentUser } from '@clerk/nextjs';
+import { currentUser } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import React from 'react'
 
