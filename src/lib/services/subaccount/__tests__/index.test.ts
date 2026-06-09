@@ -146,17 +146,23 @@ describe('SubAccount Service', () => {
         companyEmail: 'test@subaccount.com'
       })
       const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
-      
+      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+
       mockPrisma.user.findFirst.mockResolvedValue(null) // Pas d'owner trouvé
 
       // Act
       const result = await upsertSubAccount(subAccountData)
 
       // Assert
-      expect(consoleLogSpy).toHaveBeenCalledWith('Could not create subaccount')
+      expect(result).toBeNull()
+      expect(consoleWarnSpy).toHaveBeenCalledWith(
+        '[upsertSubAccount] agency owner introuvable pour agencyId',
+        subAccountData.agencyId
+      )
       expect(mockPrisma.subAccount.upsert).not.toHaveBeenCalled()
-      
+
       consoleLogSpy.mockRestore()
+      consoleWarnSpy.mockRestore()
     })
 
     it('devrait correctement configurer tous les liens de sidebar', async () => {

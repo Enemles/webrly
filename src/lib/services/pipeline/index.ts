@@ -203,7 +203,7 @@ export const deleteTicket = async (ticketId: string) => {
 
 export const upsertTag = async (
   subaccountId: string,
-  tag: Prisma.TagUncheckedCreateInput
+  tag: Omit<Prisma.TagUncheckedCreateInput, 'subAccountId'>
 ) => {
   const response = await db.tag.upsert({
     where: { id: tag.id || v4(), subAccountId: subaccountId },
