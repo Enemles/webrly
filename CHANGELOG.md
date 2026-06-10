@@ -3,6 +3,13 @@
 Tous les changements notables de ce projet seront documentés dans ce fichier.
 
 
+### [2.16.1](https://github.com/Enemles/webrly/compare/v2.16.0...v2.16.1) (2026-06-10)
+
+
+### Bug Fixes
+
+* **auth:** surface l'erreur Clerk réelle quand sendInvitation échoue ([9d25c66](https://github.com/Enemles/webrly/commit/9d25c667bf3bd524df33f47e18e1e334a2bd2196))
+
 ## [2.16.0](https://github.com/Enemles/webrly/compare/v2.15.1...v2.16.0) (2026-06-10)
 
 
