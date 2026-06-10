@@ -1,6 +1,7 @@
 'use server'
 
 import { db } from "@/lib/db"
+import { logger } from "@/lib/utils"
 import { signupsTotal } from "@/lib/real-metrics"
 import { saveActivityLogsNotification } from "@/lib/services/notification"
 import { clerkClient, currentUser } from '@clerk/nextjs/server'
@@ -309,7 +310,7 @@ export const sendInvitation = async (
   });
 
   try {
-    const invitation = await (await clerkClient()).invitations.createInvitation({
+    await (await clerkClient()).invitations.createInvitation({
       emailAddress: email,
       redirectUrl: process.env.NEXT_PUBLIC_URL,
       publicMetadata: {
@@ -318,10 +319,33 @@ export const sendInvitation = async (
       },
     });
   } catch (error) {
-    // If Clerk invitation fails, delete the database record we just created
+    // L'invitation Clerk a échoué -> on annule la ligne créée en base juste avant.
     await db.invitation.delete({ where: { id: response.id } });
-    console.log(error);
-    throw error;
+
+    // Clerk renvoie une ClerkAPIResponseError : le détail exploitable (code +
+    // longMessage, ex. redirect_url non autorisé en prod) vit dans `error.errors`,
+    // alors que `error.message` n'est qu'un générique "Bad Request". On le remonte
+    // à Sentry via le logger et on le surface proprement à l'appelant.
+    const clerkErrors = (
+      error as { errors?: { code?: string; message?: string; longMessage?: string }[] }
+    )?.errors;
+    logger.error("Échec de l'envoi d'invitation Clerk", {
+      component: 'sendInvitation',
+      metadata: {
+        email,
+        agencyId,
+        role,
+        redirectUrl: process.env.NEXT_PUBLIC_URL,
+        clerkErrors,
+      },
+      error: error instanceof Error ? error : new Error(String(error)),
+    });
+
+    throw new Error(
+      clerkErrors?.[0]?.longMessage ||
+        clerkErrors?.[0]?.message ||
+        "L'invitation n'a pas pu être envoyée."
+    );
   }
 
   return response;
