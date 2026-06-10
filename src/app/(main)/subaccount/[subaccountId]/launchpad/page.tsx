@@ -10,16 +10,18 @@ import Link from 'next/link'
 import React from 'react'
 
 type Props = {
-  searchParams: {
+  searchParams: Promise<{
     state: string,
     code: string,
-  },
-  params: {
+  }>,
+  params: Promise<{
     subaccountId: string
-  }
+  }>
 }
 
-const Page = async ({ params, searchParams }: Props) => {
+const Page = async (props: Props) => {
+  const searchParams = await props.searchParams;
+  const params = await props.params;
 
   const subaccountDetails = await db.subAccount.findUnique({
     where: {

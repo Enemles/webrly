@@ -3,12 +3,13 @@ import { getMedia } from "@/lib/services/media";
 import React from "react";
 
 type Props = {
-  params: {
+  params: Promise<{
     subaccountId: string
-  }
+  }>
 }
 
-const Page = async ({ params }: Props) => {
+const Page = async (props: Props) => {
+  const params = await props.params;
 
   const data = await getMedia(params.subaccountId)
   return <>
@@ -17,7 +18,6 @@ const Page = async ({ params }: Props) => {
       subaccountId={params.subaccountId}>
     </MediaComponent>
   </>
-
 }
 
 export default Page

@@ -5,13 +5,14 @@ import { redirect } from 'next/navigation'
 import React from 'react'
 
 type Props = {
-  searchParams: {
+  searchParams: Promise<{
     state: string,
     code: string,
-  }
+  }>
 }
 
-const Page = async ({ searchParams }: Props) => {
+const Page = async (props: Props) => {
+  const searchParams = await props.searchParams;
   const agencyId = await verifyAndAcceptInvitation()
 
   if (!agencyId) {
@@ -36,7 +37,6 @@ const Page = async ({ searchParams }: Props) => {
   }
 
   return <Unauthorized />
-
 }
 
 export default Page

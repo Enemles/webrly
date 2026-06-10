@@ -5,17 +5,12 @@ import { InfiniteMovingCards } from "@/components/modules/landing/InfiniteMoving
 import { StickyScroll } from "@/components/modules/landing/StickyScrollReveal";
 import { buttonVariants } from "@/components/ui/button";
 import MaxWidthWrapper from "@/components/ui/max-width-wrapper";
-import stripe from "@/lib/stripe";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 
 export const dynamic = 'force-dynamic'
 
 export default async function Home() {
-  const prices = await stripe.prices.list({
-    product: process.env.NEXT_WEBRLY_PRODUCT_ID,
-    active: true,
-  })
   return (
     <div className="h-full">
       <section className="w-full relative">

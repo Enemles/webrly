@@ -10,12 +10,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import clsx from 'clsx'
 
 type Props = {
-  params: {
+  params: Promise<{
     agencyId: string
-  }
+  }>
 }
 
-const Billing = async ({ params }: Props) => {
+const Billing = async (props: Props) => {
+  const params = await props.params;
 
   const addOns = await stripe.products.list({
     ids: addOnProducts.map((product) => product.id),

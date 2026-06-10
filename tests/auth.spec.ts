@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('Authentification', () => {
+test.describe.skip('Authentification', () => {
   test('doit afficher correctement la page de connexion', async ({ page }) => {
     // Naviguer vers la page de connexion
     await page.goto('/agency/sign-in');

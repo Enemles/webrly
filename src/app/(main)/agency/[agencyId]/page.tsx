@@ -21,17 +21,18 @@ import {
 import Link from 'next/link'
 import React from 'react'
 
-const Page = async ({
-  params,
-}: {
-  params: { agencyId: string }
-  searchParams: { code: string }
-}) => {
+const Page = async (
+  props: {
+    params: Promise<{ agencyId: string }>
+    searchParams: Promise<{ code: string }>
+  }
+) => {
+  const params = await props.params;
   const currentYear = new Date().getFullYear()
-  
+
   // Récupération des métriques via le service
   const analytics = await getAgencyAnalytics(params.agencyId)
-  
+
   // Valeurs par défaut si pas de données Stripe
   const defaultValues = {
     currency: 'EUR',

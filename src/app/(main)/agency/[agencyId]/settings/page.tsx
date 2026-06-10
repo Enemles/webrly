@@ -6,12 +6,13 @@ import { redirect } from 'next/navigation';
 import React from 'react'
 
 type Props = {
-  params: {
+  params: Promise<{
     agencyId: string;
-  }
+  }>
 }
 
-const Settings = async ({ params }: Props) => {
+const Settings = async (props: Props) => {
+  const params = await props.params;
   const authUser = await currentUser()
   if (!authUser) {
     redirect('/sign-in')

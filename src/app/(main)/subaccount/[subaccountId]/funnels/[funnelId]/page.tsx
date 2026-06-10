@@ -7,13 +7,14 @@ import FunnelSettings from "./_components/funnel-settings";
 import FunnelSteps from "./_components/funnel-steps";
 
 type Props = {
-  params: {
+  params: Promise<{
     funnelId: string;
     subaccountId: string
-  }
+  }>
 }
 
-const FunnelPage = async ({ params }: Props) => {
+const FunnelPage = async (props: Props) => {
+  const params = await props.params;
   const funnelPages = await getFunnel(params.funnelId)
   if (!funnelPages)
     return redirect(`/subaccount/${params.subaccountId}/funnels`)

@@ -19,7 +19,7 @@ const stripeWebhookEvents = new Set([
 export async function POST(req: NextRequest) {
   let stripeEvent: Stripe.Event
   const body = await req.text()
-  const sig = headers().get('Stripe-Signature')
+  const sig = (await headers()).get('Stripe-Signature')
   const webhookSecret =
     process.env.STRIPE_WEBHOOK_SECRET_LIVE ?? process.env.STRIPE_WEBHOOK_SECRET
   try {
@@ -27,7 +27,10 @@ export async function POST(req: NextRequest) {
       console.log(
         '🔴 Error Stripe webhook secret or the signature does not exist.'
       )
-      return
+      return new NextResponse(
+        'Webhook Error: missing signature or secret',
+        { status: 400 }
+      )
     }
     stripeEvent = stripe.webhooks.constructEvent(body, sig, webhookSecret)
   } catch (error: any) {

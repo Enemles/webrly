@@ -27,7 +27,12 @@ export default defineConfig({
   timeout: 60000,
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
-    baseURL: 'http://localhost:3000',
+    baseURL: 'http://127.0.0.1:3000',
+
+    /* En CI, le runner a un proxy (HTTP_PROXY) que chromium applique meme aux
+       requetes locales -> net::ERR_NAME_NOT_RESOLVED sur 127.0.0.1. On force une
+       connexion directe (pas de proxy) pour les tests locaux. */
+    launchOptions: { args: ['--no-proxy-server'] },
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on',
@@ -68,7 +73,7 @@ export default defineConfig({
   // Désactiver temporairement le lancement automatique du serveur
   // webServer: {
   //   command: 'pnpm run dev',
-  //   url: 'http://localhost:3000',
+  //   url: 'http://127.0.0.1:3000',
   //   reuseExistingServer: true,
   //   timeout: 120000,
   // },
