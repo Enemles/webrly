@@ -29,6 +29,11 @@ export default defineConfig({
     /* Base URL to use in actions like `await page.goto('/')`. */
     baseURL: 'http://127.0.0.1:3000',
 
+    /* En CI, le runner a un proxy (HTTP_PROXY) que chromium applique meme aux
+       requetes locales -> net::ERR_NAME_NOT_RESOLVED sur 127.0.0.1. On force une
+       connexion directe (pas de proxy) pour les tests locaux. */
+    launchOptions: { args: ['--no-proxy-server'] },
+
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on',
     screenshot: 'on',
