@@ -90,6 +90,14 @@ jobs:
     if: github.event_name == 'pull_request'
     env:
       # Variables nécessaires pour les tests E2E - valeurs factices mais valides
+      # Désactive tout proxy hérité du runner pour que chromium (Playwright) joigne
+      # directement le serveur local (sinon net::ERR_NAME_NOT_RESOLVED sur 127.0.0.1).
+      HTTP_PROXY: ''
+      HTTPS_PROXY: ''
+      http_proxy: ''
+      https_proxy: ''
+      NO_PROXY: '*'
+      no_proxy: '*'
       DATABASE_URL: postgresql://testuser:testpass@localhost:5432/testdb
       STRIPE_SECRET_KEY: sk_test_51234567890123456789012345678901234567890123456789012345678901234
       NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: pk_test_51234567890123456789012345678901234567890123456789012345678901234
