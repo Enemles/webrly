@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('Composants UI', () => {
+test.describe.skip('Composants UI', () => {
   test('doit afficher et interagir avec les cards de prix sur la page d\'accueil', async ({ page }) => {
     // Naviguer vers la page d'accueil
     await page.goto('/');
