@@ -3,6 +3,24 @@
 Tous les changements notables de ce projet seront documentés dans ce fichier.
 
 
+## [2.16.0](https://github.com/Enemles/webrly/compare/v2.15.1...v2.16.0) (2026-06-10)
+
+
+### Features
+
+* **next:** Next 14 (EOL) -> Next 16 + request APIs async (Phase C) ([9e4fcea](https://github.com/Enemles/webrly/commit/9e4fcea12b211ebc62255afe01ff1d3473572961))
+
+
+### Bug Fixes
+
+* **ci:** E2E - 127.0.0.1 au lieu de localhost (chromium ERR_NAME_NOT_RESOLVED en CI) ([efb268c](https://github.com/Enemles/webrly/commit/efb268c7d1f36f9d5e609fc6ef16839897d1cb8e))
+* **ci:** E2E - chromium --no-proxy-server (proxy du runner cassait l'acces 127.0.0.1) ([f18caec](https://github.com/Enemles/webrly/commit/f18caec2ef81977ad41f15e567f46f8604802c94))
+* **ci:** E2E - cle Clerk format valide + retrait fetch Stripe mort + skip specs sans creds ([ca0e989](https://github.com/Enemles/webrly/commit/ca0e9895bb05aa97e65a1166ca2daa549ec22127))
+* **ci:** E2E - desactive le proxy du runner pour chromium (NO_PROXY/HTTP_PROXY vides) ([ea39db9](https://github.com/Enemles/webrly/commit/ea39db9fd561258799b8a7d01d75c493a68a4f3c))
+* **landing:** nesting HTML invalide (<p> contenant div/p) surface par Next 16 ([bcd5509](https://github.com/Enemles/webrly/commit/bcd550953e228cea7d06e08da7e88395a0c0de26))
+* **next16:** webhook renvoie une Response + footgun disabled au niveau des champs ([d4402e8](https://github.com/Enemles/webrly/commit/d4402e87aca3e153cb3cb1a5061e5880e6d8ff66))
+* **ui:** CardDescription rendu en <div> au lieu de <p> ([a92876a](https://github.com/Enemles/webrly/commit/a92876a3f7e8137314880b119c49c722c963df3c))
+
 ### [2.15.1](https://github.com/Enemles/webrly/compare/v2.15.0...v2.15.1) (2026-06-09)
 
 ## [2.15.0](https://github.com/Enemles/webrly/compare/v2.14.0...v2.15.0) (2026-06-09)
