@@ -27,7 +27,7 @@ export default defineConfig({
   timeout: 60000,
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
-    baseURL: 'http://localhost:3000',
+    baseURL: 'http://127.0.0.1:3000',
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on',
@@ -68,7 +68,7 @@ export default defineConfig({
   // Désactiver temporairement le lancement automatique du serveur
   // webServer: {
   //   command: 'pnpm run dev',
-  //   url: 'http://localhost:3000',
+  //   url: 'http://127.0.0.1:3000',
   //   reuseExistingServer: true,
   //   timeout: 120000,
   // },

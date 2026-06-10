@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test('Vérification de base du site', async ({ page }) => {
   // Visiter la page
   console.log('Navigation vers la page /site...');
-  await page.goto('http://localhost:3000/site');
+  await page.goto('http://127.0.0.1:3000/site');
   
   // Attendre que la page soit chargée
   console.log('Attente du chargement complet de la page...');
