@@ -3,6 +3,21 @@
 Tous les changements notables de ce projet seront documentés dans ce fichier.
 
 
+## [2.17.0](https://github.com/Enemles/webrly/compare/v2.16.1...v2.17.0) (2026-06-15)
+
+
+### Features
+
+* **analytics:** mode démo dashboard (mock Stripe) pour les vidéos de démo ([832be79](https://github.com/Enemles/webrly/commit/832be79dac65dd9e6cb30cd91993e91bdd1872f8))
+* **site:** refonte landing inspirée screen.studio — hero Silk vert + sections ([8d7fc45](https://github.com/Enemles/webrly/commit/8d7fc4593d5f272a47eff2e1234e2b291df46ce3))
+* **site:** section features en onglets (tabs) façon screen.studio ([97f9d53](https://github.com/Enemles/webrly/commit/97f9d5377388cffbcf2497754de84474b3ae1d31))
+* **site:** vraies vidéos démo + composants React Bits (MagicBento, ChromaGrid, GradualBlur) ([b19235d](https://github.com/Enemles/webrly/commit/b19235d31b603c9142e71b1948578c8e9e2837a3))
+
+
+### Bug Fixes
+
+* **seed:** logo en chemin relatif (/webrly-logo.svg) ([2c350a0](https://github.com/Enemles/webrly/commit/2c350a011ad303f830c55f178428f2e5221f5427))
+
 ### [2.16.1](https://github.com/Enemles/webrly/compare/v2.16.0...v2.16.1) (2026-06-10)
 
 
