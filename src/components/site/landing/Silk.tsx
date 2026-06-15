@@ -103,59 +103,91 @@ const Silk = ({
     const container = containerRef.current
     if (!container) return
 
-    const renderer = new Renderer({
-      alpha: false,
-      dpr: Math.min(typeof window !== 'undefined' ? window.devicePixelRatio : 1, 2),
-    })
-    const gl = renderer.gl
-    gl.clearColor(0, 0, 0, 1)
+    let cleanup = () => {}
 
-    const geometry = new Triangle(gl)
-    const program = new Program(gl, {
-      vertex: vertexShader,
-      fragment: fragmentShader,
-      uniforms: {
-        uTime: { value: 0 },
-        uColorDark: { value: new Color(...hexToRgb(colorDark)) },
-        uColorLight: { value: new Color(...hexToRgb(colorLight)) },
-        uSpeed: { value: speed },
-        uScale: { value: scale },
-        uRotation: { value: rotation },
-        uNoiseIntensity: { value: noiseIntensity },
-      },
-    })
-    const mesh = new Mesh(gl, { geometry, program })
+    // WebGL peut être indisponible (chromium headless, vieux navigateur, GPU
+    // bloqué) : on isole l'init pour ne jamais casser la page — dans ce cas le
+    // voile dégradé de HeroSilkBackground sert de fond.
+    try {
+      const renderer = new Renderer({
+        alpha: false,
+        dpr: Math.min(typeof window !== 'undefined' ? window.devicePixelRatio : 1, 2),
+      })
+      const gl = renderer.gl
+      gl.clearColor(0, 0, 0, 1)
 
-    const canvas = gl.canvas as HTMLCanvasElement
-    canvas.style.width = '100%'
-    canvas.style.height = '100%'
-    canvas.style.display = 'block'
+      const geometry = new Triangle(gl)
+      const program = new Program(gl, {
+        vertex: vertexShader,
+        fragment: fragmentShader,
+        uniforms: {
+          uTime: { value: 0 },
+          uColorDark: { value: new Color(...hexToRgb(colorDark)) },
+          uColorLight: { value: new Color(...hexToRgb(colorLight)) },
+          uSpeed: { value: speed },
+          uScale: { value: scale },
+          uRotation: { value: rotation },
+          uNoiseIntensity: { value: noiseIntensity },
+        },
+      })
+      const mesh = new Mesh(gl, { geometry, program })
 
-    const resize = () => {
-      renderer.setSize(container.clientWidth, container.clientHeight)
+      const canvas = gl.canvas as HTMLCanvasElement
+      canvas.style.width = '100%'
+      canvas.style.height = '100%'
+      canvas.style.display = 'block'
+
+      const resize = () => {
+        renderer.setSize(container.clientWidth, container.clientHeight)
+      }
+      window.addEventListener('resize', resize)
+      resize()
+      container.appendChild(canvas)
+
+      let raf = 0
+      let last = performance.now()
+      const tick = (t: number) => {
+        const dt = (t - last) / 1000
+        last = t
+        program.uniforms.uTime.value += 0.1 * dt
+        renderer.render({ scene: mesh })
+        raf = requestAnimationFrame(tick)
+      }
+      const start = () => {
+        if (raf) return
+        last = performance.now()
+        raf = requestAnimationFrame(tick)
+      }
+      const stop = () => {
+        if (!raf) return
+        cancelAnimationFrame(raf)
+        raf = 0
+      }
+
+      // Pause hors-écran (perf / batterie) et quand l'onglet est masqué.
+      const io = new IntersectionObserver(
+        ([entry]) => (entry.isIntersecting ? start() : stop()),
+        { threshold: 0 },
+      )
+      io.observe(container)
+      const onVisibility = () => (document.hidden ? stop() : start())
+      document.addEventListener('visibilitychange', onVisibility)
+      start()
+
+      cleanup = () => {
+        stop()
+        io.disconnect()
+        document.removeEventListener('visibilitychange', onVisibility)
+        window.removeEventListener('resize', resize)
+        if (canvas.parentNode) canvas.parentNode.removeChild(canvas)
+        const loseCtx = gl.getExtension('WEBGL_lose_context')
+        loseCtx?.loseContext()
+      }
+    } catch {
+      // Pas de WebGL : on laisse le fond dégradé (HeroSilkBackground).
     }
-    window.addEventListener('resize', resize)
-    resize()
-    container.appendChild(canvas)
 
-    let raf = 0
-    let last = performance.now()
-    const update = (t: number) => {
-      raf = requestAnimationFrame(update)
-      const dt = (t - last) / 1000
-      last = t
-      program.uniforms.uTime.value += 0.1 * dt
-      renderer.render({ scene: mesh })
-    }
-    raf = requestAnimationFrame(update)
-
-    return () => {
-      cancelAnimationFrame(raf)
-      window.removeEventListener('resize', resize)
-      if (canvas.parentNode) canvas.parentNode.removeChild(canvas)
-      const loseCtx = gl.getExtension('WEBGL_lose_context')
-      loseCtx?.loseContext()
-    }
+    return () => cleanup()
   }, [speed, scale, colorLight, colorDark, noiseIntensity, rotation])
 
   return <div ref={containerRef} className="h-full w-full" />

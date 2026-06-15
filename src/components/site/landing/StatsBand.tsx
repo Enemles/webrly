@@ -11,14 +11,11 @@ function Counter({ value, suffix }: { value: number; suffix?: string }) {
   const ref = useRef<HTMLSpanElement>(null)
   const inView = useInView(ref, { once: true, margin: '0px 0px -20% 0px' })
   const reduce = useReducedMotion()
-  const [current, setCurrent] = useState(reduce ? value : 0)
+  const [current, setCurrent] = useState(0)
 
   useEffect(() => {
-    if (reduce) {
-      setCurrent(value)
-      return
-    }
-    if (!inView) return
+    // Reduced-motion : pas d'animation (valeur finale dérivée au rendu).
+    if (reduce || !inView) return
     let raf = 0
     const start = performance.now()
     const duration = 1500
@@ -32,9 +29,10 @@ function Counter({ value, suffix }: { value: number; suffix?: string }) {
     return () => cancelAnimationFrame(raf)
   }, [inView, value, reduce])
 
+  const shown = reduce ? value : current
   const display = Number.isInteger(value)
-    ? Math.round(current).toLocaleString('en-US')
-    : current.toFixed(1)
+    ? Math.round(shown).toLocaleString('en-US')
+    : shown.toFixed(1)
 
   return (
     <span ref={ref}>
