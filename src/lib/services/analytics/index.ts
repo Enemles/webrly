@@ -1,6 +1,7 @@
 import { db } from '@/lib/db'
 import { AnalyticsMetrics, DateRange, FunnelPerformanceMetric } from '@/lib/types/analytics'
 import { getStripeAnalytics } from './stripe'
+import { buildDemoStripeMetrics, isDemoMode } from '@/lib/demo'
 
 /**
  * Génère une plage de dates pour l'année en cours
@@ -62,6 +63,11 @@ export async function getSubaccountAnalytics(subaccountId: string): Promise<Anal
 
   if (!subaccountDetails) {
     throw new Error('Subaccount non trouvé')
+  }
+
+  // Mode démo (vidéos de la landing) : métriques Stripe flatteuses, sans appel Stripe.
+  if (isDemoMode()) {
+    return { stripe: buildDemoStripeMetrics(), subAccountsCount: 0 }
   }
 
   let stripeMetrics = null
