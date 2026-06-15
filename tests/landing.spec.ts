@@ -56,4 +56,12 @@ test.describe('Landing page (refonte)', () => {
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
     expect(errors).toEqual([])
   })
+
+  test('les onglets de la section features changent au clic', async ({ page }) => {
+    await page.goto(SITE)
+    await page.locator('#features').scrollIntoViewIfNeeded()
+    const tab = page.getByRole('tab', { name: /See every deal at a glance/ })
+    await tab.click()
+    await expect(tab).toHaveAttribute('data-state', 'active')
+  })
 })
