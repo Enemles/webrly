@@ -1,6 +1,6 @@
 import MaxWidthWrapper from '@/components/ui/max-width-wrapper'
-import { BENTO } from '@/config/bento'
 
+import MagicBento from './MagicBento'
 import { ScrollReveal } from './ScrollReveal'
 
 export function BentoMore() {
@@ -16,22 +16,19 @@ export function BentoMore() {
           </p>
         </ScrollReveal>
 
-        <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {BENTO.map((item) => {
-            const Icon = item.icon
-            return (
-              <ScrollReveal key={item.title} className="h-full">
-                <div className="h-full rounded-2xl border border-border bg-card p-6 transition-colors hover:border-[#00df7a]/50">
-                  <div className="flex size-10 items-center justify-center rounded-lg bg-[#00df7a]/10 text-[#00df7a]">
-                    <Icon className="size-5" />
-                  </div>
-                  <h3 className="mt-4 font-semibold">{item.title}</h3>
-                  <p className="mt-2 text-sm text-muted-foreground">{item.description}</p>
-                </div>
-              </ScrollReveal>
-            )
-          })}
-        </div>
+        <ScrollReveal className="mt-12 flex justify-center">
+          <MagicBento
+            textAutoHide
+            enableStars
+            enableSpotlight
+            enableBorderGlow
+            enableTilt
+            enableMagnetism
+            clickEffect
+            spotlightRadius={300}
+            particleCount={12}
+          />
+        </ScrollReveal>
       </MaxWidthWrapper>
     </section>
   )

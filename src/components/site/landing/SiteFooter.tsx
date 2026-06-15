@@ -28,8 +28,10 @@ const COLUMNS: { title: string; links: { label: string; href: string }[] }[] = [
 ]
 
 export function SiteFooter() {
+  // pb élargi : laisse passer les mentions légales au-dessus du voile de flou
+  // fixe (GradualBlur ~7rem) ancré en bas du viewport sur la landing.
   return (
-    <footer className="border-t border-border py-16">
+    <footer className="border-t border-border pt-16 pb-36">
       <MaxWidthWrapper>
         <div className="grid gap-10 md:grid-cols-[2fr_1fr_1fr_1fr]">
           <div>
