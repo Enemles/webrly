@@ -6,4 +6,7 @@ export * from './use-mobile'
 export * from './use-form-submit'
 export * from './use-async-operation'
 export * from './use-modal-form'
-export * from './use-pipeline-data' 
+export * from './use-pipeline-data'
+
+// Refonte landing
+export * from './use-reduced-motion'

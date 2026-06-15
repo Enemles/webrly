@@ -7,7 +7,10 @@ const CLERK_USER_ID = process.env.SEED_CLERK_USER_ID
 const CLERK_USER_EMAIL = process.env.SEED_CLERK_USER_EMAIL
 const SEED_NAME = process.env.SEED_NAME || 'Démo Owner'
 const BASE_URL = process.env.SEED_BASE_URL || 'https://webrly.selmene.dev'
-const PLACEHOLDER_LOGO = `${BASE_URL}/webrly-logo.svg`
+// Chemin RELATIF : next/image rejette tout hostname absent de
+// next.config `images.remotePatterns` (ni localhost ni le domaine prod n'y
+// figurent) ; un asset local relatif passe toujours.
+const PLACEHOLDER_LOGO = '/webrly-logo.svg'
 const SEED_AVATAR = process.env.SEED_AVATAR || PLACEHOLDER_LOGO
 
 const AGENCY_NAME = 'Pulse Commerce — Démo'

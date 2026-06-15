@@ -146,6 +146,22 @@ B (255 */
   background-size: 25px 25px;
 }
 
+/* Utilitaires verts pour la refonte de la landing (identité Webrly) */
+.text-gradient-green {
+  background-image: linear-gradient(to top left, #00df7a, #00ecbc);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.bg-glow-green {
+  background-image: radial-gradient(
+    60% 60% at 50% 0%,
+    rgba(0, 223, 122, 0.18),
+    transparent 70%
+  );
+}
+
 .use-automation-zoom-in {
   animation: automation-zoom-in 0.5s;
 }
@@ -160,4 +176,99 @@ B (255 */
     opacity: 1;
     transform: scale(1);
   }
+}
+
+/* ChromaGrid — halo de couleur suivant le curseur sur la grille pricing
+   (React Bits, adapté : le fond/bordure des cartes restent gérés par Tailwind). */
+.chroma-grid {
+  position: relative;
+  --x: 50%;
+  --y: 50%;
+  --chroma-r: 340px;
+}
+
+.chroma-card {
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.3s ease;
+  --mouse-x: 50%;
+  --mouse-y: 50%;
+  --spotlight-color: rgba(255, 255, 255, 0.25);
+}
+
+.chroma-card:hover {
+  border-color: var(--card-border);
+}
+
+/* Halo doux ancré sur le curseur, révélé au survol de la carte. */
+.chroma-card--spotlight::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.45s ease;
+  background: radial-gradient(
+    circle at var(--mouse-x) var(--mouse-y),
+    var(--spotlight-color),
+    transparent 60%
+  );
+}
+
+.chroma-card--spotlight:hover::before {
+  opacity: 1;
+}
+
+/* Voile gris qui s'efface autour du curseur (couleur révélée au survol).
+   `overlay` grise les bords, `fade` grise le centre et s'estompe au mouvement.
+   NB: le `backdrop-filter` est posé en style inline dans ChromaGrid.tsx — le
+   minifieur CSS (lightningcss) supprime la version non préfixée ici. */
+.chroma-overlay,
+.chroma-fade {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.chroma-overlay {
+  z-index: 3;
+  -webkit-mask-image: radial-gradient(
+    circle var(--chroma-r) at var(--x) var(--y),
+    transparent 0%,
+    transparent 18%,
+    rgba(0, 0, 0, 0.3) 45%,
+    rgba(0, 0, 0, 0.6) 75%,
+    #000 100%
+  );
+  mask-image: radial-gradient(
+    circle var(--chroma-r) at var(--x) var(--y),
+    transparent 0%,
+    transparent 18%,
+    rgba(0, 0, 0, 0.3) 45%,
+    rgba(0, 0, 0, 0.6) 75%,
+    #000 100%
+  );
+}
+
+.chroma-fade {
+  z-index: 4;
+  opacity: 1;
+  transition: opacity 0.25s ease;
+  -webkit-mask-image: radial-gradient(
+    circle var(--chroma-r) at var(--x) var(--y),
+    #000 0%,
+    #000 18%,
+    rgba(0, 0, 0, 0.6) 45%,
+    rgba(0, 0, 0, 0.3) 75%,
+    transparent 100%
+  );
+  mask-image: radial-gradient(
+    circle var(--chroma-r) at var(--x) var(--y),
+    #000 0%,
+    #000 18%,
+    rgba(0, 0, 0, 0.6) 45%,
+    rgba(0, 0, 0, 0.3) 75%,
+    transparent 100%
+  );
 }
