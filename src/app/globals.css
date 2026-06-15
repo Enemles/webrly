@@ -146,6 +146,22 @@ B (255 */
   background-size: 25px 25px;
 }
 
+/* Utilitaires verts pour la refonte de la landing (identité Webrly) */
+.text-gradient-green {
+  background-image: linear-gradient(to top left, #00df7a, #00ecbc);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.bg-glow-green {
+  background-image: radial-gradient(
+    60% 60% at 50% 0%,
+    rgba(0, 223, 122, 0.18),
+    transparent 70%
+  );
+}
+
 .use-automation-zoom-in {
   animation: automation-zoom-in 0.5s;
 }

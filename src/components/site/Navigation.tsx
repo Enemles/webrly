@@ -9,8 +9,6 @@ import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import { FloatingNav } from "@/components/ui/floating-navbar";
 
-import { ModeToggle } from "../global/mode-toggle";
-
 interface NavigationProps {}
 
 const Navigation: React.FC<NavigationProps> = async ({}) => {
@@ -18,20 +16,16 @@ const Navigation: React.FC<NavigationProps> = async ({}) => {
   
   const navItems = [
     {
-      name: "Pricing",
-      link: "#",
-    },
-    {
-      name: "About",
-      link: "#",
-    },
-    {
-      name: "Documentation",
-      link: "#",
-    },
-    {
       name: "Features",
-      link: "#",
+      link: "#features",
+    },
+    {
+      name: "Pricing",
+      link: "#pricing",
+    },
+    {
+      name: "FAQ",
+      link: "#faq",
     },
   ];
 
@@ -52,7 +46,6 @@ const Navigation: React.FC<NavigationProps> = async ({}) => {
               {user ? "Dashboard" : "Get Started"}
             </Link>
             {user && <UserButton afterSignOutUrl="/" />}
-            <ModeToggle />
           </div>
         }
       />
