@@ -23,7 +23,8 @@ runs:
     - name: 🟢 Installation de Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '20.11.1'
+        # Même Node que l'image de prod : garder .nvmrc et NODE_IMAGE (Dockerfile) alignés
+        node-version-file: '.nvmrc'
         cache: 'pnpm'
 
     - name: 🔧 Installation des dépendances
