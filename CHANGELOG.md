@@ -3,6 +3,13 @@
 Tous les changements notables de ce projet seront documentés dans ce fichier.
 
 
+### [2.17.1](https://github.com/Enemles/webrly/compare/v2.17.0...v2.17.1) (2026-11-03)
+
+
+### Bug Fixes
+
+* **security:** Next 16.4.4, sharp 0.35.5 et Node 22.23.4 (image Docker standalone) ([1841eed](https://github.com/Enemles/webrly/commit/1841eed9981faad593de870ac56c7e1d29c37667))
+
 ## [2.17.0](https://github.com/Enemles/webrly/compare/v2.16.1...v2.17.0) (2026-06-15)
 
 
