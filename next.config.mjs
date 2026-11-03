@@ -1,17 +1,29 @@
 import {withSentryConfig} from '@sentry/nextjs';
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Build autonome (.next/standalone/server.js) pour l'image Docker : seules les
+  // dépendances tracées sont copiées, plus besoin de node_modules complet au runtime.
+  output: 'standalone',
+  // Racine de tracing ancrée sur le projet : un lockfile parasite dans un dossier
+  // parent ferait inférer une autre racine et décalerait server.js dans standalone/.
+  outputFileTracingRoot: import.meta.dirname,
   images: {
+    // Pas de dangerouslyAllowSVG : toutes les URLs SVG stockées finissent par
+    // `.svg` (clés UploadThing `<uuid>-<id>.svg`, logos locaux), et next/image les
+    // sert alors telles quelles (unoptimized auto) sans passer par l'optimiseur.
     remotePatterns: [
-      { protocol: 'https', hostname: 'uploadthing.com' },
-      { protocol: 'https', hostname: 'utfs.io' },
+      // Uploads UploadThing v6 (logos, médias) : https://utfs.io/f/<key>
+      { protocol: 'https', hostname: 'utfs.io', pathname: '/f/**' },
+      // Anciennes URLs UploadThing (301 vers utfs.io)
+      { protocol: 'https', hostname: 'uploadthing.com', pathname: '/f/**' },
+      // Avatars Clerk (PNG/JPEG/AVIF)
       { protocol: 'https', hostname: 'img.clerk.com' },
+      // Images produits Stripe
       { protocol: 'https', hostname: 'files.stripe.com' },
-      { protocol: 'https', hostname: 'ui-avatars.com' },
+      // Données de démo (prisma/seed.ts) : médias placehold.co, anciens logos ui-avatars
       { protocol: 'https', hostname: 'placehold.co' },
-      { protocol: 'https', hostname: 'api.dicebear.com' },
+      { protocol: 'https', hostname: 'ui-avatars.com', pathname: '/api/**' },
     ],
-    dangerouslyAllowSVG: true,
     contentDispositionType: 'attachment',
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
